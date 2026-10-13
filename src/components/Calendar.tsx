@@ -1,16 +1,22 @@
 import { buildMonthGrid, getWeekdayLabels, type YearMonth } from "../domain/calendar";
-import { getShift } from "../domain/schedule";
+import { getCellMarker, getEffectiveShift } from "../domain/dayEntries";
 import { SHIFT_LABELS, type WeekStart, type WorkPattern } from "../domain/types";
+import type { EntriesByDate } from "../storage/entriesStorage";
 
 interface Props {
   month: YearMonth;
   pattern: WorkPattern;
   weekStart: WeekStart;
   today: string;
+  days: EntriesByDate;
+  onSelectDate(date: string): void;
 }
 
-/** 6행 × 7열 고정 격자. 인접 월 칸은 흐리게, 오늘 칸은 테두리로 강조한다. */
-export function Calendar({ month, pattern, weekStart, today }: Props) {
+/**
+ * 6행 × 7열 고정 격자. 칸은 누르면 그 날짜 화면을 연다.
+ * 근무 글자(세부 내용 분류로 바뀐 근무 반영, 바뀐 날은 점) 아래에 첫 세부 내용 이름 앞글자를 보여 준다.
+ */
+export function Calendar({ month, pattern, weekStart, today, days, onSelectDate }: Props) {
   const cells = buildMonthGrid(month, weekStart);
   const labels = getWeekdayLabels(weekStart);
   const monthPrefix = `${month.year}-${String(month.month).padStart(2, "0")}-`;
@@ -31,22 +37,41 @@ export function Calendar({ month, pattern, weekStart, today }: Props) {
       {Array.from({ length: 6 }, (_, week) => (
         <div className="calendar-row" role="row" key={week}>
           {cells.slice(week * 7, week * 7 + 7).map((date) => {
-            const shift = getShift(date, pattern);
+            const day = days[date];
+            const { shift, overridden } = getEffectiveShift(date, pattern, day);
+            const marker = getCellMarker(day);
+            const count = day?.items.length ?? 0;
             const outside = !date.startsWith(monthPrefix);
             const isToday = date === today;
-            const day = Number(date.slice(8));
+            const label = [
+              date,
+              SHIFT_LABELS[shift].name,
+              overridden ? "근무 변경됨" : null,
+              count > 0 ? `세부 내용 ${count}개` : null,
+              isToday ? "오늘" : null,
+            ]
+              .filter(Boolean)
+              .join(", ");
             return (
-              <div
+              <button
                 key={date}
+                type="button"
                 role="gridcell"
-                aria-label={`${date} ${SHIFT_LABELS[shift].name}${isToday ? " 오늘" : ""}`}
+                aria-label={label}
                 aria-current={isToday ? "date" : undefined}
                 className={`calendar-cell${outside ? " is-outside" : ""}${isToday ? " is-today" : ""}`}
                 data-date={date}
+                onClick={() => onSelectDate(date)}
               >
-                <span className="calendar-day">{day}</span>
-                <span className={`calendar-shift shift-${shift}`}>{SHIFT_LABELS[shift].short}</span>
-              </div>
+                <span className="calendar-day">{Number(date.slice(8))}</span>
+                <span className={`calendar-shift shift-${shift}`}>
+                  {SHIFT_LABELS[shift].short}
+                  {overridden && <span className="calendar-changed" aria-hidden="true" />}
+                </span>
+                <span className="calendar-marker" aria-hidden="true">
+                  {marker ?? ""}
+                </span>
+              </button>
             );
           })}
         </div>

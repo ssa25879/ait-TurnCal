@@ -37,12 +37,20 @@ describe("decideBackAction", () => {
     ["pattern", true, true, "confirm-discard"],
     ["display", true, false, "to-settings-menu"],
     ["settings-menu", true, false, "to-calendar"],
+    ["names", true, false, "to-settings-menu"],
+    ["names", true, true, "confirm-discard"],
+    ["reset", true, false, "to-settings-menu"],
+    ["day", true, false, "to-calendar"],
+    ["entry", true, false, "to-day"],
+    ["entry", true, true, "confirm-discard"],
+    ["names", false, false, "close"],
+    ["day", false, false, "close"],
   ])("%s (저장됨=%s, 변경=%s) → %s", (screen, hasSavedSettings, isDirty, expected) => {
     expect(decideBackAction(state(screen, hasSavedSettings, isDirty))).toBe(expected);
   });
 
   it("오버레이가 열려 있으면 화면과 무관하게 오버레이를 먼저 닫는다", () => {
-    for (const screen of ["calendar", "pattern", "display", "settings-menu", "setup-intro"] as Screen[]) {
+    for (const screen of ["calendar", "pattern", "display", "settings-menu", "setup-intro", "names", "reset", "day", "entry"] as Screen[]) {
       expect(decideBackAction(state(screen, true, true, true))).toBe("close-overlay");
     }
   });
@@ -62,6 +70,7 @@ describe("registerBackHandler", () => {
       closeOverlay: vi.fn(),
       toCalendar: vi.fn(),
       toSettingsMenu: vi.fn(),
+      toDay: vi.fn(),
       confirmDiscard: vi.fn(),
     };
     let current = initial;
@@ -93,6 +102,9 @@ describe("registerBackHandler", () => {
     setState(state("settings-menu", true));
     fire();
     expect(handlers.toCalendar).toHaveBeenCalledTimes(1);
+    setState(state("entry", true));
+    fire();
+    expect(handlers.toDay).toHaveBeenCalledTimes(1);
     setState(state("pattern", true, true));
     fire();
     expect(handlers.confirmDiscard).toHaveBeenCalledTimes(1);
