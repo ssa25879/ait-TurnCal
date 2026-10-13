@@ -9,8 +9,8 @@
 | 작업 브랜치 | `feat/v1-enhancements` — **원격에 푸시됨**(`origin/feat/v1-enhancements`), `main` 미병합 |
 | `main` | `origin/main` = `cbb1923` (MVP + 화면 설정까지) |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
-| OpenSpec | 진행 중 change `add-anonymous-user-key`(구현 5/5·실기기 `-8` 정상 확인됨) — **아카이브 대기**(`/opsx:archive add-anonymous-user-key`, Sync now) |
-| 정식 명세 | `openspec/specs/` 11개(+calendar-holidays) |
+| OpenSpec | 진행 중 change 없음 — `add-anonymous-user-key`까지 아카이브(2026-10-13, 명세 동기화: user-identity 신규, settings-reset 수정) |
+| 정식 명세 | `openspec/specs/` 12개(+user-identity) |
 | 테스트 | 단위 198개(+3개 시간대), 브라우저 E2E 5종 181개(58·39·59·19·6) — 전부 통과 |
 | 실기기 | 출시 후보 `20261013-8` 실제 광고 노출·정상 작동 확인 완료(사용자, 2026-10-13). 메모리·네트워크 수치는 측정 안 함 |
 | 출시 후보 | **`20261013-8`** (실제 광고 ID, 커밋 `54512fb`: 식별키 저장·이전/다음 아이콘, deploymentId `01a133eb-b011-7e16-8eff-2e49bd45b7c6`) — 업로드·CREATED·테스트 푸시 완료, 실기기 확인 대기. `-5`·`-6`은 대체됨 |
@@ -51,7 +51,7 @@
 
 1. **콘솔 웹에서 앱 정보 입력** — 이 작업은 MCP가 아니라 콘솔 웹(또는 Claude in Chrome)으로 한다. 아래 "콘솔 입력값" 참고. 최종 "검토 요청"과 확약 5개 동의는 **사용자가 직접/명시 요청 시에만**.
 2. 앱 정보 등록 후 폰에서 확인: 내비게이션 바의 로고·이름이 앱 정보와 같은지, 더보기(⋯) 메뉴(신고·공유)가 정상인지, 고객센터 메뉴. 가능하면 메모리·네트워크 사용 관찰.
-3. `/opsx:archive add-anonymous-user-key` (Sync now — 새 명세 user-identity, settings-reset 수정).
+3. (완료 2026-10-13) `add-anonymous-user-key` 아카이브.
 4. 1-4 병합·푸시 → 1-5 검토 신청(요청 시).
 
 #### 콘솔 입력값 (2026-10-13 결정)
