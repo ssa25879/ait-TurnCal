@@ -20,6 +20,7 @@ import {
   OverlayBackProvider,
   useCloseOnBack,
 } from "./platform/overlayBack";
+import { useAnonymousKey } from "./platform/useAnonymousKey";
 import { useBackHandler } from "./platform/useBackHandler";
 import { useSafeArea } from "./platform/useSafeArea";
 import { useToday } from "./platform/useToday";
@@ -92,6 +93,7 @@ function TurnCal({
 }) {
   useSafeArea();
   useInitAds();
+  useAnonymousKey();
   const today = useToday();
   const [view, setView] = useState<View>({ kind: "loading" });
   const [settings, setSettings] = useState<StoredSettingsV3 | null>(null);

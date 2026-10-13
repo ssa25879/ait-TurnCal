@@ -1,6 +1,7 @@
 import { DEFAULT_THEME } from "../domain/theme";
 import { removeEntries } from "./entriesStorage";
 import { removeSettings, saveSettings, type StoredSettingsV3 } from "./scheduleStorage";
+import { removeUserKey } from "./userKeyStorage";
 
 /** 반복 패턴·기준일만 지운다. 화면 설정·이름·세부 내용은 유지된다. */
 export async function resetPattern(settings: StoredSettingsV3): Promise<StoredSettingsV3> {
@@ -17,10 +18,11 @@ export async function resetDisplay(settings: StoredSettingsV3): Promise<StoredSe
 }
 
 /**
- * 세부 내용 → 설정 순서로 모든 키를 지운다. 중간에 실패하면 예외를 전달하고,
+ * 세부 내용 → 설정 → 식별키 순서로 모든 키를 지운다. 중간에 실패하면 예외를 전달하고,
  * 호출자는 저장소를 다시 읽어 실제 상태로 화면을 맞춘다.
  */
 export async function resetAll(): Promise<void> {
   await removeEntries();
   await removeSettings();
+  await removeUserKey();
 }

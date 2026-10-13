@@ -12,6 +12,7 @@ vi.mock("@apps-in-toss/web-framework", () => ({ Storage: storageMock }));
 import { ENTRIES_KEY } from "./entriesStorage";
 import { resetAll, resetDisplay, resetPattern } from "./reset";
 import { SETTINGS_KEY, type StoredSettingsV3 } from "./scheduleStorage";
+import { USER_KEY } from "./userKeyStorage";
 
 const settings: StoredSettingsV3 = {
   version: 3,
@@ -29,6 +30,7 @@ beforeEach(() => {
   storageMock.removeItem.mockImplementation(async (key: string) => void memory.delete(key));
   memory.set(SETTINGS_KEY, JSON.stringify(settings));
   memory.set(ENTRIES_KEY, JSON.stringify({ version: 1, days: {} }));
+  memory.set(USER_KEY, JSON.stringify({ version: 1, anonymousKey: "k" }));
 });
 
 describe("초기화", () => {
@@ -45,9 +47,9 @@ describe("초기화", () => {
     expect(memory.has(ENTRIES_KEY)).toBe(true);
   });
 
-  it("resetAll은 세부 내용 → 설정 순서로 지운다", async () => {
+  it("resetAll은 세부 내용 → 설정 → 식별키 순서로 지운다", async () => {
     await resetAll();
-    expect(storageMock.removeItem.mock.calls.map((c) => c[0])).toEqual([ENTRIES_KEY, SETTINGS_KEY]);
+    expect(storageMock.removeItem.mock.calls.map((c) => c[0])).toEqual([ENTRIES_KEY, SETTINGS_KEY, USER_KEY]);
     expect(memory.size).toBe(0);
   });
 
@@ -62,5 +64,15 @@ describe("초기화", () => {
   it("저장 실패를 전달한다", async () => {
     storageMock.setItem.mockRejectedValueOnce(new Error("io"));
     await expect(resetDisplay(settings)).rejects.toThrow("io");
+  });
+});
+
+describe("전체 초기화의 식별키", () => {
+  it("식별키 삭제 실패를 전달한다", async () => {
+    storageMock.removeItem.mockImplementationOnce(async (key: string) => void memory.delete(key));
+    storageMock.removeItem.mockImplementationOnce(async (key: string) => void memory.delete(key));
+    storageMock.removeItem.mockRejectedValueOnce(new Error("io"));
+    await expect(resetAll()).rejects.toThrow("io");
+    expect(memory.has(USER_KEY)).toBe(true);
   });
 });
