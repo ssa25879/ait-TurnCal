@@ -1,4 +1,4 @@
-# 턴캘 다음 작업 인수인계 (2026-10-13 저녁 갱신)
+# 턴캘 다음 작업 인수인계 (2026-10-13 밤 갱신)
 
 새 세션은 이 문서를 먼저 읽고 **"1. 바로 할 일"** 순서대로 진행한다.
 
@@ -6,8 +6,8 @@
 
 | 항목 | 상태 |
 |---|---|
-| 작업 브랜치 | `feat/v1-enhancements` — **원격에 푸시됨**(`origin/feat/v1-enhancements`), `main` 미병합 |
-| `main` | `origin/main` = `cbb1923` (MVP + 화면 설정까지) |
+| 브랜치 | **`main`에 병합·푸시 완료**(`1ef8258`, `feat/v1-enhancements`를 `--no-ff`로 병합). `main` = `origin/main`. 작업 트리의 미추적 파일은 `docs/STORE_PREVIEW.md`, `docs/preview-*.png`(임시), `assets/store/`뿐 |
+| 콘솔 앱 등록 폼 | **1·2단계 입력·임시저장 완료**(아래 1-3). 확약 체크·"검토 요청하기"는 하지 않음. 미리보기·스크린샷 이미지는 `assets/store/`에 완성, **콘솔 업로드는 아직** |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
 | OpenSpec | 진행 중 change 없음 — `add-anonymous-user-key`까지 아카이브(2026-10-13, 명세 동기화: user-identity 신규, settings-reset 수정) |
 | 정식 명세 | `openspec/specs/` 12개(+user-identity) |
@@ -22,7 +22,7 @@
 |---|---|
 | 워크스페이스 | YWS_WorkSpace `96603` (같은 곳의 냉털픽 `80586`은 다른 앱 — 업로드 금지) |
 | 미니앱 | 콘솔 저장 이름은 `턴캘`, **등록 시 `턴캘 교대근무 달력`으로 입력 예정**(2026-10-13 결정, 공백 제외 9자) `miniAppId 86006`, `appName ait-turncal`, 영문명 `Turn Cal` |
-| 앱 정보 | **콘솔에는 앱 이름 `턴캘`만 저장됨**(카테고리·키워드·로고·설명 없음, `BEFORE_FIRST_REVIEW`). 최초 검토는 앱 정보 + 번들을 콘솔 웹에서 함께 제출(MCP `initial_review_submit` 없음, 단독 제출은 4103으로 막힘) |
+| 앱 정보 | MCP(`miniapp_get`)로는 아직 이름 `턴캘`만 보임(`BEFORE_FIRST_REVIEW`) — **콘솔 웹 폼에 임시저장한 값은 MCP 조회에 안 잡힌다**. 입력 내용·진행 상태는 아래 1-3. 최초 검토는 앱 정보 + 번들을 콘솔 웹에서 함께 제출(MCP `initial_review_submit` 없음, 단독 제출은 4103으로 막힘) |
 | 업로드한 번들 | `20261013-1`~`-8`. 현재 후보는 `-8`(실제 ID). `-7`은 테스트 ID(아이콘 확인용). MCP로 `bundle_list`/`miniapp_get`/`miniapp_meta_status`/`iaa_placement_group_get` 조회 가능 |
 | 배너 광고 그룹 | "달력 하단 배너" `ait.v2.live.319dbf4b189e4745` (BANNER / 문구 강조형). 2026-10-13 15:20 조회 시 **활성(ENABLED)**, ID 동일|
 | 광고 노출 기한 | 2026-10-13 생성. **23일 연속 무노출이면 삭제예정, 30일이면 삭제** → 늦어도 11월 초 출시·노출 필요 |
@@ -49,10 +49,14 @@
 ### 1-3. v1 출시 준비 — 남은 순서
 **(완료)** 실제 광고 ID 빌드·업로드(`-8`), 광고 그룹 활성 확인, 출시 가이드 대조표(아래), 이름·카테고리 결정.
 
-1. **콘솔 웹에서 앱 정보 입력** — 이 작업은 MCP가 아니라 콘솔 웹(또는 Claude in Chrome)으로 한다. 아래 "콘솔 입력값" 참고. 최종 "검토 요청"과 확약 5개 동의는 **사용자가 직접/명시 요청 시에만**.
+1. **콘솔 웹 앱 정보 입력 — 대부분 완료(2026-10-13 밤, Claude in Chrome)**. 앱 등록 폼 1·2단계를 채우고 **임시저장까지 했다**(저장 토스트 확인). 상태:
+   - 1단계(기본 정보): 출시 노트·한/영 이름·부제·상세 설명·고객문의 이메일(`ssaqwe123@gmail.com`, 사용자 승인) — 아래 "콘솔 입력값"과 동일. 앱 번들은 `ait-turncal.ait`(= 폼이 연 `-8`).
+   - 2단계(카테고리·노출): 생활 > 편의 > 도구, 로고 `assets/logo.png`, 검색 키워드 10개 입력. 다크모드 로고·주요 기능은 비움(라이트 전용).
+   - **남은 것**: ① **미리보기·스크린샷 5장 업로드**(`assets/store/preview-1~5.png`, 636×1048 세로형 — 설계·검수 항목은 `docs/STORE_PREVIEW.md`, 업로드 전 사용자 확인) ② 폰 확인(아래 2) ③ 확약 5개 체크와 "검토 요청하기"는 **사용자가 직접/명시 요청 시에만**.
+   - 폼 다시 열기: `https://apps-in-toss.toss.im/workspace/96603/mini-app/ait-turncal/meta/edit?deploymentId=01a133eb-b011-7e16-8eff-2e49bd45b7c6` (2단계는 `&step=1`로 열릴 수 있음). 임시저장 값은 서버에 있으므로 새로고침해도 유지되는지 먼저 확인할 것.
 2. 앱 정보 등록 후 폰에서 확인: 내비게이션 바의 로고·이름이 앱 정보와 같은지, 더보기(⋯) 메뉴(신고·공유)가 정상인지, 고객센터 메뉴. 가능하면 메모리·네트워크 사용 관찰.
 3. (완료 2026-10-13) `add-anonymous-user-key` 아카이브.
-4. 1-4 병합·푸시 → 1-5 검토 신청(요청 시).
+4. (완료) 병합·푸시 → 1-5 검토 신청(요청 시).
 
 #### 콘솔 입력값 (2026-10-13 결정)
 | 항목 | 값 |
@@ -87,12 +91,16 @@
 
 → **확인 필요 2건(내비게이션 바 로고·이름/더보기, 메모리·네트워크)이 해소되기 전에는 검토 신청하지 않는다**(release-review-policy).
 
-#### Claude in Chrome으로 앱 정보를 입력하려면
-- 이 세션에서 `/chrome` 실행 후에도 `mcp__claude-in-chrome__*` 도구가 로드되지 않았다(도구는 세션 시작 시 정해지는 것으로 추정). **새 세션을 `claude --chrome`으로 시작**하고, 도구가 보이는지(`ToolSearch`) 먼저 확인한다. 안 보이면 확장 설치·Chrome 로그인 계정을 확인하고, 그래도 안 되면 위 표로 사람이 입력한다.
-- 입력은 채우기까지만. 확약 체크·"검토 요청" 클릭은 사용자 지시가 있을 때만. 브라우저 `alert/confirm` 창이 뜨는 버튼은 세션을 멈출 수 있으니 미리 알린다.
+#### 콘솔 웹 폼 조작 메모 (2026-10-13 Claude in Chrome으로 확인한 사실)
+- Chrome 도구는 `ToolSearch`로 한 번에 불러오면 된다(`select:mcp__claude-in-chrome__tabs_context_mcp,...navigate,computer,read_page,find,form_input,file_upload,get_page_text`). 콘솔은 사용자 Chrome에 로그인돼 있었다. 확장 연결이 안 되면 위 표로 사람이 입력한다.
+- **진입 경로**: 홈의 "앱 정보 등록하기 → 이동"은 폼이 아니라 **앱 출시**(`.../app-build`) 화면으로 간다. 폼은 거기서 버전의 **"검토 요청하기"**를 누르면 "앱 등록하기"(`.../meta/edit?deploymentId=...`)로 열린다. 이 버튼 자체는 제출이 아니고 폼만 연다. 폼의 최종 제출은 2단계 하단 "검토 요청하기"(확약 5개 체크 후 활성화).
+- **`form_input`은 화면 값만 바꿔 임시저장에 반영되지 않는다.** 필드를 클릭 → `ctrl+a` → `type`(키보드 입력)으로 채워야 한다(사용자 확인). 검색 키워드는 태그 입력이라 한 개 입력 후 `Return`을 반복한다.
+- 카테고리 드롭다운은 접근성 트리에 글자가 없어 스크린샷/zoom으로 보고 좌표 클릭한다. 로고는 `find`로 `type="file"` 입력을 찾아 `file_upload`(클릭 금지 — 네이티브 파일 창).
+- **MCP `miniapp_update_basic_info`/`update_category`/`update_icon`은 저장과 동시에 앱 정보 검토를 요청한다.** 검토 신청 규칙 때문에 입력용으로 쓰지 않는다.
+- 우하단 챗 위젯이 화면을 가릴 수 있다(닫기 버튼 있음).
 
-### 1-4. 병합·푸시
-- `feat/v1-enhancements` → `main` `--no-ff` 병합, `npm test` 확인 후 `git push origin main`. (브랜치 자체는 이미 푸시됨. 아직 사용자 지시 없음.)
+### 1-4. (완료) 병합·푸시
+- `feat/v1-enhancements` → `main` `--no-ff` 병합(`1ef8258`)·`git push origin main` 끝남. 이후 `docs/STORE_PREVIEW.md`·`assets/store/`는 아직 커밋하지 않았다(사용자 지시 시 커밋).
 
 ### 1-5. 검토 신청
 - 사용자가 요청할 때만. 출시 버전 하나만 제출.
