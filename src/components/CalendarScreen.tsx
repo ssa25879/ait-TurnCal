@@ -57,7 +57,9 @@ export function CalendarScreen({
           aria-label="이전 달"
           onClick={() => onMonthChange(addMonths(month, -1))}
         >
-          ‹
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M12.5 4.5 7 10l5.5 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
         <h1 className="month-title">
           {month.year}년 {month.month}월
@@ -68,7 +70,9 @@ export function CalendarScreen({
           aria-label="다음 달"
           onClick={() => onMonthChange(addMonths(month, 1))}
         >
-          ›
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
         <Button size="small" variant="weak" disabled={isTodayMonth} onClick={() => onMonthChange(todayMonth)}>
           오늘
