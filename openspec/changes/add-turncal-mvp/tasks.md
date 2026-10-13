@@ -18,12 +18,12 @@
 
 ## 3. 도메인: 달력 격자 (`shift-calendar`)
 
-- [ ] 3.1 `domain/calendar.ts`에 `buildMonthGrid(year, month, weekStart)`와 `addMonths`를 구현하고 `calendar.test.ts`로 2026년 10월 일/월 시작 첫·마지막 칸, 2026년 2월 일요일 시작 첫 칸 `2026-02-01`, 12월→1월 연도 이동이 통과하는지 확인한다
+- [x] 3.1 `domain/calendar.ts`에 `buildMonthGrid(year, month, weekStart)`와 `addMonths`를 구현하고 `calendar.test.ts`로 2026년 10월 일/월 시작 첫·마지막 칸, 2026년 2월 일요일 시작 첫 칸 `2026-02-01`, 12월→1월 연도 이동이 통과하는지 확인한다
 
 ## 4. 저장소 (`settings-persistence`)
 
-- [ ] 4.1 `storage/scheduleStorage.ts`에 `StoredSettingsV1`, 검증·`migrate`, `load(): LoadResult`(empty/ok/corrupt/error), `save(settings)`를 `Storage`(키 `turncal.settings`)로 구현한다
-- [ ] 4.2 `scheduleStorage.test.ts`에서 `vi.mock('@apps-in-toss/web-framework')` 메모리 Storage로 저장 내용 형식, 재로드 복원, 값 없음, JSON 파싱 실패, 알 수 없는 근무 유형, `version: 2`, 읽기 예외 시나리오를 검증하고 corrupt/error 경로에서 `setItem`·`removeItem`이 호출되지 않는지 확인한다
+- [x] 4.1 `storage/scheduleStorage.ts`에 `StoredSettingsV1`, 검증·`migrate`, `load(): LoadResult`(empty/ok/corrupt/error), `save(settings)`를 `Storage`(키 `turncal.settings`)로 구현한다
+- [x] 4.2 `scheduleStorage.test.ts`에서 `vi.mock('@apps-in-toss/web-framework')` 메모리 Storage로 저장 내용 형식, 재로드 복원, 값 없음, JSON 파싱 실패, 알 수 없는 근무 유형, `version: 2`, 읽기 예외 시나리오를 검증하고 corrupt/error 경로에서 `setItem`·`removeItem`이 호출되지 않는지 확인한다
 
 ## 5. 플랫폼 셸 (`miniapp-shell`)
 
