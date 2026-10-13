@@ -2,6 +2,7 @@ import { TDSMobileAITProvider } from "@toss/tds-mobile-ait";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { BRAND_PRIMARY_COLOR } from "./brand";
 import "./style.css";
 
 const container = document.getElementById("app");
@@ -12,7 +13,7 @@ if (!container) {
 
 createRoot(container).render(
   <StrictMode>
-    <TDSMobileAITProvider>
+    <TDSMobileAITProvider brandPrimaryColor={BRAND_PRIMARY_COLOR}>
       <App />
     </TDSMobileAITProvider>
   </StrictMode>,

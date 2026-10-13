@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <!-- 배경: 정사각형 전체를 채운다(모서리 라운드는 콘솔이 처리) -->
+  <rect width="600" height="600" fill="#4F46E5"/>
+
+  <!-- 달력 카드 -->
+  <rect x="130" y="150" width="340" height="320" rx="44" fill="#FFFFFF"/>
+  <!-- 달력 머리띠 -->
+  <path d="M130 194 a44 44 0 0 1 44 -44 h252 a44 44 0 0 1 44 44 v42 h-340 z" fill="#C7D2FE"/>
+  <!-- 고리 -->
+  <rect x="205" y="112" width="30" height="76" rx="15" fill="#FFFFFF"/>
+  <rect x="365" y="112" width="30" height="76" rx="15" fill="#FFFFFF"/>
+  <rect x="213" y="120" width="14" height="60" rx="7" fill="#4F46E5"/>
+  <rect x="373" y="120" width="14" height="60" rx="7" fill="#4F46E5"/>
+
+  <!-- 순환 화살표(교대 반복) -->
+  <g fill="none" stroke="#4F46E5" stroke-width="30" stroke-linecap="round">
+    <path d="M230 350 A70 70 0 0 1 345 296"/>
+    <path d="M370 350 A70 70 0 0 1 255 404"/>
+  </g>
+  <path d="M376 322 L367 266 L319 323 Z" fill="#4F46E5" stroke="#4F46E5" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M224 378 L233 434 L281 377 Z" fill="#4F46E5" stroke="#4F46E5" stroke-width="6" stroke-linejoin="round"/>
+</svg>
+

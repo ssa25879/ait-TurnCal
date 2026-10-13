@@ -10,7 +10,7 @@
   --color-border: #e5e8eb;
   --color-bg: #ffffff;
   --color-bg-sub: #f2f4f6;
-  --color-primary: #3182f6;
+  --color-primary: #4f46e5;
   --color-danger: #f04452;
 
   /* 근무 유형 색상: 배경 + 글자. 약어 문자를 항상 함께 표시해 색상에만 의존하지 않는다. */
@@ -27,7 +27,7 @@
   --shift-off-bg: #f2f4f6;
   --shift-off-fg: #4e5968;
 
-  font-family: "Toss Product Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
     "Noto Sans KR", sans-serif;
   color: var(--color-text);
   background: var(--color-bg);
