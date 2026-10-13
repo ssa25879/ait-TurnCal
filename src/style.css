@@ -1,8 +1,36 @@
+/* 미니앱은 라이트 모드 전용이다(앱인토스 비게임 출시 가이드). 다크 모드 규칙을 추가하지 않는다. */
 :root {
-  font-family: sans-serif;
-  color: #333d4b;
   color-scheme: light;
-  background: #ffffff;
+  --safe-top: 0px;
+  --safe-bottom: 0px;
+
+  --color-text: #191f28;
+  --color-text-sub: #6b7684;
+  --color-text-weak: #b0b8c1;
+  --color-border: #e5e8eb;
+  --color-bg: #ffffff;
+  --color-bg-sub: #f2f4f6;
+  --color-primary: #4f46e5;
+  --color-danger: #f04452;
+
+  /* 근무 유형 색상: 배경 + 글자. 약어 문자를 항상 함께 표시해 색상에만 의존하지 않는다. */
+  --shift-day-bg: #fff3c4;
+  --shift-day-fg: #8a5a00;
+  --shift-evening-bg: #ffe0cc;
+  --shift-evening-fg: #a23e00;
+  --shift-night-bg: #dce4ff;
+  --shift-night-fg: #1e3a8a;
+  --shift-duty-bg: #f3ddfb;
+  --shift-duty-fg: #6b21a8;
+  --shift-after-night-bg: #d7f2ec;
+  --shift-after-night-fg: #0f6b5c;
+  --shift-off-bg: #f2f4f6;
+  --shift-off-fg: #4e5968;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Noto Sans KR", sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
 * {
@@ -10,106 +38,301 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html,
+body {
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: var(--color-bg);
 }
 
-#app,
-#root,
-my-element {
-  display: block;
-  width: 100%;
+#app {
   min-height: 100vh;
-  padding: 24px;
-}
-
-@media (min-width: 481px) {
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    background-color: #f5f5f5;
-  }
-
-  #app,
-  #root,
-  my-element {
-    max-width: 480px;
-    margin: 0 auto;
-    background-color: #ffffff;
-  }
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
 }
 
 .app {
-  display: flex;
-  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 20px 24px;
 }
 
-.app-header {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 24px 0;
+.shift-DAY {
+  background: var(--shift-day-bg);
+  color: var(--shift-day-fg);
+}
+.shift-EVENING {
+  background: var(--shift-evening-bg);
+  color: var(--shift-evening-fg);
+}
+.shift-NIGHT {
+  background: var(--shift-night-bg);
+  color: var(--shift-night-fg);
+}
+.shift-DUTY {
+  background: var(--shift-duty-bg);
+  color: var(--shift-duty-fg);
+}
+.shift-AFTER_NIGHT {
+  background: var(--shift-after-night-bg);
+  color: var(--shift-after-night-fg);
+}
+.shift-OFF {
+  background: var(--shift-off-bg);
+  color: var(--shift-off-fg);
 }
 
-.page-title {
-  margin: 0;
-  color: #333d4b;
+/* ---------- 공통 ---------- */
+.page-title,
+.intro-title {
+  margin: 8px 0 12px;
   font-size: 24px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.intro-desc,
+.section-desc,
+.notice,
+.hint,
+.empty {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-sub);
+}
+
+.hint,
+.empty {
+  font-size: 14px;
+}
+
+.notice {
+  margin-top: 24px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-bg-sub);
+  font-size: 13px;
+}
+
+.error-text {
+  margin: 8px 0;
+  font-size: 14px;
+  color: var(--color-danger);
+}
+
+.section {
+  margin-top: 24px;
+}
+
+.section-title {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.bottom-action {
+  margin-top: 28px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* ---------- 초기 안내 ---------- */
+.intro {
+  padding-top: 24px;
+}
+
+.intro-example {
+  display: flex;
+  gap: 6px;
+  margin: 24px 0 8px;
+}
+
+/* ---------- 패턴 편집 ---------- */
+.shift-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.shift-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 48px;
+  border: 0;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shift-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.shift-button-short {
+  font-weight: 800;
+}
+
+.cycle-list,
+.today-picker {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cycle-item,
+.today-cell {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cycle-item-order {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.today-cell.is-selected {
+  border-color: var(--color-primary);
+}
+
+.today-badge {
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.start-date {
+  margin-top: 16px;
+}
+
+.sheet-action {
+  padding: 8px 24px 16px;
+}
+
+/* ---------- 달력 ---------- */
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0 16px;
+}
+
+.month-title {
+  flex: 1;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.month-nav-button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--color-bg-sub);
+  color: var(--color-text);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.calendar {
+  display: grid;
+  gap: 4px;
+}
+
+.calendar-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-weekday {
+  padding: 4px 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--color-text-sub);
+}
+
+.calendar-weekday.is-sunday {
+  color: var(--color-danger);
+}
+
+.calendar-weekday.is-saturday {
+  color: var(--color-primary);
+}
+
+.calendar-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+}
+
+.calendar-cell.is-today {
+  border-color: var(--color-primary);
+}
+
+.calendar-cell.is-outside {
+  opacity: 0.35;
+}
+
+.calendar-day {
+  font-size: 13px;
   font-weight: 600;
 }
 
-.page-subtitle {
-  margin: 0;
-  color: #4e5968;
-  font-size: 18px;
-}
-
-.app-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px 0;
-}
-
-.app-button {
-  display: flex;
-  width: 100%;
-  padding: 20px;
+.calendar-shift {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 16px;
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: 500;
-  text-decoration: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.app-button:active {
-  transform: scale(0.96);
-  transition: transform 0.1s ease;
-}
-
-.app-button-primary {
-  color: #2272eb;
-  background-color: #ebf2ff;
-}
-
-.app-button-primary:hover {
-  background-color: #c9e2ff;
-}
-
-.app-logo-wrap {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.logo {
-  width: 160px;
-  height: auto;
+.week-start {
+  margin-top: 20px;
 }
