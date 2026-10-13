@@ -141,6 +141,20 @@ v1은 출시됐다. 아래 1-1~1-5(출시 준비 기록)는 완료된 이력이�
 ### 정기 유지보수
 - 임시공휴일이 발표되면 `src/domain/holidays.ts`의 `TEMPORARY` 표에 추가(갱신 방법은 파일 머리 주석). 2028년 이후 선거일은 계산값이라 선관위 공고 후 확정값으로 교체. 지원 범위는 2026~2035.
 
+## 2-1. 새 PC·새 위치에서 이어 작업하기
+
+저장소에 **없는 것**을 먼저 알아 둔다.
+
+| 없는 것 | 이유 | 새 PC에서 하는 법 |
+|---|---|---|
+| `.env.production.local` | 실제 광고 ID라 `.gitignore`(`*.local`) | 파일을 만들고 `VITE_TOSS_BANNER_AD_GROUP_ID=ait.v2.live.319dbf4b189e4745` 한 줄만 넣는다(값은 위 "배너 광고 그룹"). 출시 빌드(`npm run build`) 직전에만 쓰고 커밋하지 않는다 |
+| `.env.adtest` | `.gitignore`에 있어 커밋 안 됨 | `VITE_TOSS_BANNER_AD_GROUP_ID=<토스 애즈 테스트 ID>` 한 줄. 테스트 ID 값은 `src/ads/adConfig.ts`의 `TEST_BANNER_AD_GROUP_ID`와 같다. **이 파일이 없으면 `npm run build:adtest` 번들에는 광고가 나오지 않는다**(개발 서버 `npm run dev`는 코드 안 기본값으로 테스트 ID 사용) |
+| `node_modules`, `dist`, `ait-turncal.ait` | 빌드 산출물 | `npm install` 후 `npm run build`/`build:adtest`로 다시 만든다 |
+| 기획서 원본 | 저장소 밖(`C:\Users\USER\Downloads\TurnCal_개발_계획서.md`, v1.3) | 필요하면 사용자에게 파일을 받아 `docs/`에 넣는다. 현재 기능은 `openspec/specs/`가 정본이다 |
+| 콘솔·MCP·Chrome 연동 | 계정·확장 설정은 PC별 | Claude Code에서 앱인토스 콘솔 MCP(`mcp__plugin_ait_apps-in-toss-console__*`)·docs MCP 로그인 상태를 확인한다. 콘솔 웹 작업이 필요하면 Chrome 확장 연결과 콘솔 로그인이 있어야 한다(없으면 사용자가 직접 입력) |
+
+순서: `git clone https://github.com/ssa25879/ait-TurnCal.git` → `npm install` → 위 표의 `.env.*` 준비 → `npm run typecheck && npm test`로 환경 확인 → 이 문서 1절부터 진행. 브라우저 E2E는 `scripts/e2e/README.md`(Edge 경로·`playwright-core` 임시 설치 필요).
+
 ## 3. 참고 위치
 | 무엇 | 어디 |
 |---|---|
