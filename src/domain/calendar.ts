@@ -16,8 +16,13 @@ function pad(value: number): string {
 }
 
 /** 0=일요일 … 6=토요일. 1970-01-01은 목요일(4)이다. */
-function weekdayOf(dayNumber: number): number {
+function weekdayOfDayNumber(dayNumber: number): number {
   return (((dayNumber + 4) % 7) + 7) % 7;
+}
+
+/** YYYY-MM-DD의 요일. 0=일요일 … 6=토요일. */
+export function weekdayOf(date: string): number {
+  return weekdayOfDayNumber(toUtcDayNumber(date));
 }
 
 export function yearMonthOf(date: string): YearMonth {
@@ -34,7 +39,7 @@ export function addMonths({ year, month }: YearMonth, delta: number): YearMonth 
 export function buildMonthGrid({ year, month }: YearMonth, weekStart: WeekStart): string[] {
   const firstDay = toUtcDayNumber(`${year}-${pad(month)}-01`);
   const startWeekday = weekStart === "SUN" ? 0 : 1;
-  const offset = (weekdayOf(firstDay) - startWeekday + 7) % 7;
+  const offset = (weekdayOfDayNumber(firstDay) - startWeekday + 7) % 7;
   const gridStart = firstDay - offset;
   return Array.from({ length: GRID_CELL_COUNT }, (_, i) => fromUtcDayNumber(gridStart + i));
 }

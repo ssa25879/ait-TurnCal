@@ -11,6 +11,7 @@ import {
 } from "../domain/settingsDraft";
 import type { ShiftType, WorkPattern } from "../domain/types";
 import { PatternEditor } from "./PatternEditor";
+import { ResetAction } from "./ResetAction";
 import { StartDatePicker } from "./StartDatePicker";
 import { TodayPositionPicker } from "./TodayPositionPicker";
 
@@ -19,10 +20,12 @@ interface Props {
   today: string;
   onSave(pattern: WorkPattern): Promise<void>;
   onDirtyChange(dirty: boolean): void;
+  /** 저장된 패턴이 있는 편집 흐름에서만 넘긴다. 없으면 초기화 버튼을 그리지 않는다. */
+  onResetPattern?: () => Promise<void>;
 }
 
 /** 편집 내용은 draft로만 유지하고 [저장]을 눌렀을 때만 저장소·달력에 반영한다. */
-export function SettingsScreen({ saved, today, onSave, onDirtyChange }: Props) {
+export function SettingsScreen({ saved, today, onSave, onDirtyChange, onResetPattern }: Props) {
   const [draft, setDraft] = useState<PatternDraft>(() => createDraft(saved, today));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -71,6 +74,15 @@ export function SettingsScreen({ saved, today, onSave, onDirtyChange }: Props) {
         설정은 이 기기에만 저장돼요. 앱을 삭제하면 저장된 설정도 함께 삭제되고, 다른 기기와
         자동으로 동기화되지 않아요.
       </p>
+
+      {onResetPattern && (
+        <ResetAction
+          title="근무 패턴 초기화"
+          description="반복 근무 순서와 기준일을 지우고 다시 등록해요. 화면 설정·이름·날짜 세부 내용은 남아요."
+          confirm="근무 패턴을 초기화할까요?"
+          onReset={onResetPattern}
+        />
+      )}
 
       <div className="bottom-action">
         {saveError && <p className="error-text" role="alert">{saveError}</p>}

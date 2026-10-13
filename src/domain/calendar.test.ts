@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addMonths, buildMonthGrid, getWeekdayLabels, yearMonthOf } from "./calendar";
+import { addMonths, buildMonthGrid, getWeekdayLabels, weekdayOf, yearMonthOf } from "./calendar";
 
 describe("buildMonthGrid", () => {
   it("일요일 시작 2026년 10월은 09-27부터 11-07까지 42칸이다", () => {
@@ -47,5 +47,14 @@ describe("getWeekdayLabels", () => {
   it("주 시작 요일에 맞게 요일 머리글을 돌려준다", () => {
     expect(getWeekdayLabels("SUN")).toEqual(["일", "월", "화", "수", "목", "금", "토"]);
     expect(getWeekdayLabels("MON")).toEqual(["월", "화", "수", "목", "금", "토", "일"]);
+  });
+});
+
+describe("weekdayOf", () => {
+  it("날짜의 요일을 0(일)~6(토)으로 돌려준다", () => {
+    expect(weekdayOf("2026-10-11")).toBe(0);
+    expect(weekdayOf("2026-10-13")).toBe(2);
+    expect(weekdayOf("2026-10-17")).toBe(6);
+    expect(weekdayOf("1969-12-31")).toBe(3);
   });
 });

@@ -16,21 +16,22 @@ import {
   loadSettings,
   saveSettings,
   SETTINGS_KEY,
-  type StoredSettingsV2,
+  type StoredSettingsV3,
 } from "./scheduleStorage";
 
-const valid: StoredSettingsV2 = {
-  version: 2,
+const pattern = { startDate: "2026-10-13", cycle: ["DAY", "NIGHT", "AFTER_NIGHT", "OFF"] };
+
+const valid: StoredSettingsV3 = {
+  version: 3,
   pattern: { startDate: "2026-10-13", cycle: ["DAY", "NIGHT", "AFTER_NIGHT", "OFF"] },
   weekStart: "SUN",
   theme: "INDIGO",
+  userName: "지수",
+  scheduleName: "병동 3교대",
 };
 
-const v1 = {
-  version: 1,
-  pattern: { startDate: "2026-10-11", cycle: ["DAY", "DAY", "NIGHT", "NIGHT", "OFF", "OFF"] },
-  weekStart: "MON",
-};
+const v1 = { version: 1, pattern, weekStart: "MON" };
+const v2 = { version: 2, pattern, weekStart: "MON", theme: "TEAL" };
 
 beforeEach(() => {
   memory.clear();
@@ -48,10 +49,9 @@ function expectNoWrites() {
 }
 
 describe("saveSettings", () => {
-  it("turncal.settings 키에 version 2와 테마를 포함한 JSON 문자열로 저장한다", async () => {
-    expect(CURRENT_VERSION).toBe(2);
+  it("turncal.settings 키에 version 3과 여섯 값을 JSON 문자열로 저장한다", async () => {
+    expect(CURRENT_VERSION).toBe(3);
     await saveSettings(valid);
-    expect(storageMock.setItem).toHaveBeenCalledWith(SETTINGS_KEY, expect.any(String));
     expect(SETTINGS_KEY).toBe("turncal.settings");
     expect(JSON.parse(memory.get(SETTINGS_KEY)!)).toEqual(valid);
   });
@@ -64,53 +64,70 @@ describe("saveSettings", () => {
 
 describe("loadSettings", () => {
   it("저장 후 다시 읽으면 같은 설정을 복원한다", async () => {
-    await saveSettings({ ...valid, theme: "TEAL" });
+    await saveSettings(valid);
     vi.clearAllMocks();
     storageMock.getItem.mockImplementation(async (key: string) => memory.get(key) ?? null);
-    await expect(loadSettings()).resolves.toEqual({ kind: "ok", settings: { ...valid, theme: "TEAL" } });
+    await expect(loadSettings()).resolves.toEqual({ kind: "ok", settings: valid });
     expectNoWrites();
+  });
+
+  it("패턴 초기화 상태(pattern: null)를 복원한다", async () => {
+    const reset = { ...valid, pattern: null };
+    memory.set(SETTINGS_KEY, JSON.stringify(reset));
+    await expect(loadSettings()).resolves.toEqual({ kind: "ok", settings: reset });
   });
 
   it("값이 없으면 empty를 반환한다", async () => {
     await expect(loadSettings()).resolves.toEqual({ kind: "empty" });
   });
 
-  it("v1 설정은 인디고 테마의 v2로 복원하고 저장소에 다시 쓰지 않는다", async () => {
+  it("v1은 인디고·이름 없음의 v3로 복원하고 쓰지 않는다", async () => {
     const raw = JSON.stringify(v1);
     memory.set(SETTINGS_KEY, raw);
     await expect(loadSettings()).resolves.toEqual({
       kind: "ok",
-      settings: { version: 2, pattern: v1.pattern, weekStart: "MON", theme: "INDIGO" },
+      settings: { version: 3, pattern, weekStart: "MON", theme: "INDIGO", userName: null, scheduleName: null },
     });
     expect(memory.get(SETTINGS_KEY)).toBe(raw);
     expectNoWrites();
   });
 
-  it("v1에서 복원한 설정을 저장하면 v2로 기록된다", async () => {
-    memory.set(SETTINGS_KEY, JSON.stringify(v1));
-    const result = await loadSettings();
-    if (result.kind !== "ok") throw new Error("v1 복원 실패");
-    await saveSettings({ ...result.settings, theme: "TEAL" });
-    expect(JSON.parse(memory.get(SETTINGS_KEY)!)).toEqual({
-      version: 2,
-      pattern: v1.pattern,
-      weekStart: "MON",
-      theme: "TEAL",
+  it("v2는 테마를 유지한 이름 없음의 v3로 복원하고 쓰지 않는다", async () => {
+    const raw = JSON.stringify(v2);
+    memory.set(SETTINGS_KEY, raw);
+    await expect(loadSettings()).resolves.toEqual({
+      kind: "ok",
+      settings: { version: 3, pattern, weekStart: "MON", theme: "TEAL", userName: null, scheduleName: null },
     });
+    expectNoWrites();
+  });
+
+  it("이전 버전에서 복원한 설정을 저장하면 v3로 기록된다", async () => {
+    for (const old of [v1, v2]) {
+      memory.set(SETTINGS_KEY, JSON.stringify(old));
+      const result = await loadSettings();
+      if (result.kind !== "ok") throw new Error("복원 실패");
+      await saveSettings({ ...result.settings, scheduleName: "병동" });
+      expect(JSON.parse(memory.get(SETTINGS_KEY)!)).toMatchObject({ version: 3, weekStart: "MON", scheduleName: "병동" });
+    }
   });
 
   it.each([
     ["JSON 파싱 실패", "{not json"],
-    ["알 수 없는 근무 유형", JSON.stringify({ ...valid, pattern: { ...valid.pattern, cycle: ["DAY", "SWING"] } })],
-    ["빈 패턴", JSON.stringify({ ...valid, pattern: { ...valid.pattern, cycle: [] } })],
-    ["57개 패턴", JSON.stringify({ ...valid, pattern: { ...valid.pattern, cycle: Array(57).fill("DAY") } })],
-    ["존재하지 않는 기준일", JSON.stringify({ ...valid, pattern: { ...valid.pattern, startDate: "2026-02-31" } })],
+    ["알 수 없는 근무 유형", JSON.stringify({ ...valid, pattern: { ...pattern, cycle: ["DAY", "SWING"] } })],
+    ["빈 패턴", JSON.stringify({ ...valid, pattern: { ...pattern, cycle: [] } })],
+    ["57개 패턴", JSON.stringify({ ...valid, pattern: { ...pattern, cycle: Array(57).fill("DAY") } })],
+    ["존재하지 않는 기준일", JSON.stringify({ ...valid, pattern: { ...pattern, startDate: "2026-02-31" } })],
     ["알 수 없는 주 시작 요일", JSON.stringify({ ...valid, weekStart: "TUE" })],
     ["알 수 없는 테마", JSON.stringify({ ...valid, theme: "BLUE" })],
-    ["v2인데 테마 누락", JSON.stringify({ version: 2, pattern: valid.pattern, weekStart: "SUN" })],
-    ["version 누락", JSON.stringify({ pattern: valid.pattern, weekStart: "SUN" })],
-    ["상위 version", JSON.stringify({ ...valid, version: 3 })],
-    ["v1인데 패턴 손상", JSON.stringify({ ...v1, pattern: { startDate: "2026-13-01", cycle: ["DAY"] } })],
+    ["근무표 이름 21자", JSON.stringify({ ...valid, scheduleName: "가".repeat(21) })],
+    ["호칭 11자", JSON.stringify({ ...valid, userName: "가".repeat(11) })],
+    ["빈 문자열 이름", JSON.stringify({ ...valid, userName: "" })],
+    ["앞뒤 공백 이름", JSON.stringify({ ...valid, userName: " 지수 " })],
+    ["v3인데 이름 필드 누락", JSON.stringify({ version: 3, pattern, weekStart: "SUN", theme: "INDIGO" })],
+    ["v1인데 패턴 null", JSON.stringify({ ...v1, pattern: null })],
+    ["version 누락", JSON.stringify({ pattern, weekStart: "SUN" })],
+    ["상위 version", JSON.stringify({ ...valid, version: 4 })],
     ["객체가 아님", JSON.stringify(["DAY"])],
   ])("%s이면 corrupt를 반환하고 저장값을 건드리지 않는다", async (_label, raw) => {
     memory.set(SETTINGS_KEY, raw);

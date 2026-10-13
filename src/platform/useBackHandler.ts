@@ -7,12 +7,16 @@ export type Screen =
   | "load-error"
   | "calendar"
   | "settings-menu"
+  | "names"
   | "pattern"
-  | "display";
+  | "display"
+  | "reset"
+  | "day"
+  | "entry";
 
 export interface BackState {
   screen: Screen;
-  /** 유효한 저장 설정이 있는지. 없으면 설정 화면도 최초 흐름이다. */
+  /** 반복 패턴이 저장되어 있는지. 없으면(최초·패턴 초기화 후) 설정 화면도 최초 흐름이다. */
   hasSavedSettings: boolean;
   isDirty: boolean;
   /** 바텀시트·다이얼로그가 열려 있는지. TDS 오버레이는 AIT backEvent를 직접 듣지 않는다. */
@@ -24,12 +28,14 @@ export type BackAction =
   | "close"
   | "to-calendar"
   | "to-settings-menu"
+  | "to-day"
   | "confirm-discard";
 
 /**
  * 토스 내비게이션 바 뒤로가기와 Android 시스템 백버튼에 대한 동작을 정한다.
- * 열린 오버레이가 있으면 먼저 닫는다. 저장된 설정이 있으면 설정 계층을 한 단계씩 올라가고
- * (근무 패턴·화면 설정 → 설정 목록 → 달력), 나머지 최초 화면은 미니앱을 종료한다.
+ * 열린 오버레이가 있으면 먼저 닫는다. 저장된 패턴이 있으면 화면 계층을 한 단계씩 올라가고
+ * (설정 상세 → 설정 목록 → 달력, 세부 내용 편집 → 날짜 → 달력), 나머지 최초 화면은 미니앱을 종료한다.
+ * 편집 중인 변경이 있으면 폐기 확인을 먼저 띄운다(목적지는 호출자가 화면별로 정한다).
  */
 export function decideBackAction({
   screen,
@@ -41,11 +47,16 @@ export function decideBackAction({
   if (!hasSavedSettings) return "close";
   switch (screen) {
     case "pattern":
+    case "names":
       return isDirty ? "confirm-discard" : "to-settings-menu";
     case "display":
+    case "reset":
       return "to-settings-menu";
     case "settings-menu":
+    case "day":
       return "to-calendar";
+    case "entry":
+      return isDirty ? "confirm-discard" : "to-day";
     default:
       return "close";
   }
@@ -55,6 +66,7 @@ export interface BackHandlers {
   closeOverlay(): void;
   toCalendar(): void;
   toSettingsMenu(): void;
+  toDay(): void;
   confirmDiscard(): void;
 }
 
@@ -77,6 +89,9 @@ export function registerBackHandler(
           break;
         case "to-settings-menu":
           handlers().toSettingsMenu();
+          break;
+        case "to-day":
+          handlers().toDay();
           break;
         case "confirm-discard":
           handlers().confirmDiscard();

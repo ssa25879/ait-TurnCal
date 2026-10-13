@@ -1,6 +1,7 @@
 import { SegmentedControl } from "@toss/tds-mobile";
 import { THEME_IDS, THEMES, type ThemeId } from "../domain/theme";
 import type { WeekStart } from "../domain/types";
+import { ResetAction } from "./ResetAction";
 
 interface Props {
   theme: ThemeId;
@@ -8,6 +9,7 @@ interface Props {
   error: string | null;
   onThemeChange(theme: ThemeId): void;
   onWeekStartChange(weekStart: WeekStart): void;
+  onReset(): Promise<void>;
 }
 
 /** 화면 설정. 선택은 [저장] 없이 바로 저장되고 앱에 반영된다. */
@@ -17,6 +19,7 @@ export function DisplaySettingsScreen({
   error,
   onThemeChange,
   onWeekStartChange,
+  onReset,
 }: Props) {
   return (
     <section className="display-settings">
@@ -69,6 +72,13 @@ export function DisplaySettingsScreen({
           {error}
         </p>
       )}
+
+      <ResetAction
+        title="화면 설정 초기화"
+        description="테마를 인디고, 주 시작 요일을 일요일로 되돌려요. 다른 데이터는 그대로예요."
+        confirm="화면 설정을 초기화할까요?"
+        onReset={onReset}
+      />
     </section>
   );
 }

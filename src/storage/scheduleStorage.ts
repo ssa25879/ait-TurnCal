@@ -1,36 +1,40 @@
 import { Storage } from "@apps-in-toss/web-framework";
+import { isValidName, SCHEDULE_NAME_MAX, USER_NAME_MAX } from "../domain/names";
 import { isValidPattern } from "../domain/schedule";
 import { DEFAULT_THEME, isThemeId, type ThemeId } from "../domain/theme";
 import { isShiftType, type WeekStart, type WorkPattern } from "../domain/types";
 
 export const SETTINGS_KEY = "turncal.settings";
-export const CURRENT_VERSION = 2;
+export const CURRENT_VERSION = 3;
 
-/** 앱 내부에서 쓰는 설정은 항상 최신 형식(v2)이다. */
-export interface StoredSettingsV2 {
-  version: 2;
-  pattern: WorkPattern;
+/** 앱 내부에서 쓰는 설정은 항상 최신 형식(v3)이다. */
+export interface StoredSettingsV3 {
+  version: 3;
+  /** 근무 패턴 초기화 후에는 null */
+  pattern: WorkPattern | null;
   weekStart: WeekStart;
   theme: ThemeId;
+  userName: string | null;
+  scheduleName: string | null;
 }
 
 export type LoadResult =
   | { kind: "empty" }
-  | { kind: "ok"; settings: StoredSettingsV2 }
+  | { kind: "ok"; settings: StoredSettingsV3 }
   | { kind: "corrupt"; reason: string }
   | { kind: "error"; error: unknown };
 
 type ParseResult =
-  | { ok: true; settings: StoredSettingsV2 }
+  | { ok: true; settings: StoredSettingsV3 }
   | { ok: false; reason: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** v1 필드(패턴·주 시작 요일)를 검증하고, v1에는 없는 테마를 기본값으로 채운다. */
-function parseV1(data: Record<string, unknown>): ParseResult {
-  const { pattern, weekStart } = data;
+type PatternResult = { ok: true; pattern: WorkPattern } | { ok: false; reason: string };
+
+function parsePattern(pattern: unknown): PatternResult {
   if (!isRecord(pattern)) return { ok: false, reason: "패턴 형식이 올바르지 않아요." };
   const { startDate, cycle } = pattern;
   if (typeof startDate !== "string" || !Array.isArray(cycle) || !cycle.every(isShiftType)) {
@@ -40,15 +44,32 @@ function parseV1(data: Record<string, unknown>): ParseResult {
   if (!isValidPattern(workPattern)) {
     return { ok: false, reason: "기준일 또는 패턴 길이가 올바르지 않아요." };
   }
-  if (weekStart !== "SUN" && weekStart !== "MON") {
-    return { ok: false, reason: "주 시작 요일 값이 올바르지 않아요." };
-  }
+  return { ok: true, pattern: workPattern };
+}
+
+function isWeekStart(value: unknown): value is WeekStart {
+  return value === "SUN" || value === "MON";
+}
+
+/** v1(패턴·주 시작 요일): 테마는 인디고, 이름은 비어 있는 v3로 변환한다. */
+function parseV1(data: Record<string, unknown>): ParseResult {
+  const pattern = parsePattern(data.pattern);
+  if (!pattern.ok) return pattern;
+  if (!isWeekStart(data.weekStart)) return { ok: false, reason: "주 시작 요일 값이 올바르지 않아요." };
   return {
     ok: true,
-    settings: { version: 2, pattern: workPattern, weekStart, theme: DEFAULT_THEME },
+    settings: {
+      version: 3,
+      pattern: pattern.pattern,
+      weekStart: data.weekStart,
+      theme: DEFAULT_THEME,
+      userName: null,
+      scheduleName: null,
+    },
   };
 }
 
+/** v2(+테마): 이름은 비어 있는 v3로 변환한다. */
 function parseV2(data: Record<string, unknown>): ParseResult {
   const base = parseV1(data);
   if (!base.ok) return base;
@@ -56,9 +77,33 @@ function parseV2(data: Record<string, unknown>): ParseResult {
   return { ok: true, settings: { ...base.settings, theme: data.theme } };
 }
 
+function parseV3(data: Record<string, unknown>): ParseResult {
+  let pattern: WorkPattern | null = null;
+  if (data.pattern !== null) {
+    const parsed = parsePattern(data.pattern);
+    if (!parsed.ok) return parsed;
+    pattern = parsed.pattern;
+  }
+  if (!isWeekStart(data.weekStart)) return { ok: false, reason: "주 시작 요일 값이 올바르지 않아요." };
+  if (!isThemeId(data.theme)) return { ok: false, reason: "테마 값이 올바르지 않아요." };
+  const { userName, scheduleName } = data;
+  if (
+    !(userName === null || typeof userName === "string") ||
+    !(scheduleName === null || typeof scheduleName === "string") ||
+    !isValidName(userName, USER_NAME_MAX) ||
+    !isValidName(scheduleName, SCHEDULE_NAME_MAX)
+  ) {
+    return { ok: false, reason: "이름 값이 올바르지 않아요." };
+  }
+  return {
+    ok: true,
+    settings: { version: 3, pattern, weekStart: data.weekStart, theme: data.theme, userName, scheduleName },
+  };
+}
+
 /**
- * 저장된 JSON을 version별로 검증·변환한다. v1은 v2로 변환만 하고 저장소에 다시 쓰지 않는다
- * (다음 저장 때 v2로 기록된다). 현재 앱이 모르는 상위 version은 손상 데이터와 같이 다루되
+ * 저장된 JSON을 version별로 검증·변환한다. v1·v2는 v3로 변환만 하고 저장소에 다시 쓰지 않는다
+ * (다음 저장 때 v3로 기록된다). 현재 앱이 모르는 상위 version은 손상 데이터와 같이 다루되
  * 저장값은 지우지 않는다.
  */
 function migrate(raw: string): ParseResult {
@@ -74,6 +119,8 @@ function migrate(raw: string): ParseResult {
       return parseV1(data);
     case 2:
       return parseV2(data);
+    case 3:
+      return parseV3(data);
     default:
       return typeof data.version === "number" && data.version > CURRENT_VERSION
         ? { ok: false, reason: "더 새로운 버전의 앱에서 저장한 설정이에요." }
@@ -97,6 +144,21 @@ export async function loadSettings(): Promise<LoadResult> {
 }
 
 /** 실패하면 예외를 그대로 전달해 호출자가 안내하게 한다. */
-export async function saveSettings(settings: StoredSettingsV2): Promise<void> {
+export async function saveSettings(settings: StoredSettingsV3): Promise<void> {
   await Storage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+export async function removeSettings(): Promise<void> {
+  await Storage.removeItem(SETTINGS_KEY);
+}
+
+export function createDefaultSettings(): StoredSettingsV3 {
+  return {
+    version: 3,
+    pattern: null,
+    weekStart: "SUN",
+    theme: DEFAULT_THEME,
+    userName: null,
+    scheduleName: null,
+  };
 }
