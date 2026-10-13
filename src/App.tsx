@@ -1,4 +1,5 @@
 import { ConfirmDialog } from "@toss/tds-mobile";
+import { useInitAds } from "./ads/tossAds";
 import { useCallback, useEffect, useState } from "react";
 import { CalendarScreen } from "./components/CalendarScreen";
 import { DayScreen } from "./components/DayScreen";
@@ -90,6 +91,7 @@ function TurnCal({
   onThemeChange: (theme: ThemeId) => void;
 }) {
   useSafeArea();
+  useInitAds();
   const today = useToday();
   const [view, setView] = useState<View>({ kind: "loading" });
   const [settings, setSettings] = useState<StoredSettingsV3 | null>(null);

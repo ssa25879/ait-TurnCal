@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:tz": "cross-env TZ=Asia/Seoul vitest run && cross-env TZ=America/New_York vitest run && cross-env TZ=UTC vitest run",
     "build": "tsc --noEmit && vite build && ait build",
+    "build:adtest": "tsc --noEmit && vite build --mode adtest && ait build",
     "preview": "vite preview",
     "deploy": "ait deploy"
   },

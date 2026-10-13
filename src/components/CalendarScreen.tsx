@@ -1,4 +1,5 @@
 import { Button } from "@toss/tds-mobile";
+import { CalendarBanner } from "../ads/CalendarBanner";
 import { addMonths, yearMonthOf, type YearMonth } from "../domain/calendar";
 import { scheduleTitle } from "../domain/names";
 import type { WeekStart, WorkPattern } from "../domain/types";
@@ -88,6 +89,8 @@ export function CalendarScreen({
           설정
         </Button>
       </div>
+
+      <CalendarBanner />
     </section>
   );
 }
