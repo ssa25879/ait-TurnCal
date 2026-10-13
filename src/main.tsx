@@ -1,9 +1,24 @@
 import { TDSMobileAITProvider } from "@toss/tds-mobile-ait";
-import { StrictMode } from "react";
+import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
-import { BRAND_PRIMARY_COLOR } from "./brand";
+import { applyTheme, DEFAULT_THEME, THEMES, type ThemeId } from "./domain/theme";
 import "./style.css";
+
+/** 테마를 TDS Provider 위에 두어 CSS 강조색과 TDS 컴포넌트 색을 같은 값으로 구동한다. */
+function Root() {
+  const [theme, setTheme] = useState<ThemeId>(DEFAULT_THEME);
+
+  useEffect(() => {
+    applyTheme(document.documentElement, theme);
+  }, [theme]);
+
+  return (
+    <TDSMobileAITProvider brandPrimaryColor={THEMES[theme].primary}>
+      <App onThemeChange={setTheme} />
+    </TDSMobileAITProvider>
+  );
+}
 
 const container = document.getElementById("app");
 
@@ -13,8 +28,6 @@ if (!container) {
 
 createRoot(container).render(
   <StrictMode>
-    <TDSMobileAITProvider brandPrimaryColor={BRAND_PRIMARY_COLOR}>
-      <App />
-    </TDSMobileAITProvider>
+    <Root />
   </StrictMode>,
 );
