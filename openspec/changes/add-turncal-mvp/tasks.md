@@ -11,10 +11,10 @@
 
 ## 2. 도메인: 날짜·근무 계산 (`shift-schedule`)
 
-- [ ] 2.1 `domain/types.ts`에 `ShiftType`(6종), 표시명·약어 매핑, `WorkPattern`, `WeekStart`, 패턴 길이 상수(1~56)를 정의하고 typecheck 통과를 확인한다
-- [ ] 2.2 `domain/date.ts`에 `isValidDateString`, `getTodayLocal`, `toUtcDayNumber`, `fromUtcDayNumber`, `addDays`를 구현하고 `date.test.ts`로 spec의 날짜 검증 5개 시나리오와 KST 03:00 로컬 오늘 시나리오가 통과하는지 확인한다
-- [ ] 2.3 `domain/schedule.ts`에 `isValidPattern`, `getShift`, `getTodayIndex`, `deriveStartDate`를 구현하고 `schedule.test.ts`로 기준일 전후 7개 날짜, 하루짜리·빈·57개 패턴, 당직·비번 패턴, 월말·연말·윤년 경계, 오늘 위치↔기준일 변환 3개 시나리오가 통과하는지 확인한다
-- [ ] 2.4 `npm run test:tz`로 Asia/Seoul·America/New_York(2026-03-08, 2026-11-01 DST 경계 포함)·UTC에서 2.2~2.3 테스트가 모두 통과하는지 확인한다
+- [x] 2.1 `domain/types.ts`에 `ShiftType`(6종), 표시명·약어 매핑, `WorkPattern`, `WeekStart`, 패턴 길이 상수(1~56)를 정의하고 typecheck 통과를 확인한다
+- [x] 2.2 `domain/date.ts`에 `isValidDateString`, `getTodayLocal`, `toUtcDayNumber`, `fromUtcDayNumber`, `addDays`를 구현하고 `date.test.ts`로 spec의 날짜 검증 5개 시나리오와 KST 03:00 로컬 오늘 시나리오가 통과하는지 확인한다
+- [x] 2.3 `domain/schedule.ts`에 `isValidPattern`, `getShift`, `getTodayIndex`, `deriveStartDate`를 구현하고 `schedule.test.ts`로 기준일 전후 7개 날짜, 하루짜리·빈·57개 패턴, 당직·비번 패턴, 월말·연말·윤년 경계, 오늘 위치↔기준일 변환 3개 시나리오가 통과하는지 확인한다
+- [x] 2.4 `npm run test:tz`로 Asia/Seoul·America/New_York(2026-03-08, 2026-11-01 DST 경계 포함)·UTC에서 2.2~2.3 테스트가 모두 통과하는지 확인한다
 
 ## 3. 도메인: 달력 격자 (`shift-calendar`)
 
