@@ -7,7 +7,7 @@ import { DisplaySettingsScreen } from "./components/DisplaySettingsScreen";
 import { EntryEditor, type EntryDraft } from "./components/EntryEditor";
 import { LoadError } from "./components/LoadError";
 import { NamesScreen } from "./components/NamesScreen";
-import { ResetScreen, type ResetKind } from "./components/ResetScreen";
+import { ResetScreen } from "./components/ResetScreen";
 import { SettingsMenu } from "./components/SettingsMenu";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { SetupIntro } from "./components/SetupIntro";
@@ -208,30 +208,34 @@ function TurnCal({
     }
   };
 
-  const runReset = async (kind: ResetKind) => {
-    if (kind === "all") {
-      try {
-        await resetAll();
-      } catch (error) {
-        // 일부만 지워졌을 수 있으니 화면은 그대로 두고 실제 저장 상태로 데이터를 맞춘다.
-        await applyLoaded(false);
-        throw error;
-      }
-      setSettings(null);
-      setDays({});
-      setEntriesBroken(false);
-      setMonth(yearMonthOf(today));
-      go({ kind: "setup-intro" });
-      return;
+  // ---------- 초기화 (실패하면 예외를 ResetAction이 받아 그 화면에서 안내한다) ----------
+  const runResetAll = async () => {
+    try {
+      await resetAll();
+    } catch (error) {
+      // 일부만 지워졌을 수 있으니 화면은 그대로 두고 실제 저장 상태로 데이터를 맞춘다.
+      await applyLoaded(false);
+      throw error;
     }
+    setSettings(null);
+    setDays({});
+    setEntriesBroken(false);
+    setMonth(yearMonthOf(today));
+    go({ kind: "setup-intro" });
+  };
+
+  /** 편집 중이던 내용도 함께 버리고 등록 안내로 간다(확인 창이 폐기 확인을 대신한다). */
+  const runResetPattern = async () => {
     if (!settings) return;
-    if (kind === "pattern") {
-      setSettings(await resetPattern(settings));
-      go({ kind: "setup-intro" });
-    } else {
-      setSettings(await resetDisplay(settings));
-      toSettingsMenu();
-    }
+    setSettings(await resetPattern(settings));
+    go({ kind: "setup-intro" });
+  };
+
+  /** 저장에 성공했을 때만 반영하고 화면 설정에 머문다. */
+  const runResetDisplay = async () => {
+    if (!settings) return;
+    setSettings(await resetDisplay(settings));
+    setDisplayError(null);
   };
 
   // ---------- 세부 내용 저장 ----------
@@ -310,6 +314,7 @@ function TurnCal({
           today={today}
           onSave={savePattern}
           onDirtyChange={handleDirtyChange}
+          onResetPattern={pattern ? runResetPattern : undefined}
         />
       )}
       {view.kind === "settings-menu" && settings && pattern && (
@@ -343,9 +348,10 @@ function TurnCal({
           error={displayError}
           onThemeChange={(theme) => void updateDisplaySettings({ theme })}
           onWeekStartChange={(weekStart) => void updateDisplaySettings({ weekStart })}
+          onReset={runResetDisplay}
         />
       )}
-      {view.kind === "reset" && <ResetScreen key={session} onReset={runReset} />}
+      {view.kind === "reset" && <ResetScreen key={session} onResetAll={runResetAll} />}
       {view.kind === "calendar" && settings && pattern && (
         <CalendarScreen
           pattern={pattern}

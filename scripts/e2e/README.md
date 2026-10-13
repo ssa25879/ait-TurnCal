@@ -15,11 +15,12 @@ npm init -y; npm install playwright-core@1.49.1
 
 ```powershell
 npx vite --port 5179 --strictPort          # 저장소 루트에서, 별도 터미널
-$env:NODE_PATH="$env:TEMP\turncal-e2e\node_modules"
-node scripts/e2e/mvp-regression.mjs       # MVP 회귀 58개
-node scripts/e2e/display-settings.mjs     # 설정 목록·테마·저장 v2→v3 39개
-node scripts/e2e/day-entries.mjs          # 세부 내용·이름·초기화 40개
-node scripts/e2e/banner.mjs               # 달력 하단 배너 19개
+# ESM은 NODE_PATH를 무시하므로 스크립트를 playwright-core 설치 폴더로 복사해 실행한다
+Copy-Item scripts\e2e\*.mjs $env:TEMP\turncal-e2e\
+node $env:TEMP\turncal-e2e\mvp-regression.mjs     # MVP 회귀 58개
+node $env:TEMP\turncal-e2e\display-settings.mjs   # 설정 목록·테마·저장 v2→v3 39개
+node $env:TEMP\turncal-e2e\day-entries.mjs        # 세부 내용·이름·초기화·주말·공휴일 59개
+node $env:TEMP\turncal-e2e\banner.mjs             # 달력 하단 배너 19개
 ```
 
 - 브라우저 경로는 `EDGE_PATH`, 앱 주소는 `APP_URL` 환경 변수로 바꿀 수 있다.

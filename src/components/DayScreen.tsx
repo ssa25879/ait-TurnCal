@@ -1,5 +1,5 @@
 import { Button } from "@toss/tds-mobile";
-import { toUtcDayNumber } from "../domain/date";
+import { weekdayOf } from "../domain/calendar";
 import {
   formatTimeRange,
   getEffectiveShift,
@@ -7,6 +7,7 @@ import {
   sortEntries,
   type DayRecord,
 } from "../domain/dayEntries";
+import { getHolidays } from "../domain/holidays";
 import { getShift } from "../domain/schedule";
 import { SHIFT_LABELS, type WorkPattern } from "../domain/types";
 
@@ -14,7 +15,7 @@ const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 export function formatDateTitle(date: string): string {
   const [, month, day] = date.split("-").map(Number);
-  const weekday = WEEKDAYS[(((toUtcDayNumber(date) + 4) % 7) + 7) % 7];
+  const weekday = WEEKDAYS[weekdayOf(date)];
   return `${month}월 ${day}일 (${weekday})`;
 }
 
@@ -47,10 +48,14 @@ export function DayScreen({
   const { shift, overridden } = getEffectiveShift(date, pattern, day);
   const source = getShiftSource(day);
   const categorized = items.filter((item) => item.shift);
+  const holidays = getHolidays(date);
 
   return (
     <section className="day-screen">
       <h1 className="page-title">{formatDateTitle(date)}</h1>
+      {holidays.length > 0 && (
+        <p className="day-holiday">{holidays.map((holiday) => holiday.name).join(" · ")}</p>
+      )}
 
       <div className="day-shift">
         <span className={`chip shift-${shift}`}>{SHIFT_LABELS[shift].short}</span>

@@ -158,7 +158,7 @@ check("분류 항목 모두 삭제 → 패턴 근무 복귀", !(await page.getBy
 await back();
 check("달력: 변경 점 사라짐", (await cell(D).locator(".calendar-changed").count()) === 0 && (shiftOfD === null || (await cell(D).locator(".calendar-shift").textContent()) === shiftOfD));
 
-// ---------- 초기화 ----------
+// ---------- 초기화 (근무 패턴·화면 설정은 각 화면 아래, 전체는 초기화 화면) ----------
 await openMenu();
 await page.getByText("화면 설정", { exact: true }).click();
 await page.getByText("딥 틸").click();
@@ -167,6 +167,7 @@ await wait();
 await back();
 await page.getByText("초기화", { exact: true }).click();
 await page.waitForSelector(".reset-screen");
+check("초기화 화면: 전체 초기화만", (await page.locator(".reset-screen .reset-option").count()) === 1 && (await page.getByRole("button", { name: "화면 설정 초기화" }).count()) === 0 && (await page.getByRole("button", { name: "근무 패턴 초기화" }).count()) === 0);
 await page.getByRole("button", { name: "전체 초기화" }).click();
 await visible("모든 데이터를 지울까요?");
 await page.getByRole("button", { name: "취소" }).click();
@@ -174,25 +175,39 @@ await wait();
 check("초기화 취소 → 무변경", (await settingsJson()).theme === "TEAL");
 await back();
 check("초기화 화면 뒤로가기 → 설정 목록", await page.locator(".settings-menu").isVisible());
-await page.getByText("초기화", { exact: true }).click();
+await page.getByText("화면 설정", { exact: true }).click();
+await page.getByRole("button", { name: "화면 설정 초기화" }).click();
+await visible("화면 설정을 초기화할까요?");
+await back();
+check("화면 설정 초기화 확인 창 뒤로가기 → 창만 닫힘", (await page.locator(".display-settings").isVisible()) && (await settingsJson()).theme === "TEAL");
 await page.getByRole("button", { name: "화면 설정 초기화" }).click();
 await visible("화면 설정을 초기화할까요?");
 await page.getByRole("button", { name: "초기화하기" }).click();
-await page.waitForSelector(".settings-menu");
+await wait();
 const s2 = await settingsJson();
-check("화면 설정 초기화: 인디고·일요일, 나머지 유지", s2.theme === "INDIGO" && s2.weekStart === "SUN" && s2.scheduleName === "병동 3교대" && s2.pattern !== null);
-await page.getByText("초기화", { exact: true }).click();
+check("화면 설정 초기화: 인디고·일요일, 나머지 유지, 화면 설정에 머묾", s2.theme === "INDIGO" && s2.weekStart === "SUN" && s2.scheduleName === "병동 3교대" && s2.pattern !== null && (await page.locator(".display-settings").isVisible()));
+await back();
+await page.getByText("근무 패턴", { exact: true }).click();
+await page.waitForSelector(".settings");
+await page.getByRole("button", { name: "근무 패턴 초기화" }).click();
+await visible("근무 패턴을 초기화할까요?");
+await page.getByRole("button", { name: "취소" }).click();
+await wait();
+check("근무 패턴 초기화 취소 → 무변경", (await settingsJson()).pattern !== null && (await page.locator(".settings").isVisible()));
+await page.locator(".shift-button", { hasText: "당직" }).click();
+await wait(200);
 await page.getByRole("button", { name: "근무 패턴 초기화" }).click();
 await visible("근무 패턴을 초기화할까요?");
 await page.getByRole("button", { name: "초기화하기" }).click();
 await page.waitForSelector(".intro");
 const s3 = await settingsJson();
-check("근무 패턴 초기화: 패턴 null, 이름·세부 내용 유지", s3.pattern === null && s3.scheduleName === "병동 3교대" && (await entriesJson()).days[D].items.length === 3);
+check("편집 중 근무 패턴 초기화: 패턴 null, 이름·세부 내용 유지", s3.pattern === null && s3.scheduleName === "병동 3교대" && (await entriesJson()).days[D].items.length === 3);
 let before = closeCalls();
 await back();
 check("패턴 초기화 후 안내 화면 뒤로가기 → 종료", closeCalls() === before + 1);
 await page.getByText("패턴 등록하기").click();
 await page.waitForSelector(".settings");
+check("최초 등록 화면: 근무 패턴 초기화 없음", (await page.getByRole("button", { name: "근무 패턴 초기화" }).count()) === 0);
 await page.locator(".shift-button", { hasText: "주간" }).click();
 await page.locator(".shift-button", { hasText: "휴무" }).click();
 await page.locator(".today-cell").first().click();
@@ -206,6 +221,44 @@ await visible("모든 데이터를 지울까요?");
 await page.getByRole("button", { name: "초기화하기" }).click();
 await page.waitForSelector(".intro");
 check("전체 초기화: 저장 데이터 없음, 인디고", (await get(SKEY)) === null && (await get(EKEY)) === null && (await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim().toUpperCase())) === "#4F46E5");
+
+// ---------- 주말·공휴일 표시 ----------
+const monthIndex = (date) => Number(date.slice(0, 4)) * 12 + Number(date.slice(5, 7)) - 1;
+async function showMonth(date, settings = v3()) {
+  await fresh(settings);
+  const diff = monthIndex(date) - monthIndex(today);
+  for (let i = 0; i < Math.abs(diff); i++) await page.getByLabel(diff > 0 ? "다음 달" : "이전 달").click();
+  await wait(200);
+}
+const dayClass = async (date) => (await cell(date).locator(".calendar-day").getAttribute("class")) ?? "";
+const dayColor = (date) => cell(date).locator(".calendar-day").evaluate((el) => getComputedStyle(el).color);
+const holidayText = async (date) => ((await cell(date).locator(".calendar-holiday").textContent()) ?? "").trim();
+await showMonth("2026-10-01");
+check("일요일 숫자 빨강", (await dayClass("2026-10-11")).includes("is-sunday") && (await dayColor("2026-10-11")) === "rgb(240, 68, 82)");
+check("토요일 숫자 테마색(인디고)", (await dayClass("2026-10-17")).includes("is-saturday") && (await dayColor("2026-10-17")) === "rgb(79, 70, 229)");
+check("평일 숫자 기본색", !/is-(sunday|saturday|holiday)/.test(await dayClass("2026-10-14")));
+check("한글날 칸: 빨강 + 축약 이름", (await dayClass("2026-10-09")).includes("is-holiday") && (await holidayText("2026-10-09")) === "한글날");
+check("개천절(토) 칸: 공휴일 색 우선", (await dayClass("2026-10-03")).includes("is-holiday") && (await holidayText("2026-10-03")) === "개천절");
+check("대체공휴일 10-05 칸: 대체", (await holidayText("2026-10-05")) === "대체");
+check("공휴일 접근성 이름", ((await cell("2026-10-09").getAttribute("aria-label")) ?? "").includes("한글날"));
+const heights = await page.locator(".calendar-row:not(.calendar-head)").evaluateAll((rows) => rows.map((r) => Math.round(r.getBoundingClientRect().height)));
+check("행 높이 일정", new Set(heights).size === 1, heights.join(","));
+await cell("2026-10-05").click();
+await page.waitForSelector(".day-screen");
+check("날짜 화면: 개천절 대체공휴일", ((await page.locator(".day-holiday").textContent()) ?? "") === "개천절 대체공휴일");
+await back();
+await cell("2026-10-14").click();
+await page.waitForSelector(".day-screen");
+check("평일 날짜 화면: 공휴일 줄 없음", (await page.locator(".day-holiday").count()) === 0);
+await showMonth("2026-09-01");
+check("추석 3일 칸", (await holidayText("2026-09-24")) === "추석" && (await holidayText("2026-09-25")) === "추석" && (await holidayText("2026-09-26")) === "추석");
+await cell("2026-09-25").click();
+await page.waitForSelector(".day-screen");
+check("날짜 화면: 추석", ((await page.locator(".day-holiday").textContent()) ?? "") === "추석");
+await showMonth("2026-10-01", v3({ theme: "TEAL", weekStart: "MON" }));
+check("딥 틸·월요일 시작: 토요일 숫자 딥 틸, 실제 요일 기준", (await dayClass("2026-10-17")).includes("is-saturday") && (await dayColor("2026-10-17")) === "rgb(15, 118, 110)" && (await dayClass("2026-10-11")).includes("is-sunday"));
+await showMonth("2036-01-01");
+check("범위 밖(2036-01): 공휴일 표시 없음", (await page.locator(".calendar-day.is-holiday").count()) === 0 && (await page.locator(".calendar-day.is-sunday").count()) > 0);
 
 // ---------- 세부 내용 손상 ----------
 await fresh(v3(), "{bad");
@@ -223,7 +276,7 @@ await fresh(v2, null);
 check("v2 실행: 딥 틸·월요일, 무기록", (await page.locator(".calendar-weekday").first().textContent()) === "월" && (await get(SKEY)) === v2);
 
 // ---------- 저장 실패 ----------
-await fresh(v3({ scheduleName: "병동" }), null);
+await fresh(v3({ scheduleName: "병동", theme: "TEAL" }), null);
 await page.evaluate(() => { const o = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k.startsWith("__ait_storage:turncal")) throw new Error("quota"); return o.call(this, k, v); }; Storage.prototype.removeItem = function () { throw new Error("io"); }; });
 await cell(today).click();
 await page.waitForSelector(".day-screen");
@@ -235,6 +288,12 @@ await page.getByLabel("이름").fill("");
 await back(); await page.getByRole("button", { name: "버리기" }).click(); await wait();
 await back();
 await openMenu();
+await page.getByText("화면 설정", { exact: true }).click();
+await page.getByRole("button", { name: "화면 설정 초기화" }).click();
+await visible("화면 설정을 초기화할까요?");
+await page.getByRole("button", { name: "초기화하기" }).click();
+check("화면 설정 초기화 실패 → 화면 설정 유지·이전 값·안내", (await visible("초기화하지 못했어요")) && (await page.locator(".display-settings").isVisible()) && (await page.locator(".theme-option.is-selected").textContent()).includes("딥 틸") && (await settingsJson()).theme === "TEAL");
+await back();
 await page.getByText("초기화", { exact: true }).click();
 await page.getByRole("button", { name: "전체 초기화" }).click();
 await visible("모든 데이터를 지울까요?");

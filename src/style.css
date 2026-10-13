@@ -307,7 +307,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  min-height: 72px;
+  min-height: 86px;
   padding: 6px 0 4px;
   border: 2px solid transparent;
   border-radius: 10px;
@@ -332,6 +332,28 @@ body {
 .calendar-day {
   font-size: 13px;
   font-weight: 600;
+}
+
+/* 요일 머리글과 같은 규칙: 일요일·공휴일 빨강, 토요일 테마 강조색 */
+.calendar-day.is-sunday,
+.calendar-day.is-holiday {
+  color: var(--color-danger);
+}
+
+.calendar-day.is-saturday {
+  color: var(--color-primary);
+}
+
+.calendar-holiday {
+  min-height: 14px;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-danger);
 }
 
 .calendar-shift {
@@ -440,6 +462,13 @@ body {
 }
 
 /* ---------- 날짜 화면 ---------- */
+.day-holiday {
+  margin: -8px 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
 .day-shift {
   display: flex;
   align-items: center;

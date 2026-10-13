@@ -32,7 +32,7 @@ export function SettingsMenu({
       bottom: `${THEMES[theme].name} · ${weekStart === "SUN" ? "일요일" : "월요일"} 시작`,
       onClick: onOpenDisplay,
     },
-    { top: "초기화", bottom: "근무 패턴 · 화면 설정 · 전체", onClick: onOpenReset },
+    { top: "초기화", bottom: "전체 데이터 지우기", onClick: onOpenReset },
   ];
 
   return (
