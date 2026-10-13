@@ -62,7 +62,8 @@ src/
 - 설정 화면은 진입 시 저장된 설정을 복사한 draft를 가지며, `isDirty`는 draft와 원본 비교로 판단한다.
 
 ### D5. 뒤로가기는 단일 `backEvent` 처리기
-`useBackHandler(screen, isDirty, hasSavedSettings)`가 `graniteEvent.addEventListener('backEvent')`를 한 번 등록하고 반환된 해제 함수로 정리한다.
+`useBackHandler(getState, handlers)`가 `graniteEvent.addEventListener('backEvent')`를 한 번 등록하고 반환된 해제 함수로 정리한다. 상태(`screen`, `hasSavedSettings`, `isDirty`, `hasOverlay`)는 이벤트 시점에 조회한다.
+- 오버레이가 열려 있으면 → 가장 최근 오버레이만 닫는다(화면 이동·종료 없음). `TDSMobileAITProvider`는 TDS `config.backEvent`를 주입하지 않아 TDS 바텀시트·다이얼로그가 AIT `backEvent`를 직접 듣지 않으므로, 열린 오버레이는 `useCloseOnBack(open, onClose)`로 앱의 등록부(스택)에 등록한다.
 - `calendar`, `setup-intro`, `load-error`, `settings(first)` → `closeView()`
 - `settings(edit)` → dirty면 TDS 확인 다이얼로그 후 `calendar`, 아니면 바로 `calendar`
 - 대안: `popstate` 기반 — 연동이 문서화되지 않아 기각.
