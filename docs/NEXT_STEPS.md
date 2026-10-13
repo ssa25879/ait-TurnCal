@@ -7,14 +7,14 @@
 | 항목 | 상태 |
 |---|---|
 | 브랜치 | **`main`에 병합·푸시 완료**(`1ef8258`, `feat/v1-enhancements`를 `--no-ff`로 병합). `main` = `origin/main`. 작업 트리의 미추적 파일은 `docs/STORE_PREVIEW.md`, `docs/preview-*.png`(임시), `assets/store/`뿐 |
-| 콘솔 앱 등록 폼 | **1·2단계 입력·임시저장 완료**(아래 1-3). 확약 체크·"검토 요청하기"는 하지 않음. 미리보기·스크린샷 이미지는 `assets/store/`에 완성, **콘솔 업로드는 아직** |
+| 콘솔 앱 등록 폼 | **제출 완료(2026-10-13 16:39, 사용자가 콘솔 웹에서 "검토 요청하기")**. 스크린샷 5장(`assets/store/`)은 제출 전 사용자가 업로드한 것으로 본다(미확인) |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
 | OpenSpec | 진행 중 change 없음 — `add-anonymous-user-key`까지 아카이브(2026-10-13, 명세 동기화: user-identity 신규, settings-reset 수정) |
 | 정식 명세 | `openspec/specs/` 12개(+user-identity) |
 | 테스트 | 단위 198개(+3개 시간대), 브라우저 E2E 5종 181개(58·39·59·19·6) — 전부 통과 |
 | 실기기 | 출시 후보 `20261013-8` 실제 광고 노출·정상 작동 확인 완료(사용자, 2026-10-13). 메모리·네트워크 수치는 측정 안 함 |
 | 출시 후보 | **`20261013-8`** (실제 광고 ID, 커밋 `54512fb`: 식별키 저장·이전/다음 아이콘, deploymentId `01a133eb-b011-7e16-8eff-2e49bd45b7c6`) — 업로드·CREATED·테스트 푸시 완료, 실기기 확인 대기. `-5`·`-6`은 대체됨 |
-| 검토 신청 | **하지 않음** (출시 버전만 신청 — 아래 규칙) |
+| 검토 신청 | **진행 중** — reviewRequestId `250615`, 유형 INITIAL, 번들 `20261013-8`, 상태 PENDING/REVIEWING, 앱 정보 `IN_REVIEW`(반려 사유 없음, 수정 불가, 미배포). 2026-10-13 MCP(`review_list`·`miniapp_meta_status`)로 확인. **신청 시점에 "확인 필요 2건"(내비 바 로고·이름/더보기, 메모리·네트워크)은 미해소 상태였다** |
 
 ### 콘솔·광고 식별자
 
@@ -89,7 +89,7 @@
 | 토스 로그인·인앱 결제·토스페이 | 해당 없음 | 미사용 |
 | 인앱 광고(배너) | 통과 | 실제 광고 정상 노출 확인, SDK의 "Ad" 표기 유지, 새로고침 없음, 스크롤 화면 하단, 같은 화면 같은 포맷 1개, 설정 버튼과 32px 이상 간격, 번들에 테스트 ID 없음 |
 
-→ **확인 필요 2건(내비게이션 바 로고·이름/더보기, 메모리·네트워크)이 해소되기 전에는 검토 신청하지 않는다**(release-review-policy).
+→ (2026-10-13 신청은 이 2건이 남은 채 이뤄졌다 — 사용자 판단.) **확인 필요 2건(내비게이션 바 로고·이름/더보기, 메모리·네트워크)이 해소되기 전에는 검토 신청하지 않는다**(release-review-policy).
 
 #### 콘솔 웹 폼 조작 메모 (2026-10-13 Claude in Chrome으로 확인한 사실)
 - Chrome 도구는 `ToolSearch`로 한 번에 불러오면 된다(`select:mcp__claude-in-chrome__tabs_context_mcp,...navigate,computer,read_page,find,form_input,file_upload,get_page_text`). 콘솔은 사용자 Chrome에 로그인돼 있었다. 확장 연결이 안 되면 위 표로 사람이 입력한다.
