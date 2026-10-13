@@ -1,7 +1,14 @@
 import { closeView, graniteEvent } from "@apps-in-toss/web-framework";
 import { useEffect, useRef } from "react";
 
-export type Screen = "loading" | "setup-intro" | "settings" | "calendar" | "load-error";
+export type Screen =
+  | "loading"
+  | "setup-intro"
+  | "load-error"
+  | "calendar"
+  | "settings-menu"
+  | "pattern"
+  | "display";
 
 export interface BackState {
   screen: Screen;
@@ -12,12 +19,17 @@ export interface BackState {
   hasOverlay: boolean;
 }
 
-export type BackAction = "close-overlay" | "close" | "to-calendar" | "confirm-discard";
+export type BackAction =
+  | "close-overlay"
+  | "close"
+  | "to-calendar"
+  | "to-settings-menu"
+  | "confirm-discard";
 
 /**
  * 토스 내비게이션 바 뒤로가기와 Android 시스템 백버튼에 대한 동작을 정한다.
- * 열린 오버레이가 있으면 먼저 닫는다. 저장된 설정이 있는 상태의 설정 화면만 달력으로 돌아가고,
- * 나머지 최초 화면은 미니앱을 종료한다.
+ * 열린 오버레이가 있으면 먼저 닫는다. 저장된 설정이 있으면 설정 계층을 한 단계씩 올라가고
+ * (근무 패턴·화면 설정 → 설정 목록 → 달력), 나머지 최초 화면은 미니앱을 종료한다.
  */
 export function decideBackAction({
   screen,
@@ -26,15 +38,23 @@ export function decideBackAction({
   hasOverlay,
 }: BackState): BackAction {
   if (hasOverlay) return "close-overlay";
-  if (screen === "settings" && hasSavedSettings) {
-    return isDirty ? "confirm-discard" : "to-calendar";
+  if (!hasSavedSettings) return "close";
+  switch (screen) {
+    case "pattern":
+      return isDirty ? "confirm-discard" : "to-settings-menu";
+    case "display":
+      return "to-settings-menu";
+    case "settings-menu":
+      return "to-calendar";
+    default:
+      return "close";
   }
-  return "close";
 }
 
 export interface BackHandlers {
   closeOverlay(): void;
   toCalendar(): void;
+  toSettingsMenu(): void;
   confirmDiscard(): void;
 }
 
@@ -54,6 +74,9 @@ export function registerBackHandler(
           break;
         case "to-calendar":
           handlers().toCalendar();
+          break;
+        case "to-settings-menu":
+          handlers().toSettingsMenu();
           break;
         case "confirm-discard":
           handlers().confirmDiscard();

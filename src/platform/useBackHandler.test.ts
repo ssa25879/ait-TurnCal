@@ -31,16 +31,18 @@ describe("decideBackAction", () => {
     ["setup-intro", false, false, "close"],
     ["load-error", false, false, "close"],
     ["loading", false, false, "close"],
-    ["settings", false, false, "close"],
-    ["settings", false, true, "close"],
-    ["settings", true, false, "to-calendar"],
-    ["settings", true, true, "confirm-discard"],
+    ["pattern", false, false, "close"],
+    ["pattern", false, true, "close"],
+    ["pattern", true, false, "to-settings-menu"],
+    ["pattern", true, true, "confirm-discard"],
+    ["display", true, false, "to-settings-menu"],
+    ["settings-menu", true, false, "to-calendar"],
   ])("%s (저장됨=%s, 변경=%s) → %s", (screen, hasSavedSettings, isDirty, expected) => {
     expect(decideBackAction(state(screen, hasSavedSettings, isDirty))).toBe(expected);
   });
 
   it("오버레이가 열려 있으면 화면과 무관하게 오버레이를 먼저 닫는다", () => {
-    for (const screen of ["calendar", "settings", "setup-intro"] as Screen[]) {
+    for (const screen of ["calendar", "pattern", "display", "settings-menu", "setup-intro"] as Screen[]) {
       expect(decideBackAction(state(screen, true, true, true))).toBe("close-overlay");
     }
   });
@@ -56,7 +58,12 @@ describe("registerBackHandler", () => {
         return unsubscribe;
       },
     );
-    const handlers = { closeOverlay: vi.fn(), toCalendar: vi.fn(), confirmDiscard: vi.fn() };
+    const handlers = {
+      closeOverlay: vi.fn(),
+      toCalendar: vi.fn(),
+      toSettingsMenu: vi.fn(),
+      confirmDiscard: vi.fn(),
+    };
     let current = initial;
     const stop = registerBackHandler(() => current, () => handlers);
     return {
@@ -80,10 +87,13 @@ describe("registerBackHandler", () => {
 
   it("이벤트 시점의 최신 상태로 동작한다", () => {
     const { fire, handlers, setState } = setup(state("calendar", true));
-    setState(state("settings", true));
+    setState(state("pattern", true));
+    fire();
+    expect(handlers.toSettingsMenu).toHaveBeenCalledTimes(1);
+    setState(state("settings-menu", true));
     fire();
     expect(handlers.toCalendar).toHaveBeenCalledTimes(1);
-    setState(state("settings", true, true));
+    setState(state("pattern", true, true));
     fire();
     expect(handlers.confirmDiscard).toHaveBeenCalledTimes(1);
     setState(state("calendar", true, false, true));
