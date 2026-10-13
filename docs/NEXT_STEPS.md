@@ -9,10 +9,11 @@
 | 작업 브랜치 | `feat/v1-enhancements` (원격 미푸시, `main` 대비 9+커밋) |
 | `main` | `origin/main` = `cbb1923` (MVP + 화면 설정까지) |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
-| OpenSpec 완료·미아카이브 | `improve-calendar-weekends-and-resets` 9/9 — **실기기 확인 대기** |
-| 정식 명세 | `openspec/specs/` 10개(+day-entries, schedule-names, settings-reset, in-app-ads) |
+| OpenSpec | 진행 중 change 없음 (`improve-calendar-weekends-and-resets`까지 아카이브) |
+| 정식 명세 | `openspec/specs/` 11개(+calendar-holidays) |
 | 테스트 | 단위 185개(+3개 시간대), 브라우저 E2E 4종 175개(58·39·59·19) — 전부 통과 |
-| 실기기 | `20261013-3`(세부 내용·이름·초기화·배너, 테스트 광고 ID)까지 확인 완료 |
+| 실기기 | `20261013-4`(주말·공휴일·초기화 위치, 테스트 광고 ID) 확인 완료(사용자 진행 지시, 2026-10-13) |
+| 출시 후보 | **`20261013-5`** (실제 광고 ID, 커밋 `76bd918`, deploymentId `01a133af-1290-77ba-bf1b-d8407d450734`) — 업로드·CREATED·테스트 푸시 완료, 실기기 확인 대기 |
 | 검토 신청 | **하지 않음** (출시 버전만 신청 — 아래 규칙) |
 
 ### 콘솔·광고 식별자
@@ -40,12 +41,12 @@
 - 공휴일 근거: 「관공서의 공휴일에 관한 규정」 대통령령 제36290호(2026-05-01 시행 — **노동절·제헌절 공휴일화, 대체공휴일 적용**), 천문연 음양력 변환값, 공직선거법 제34조. 2027 월력요항(대체공휴일 7일·공휴일 72일)과 단위 테스트로 대조. 갱신 방법은 `src/domain/holidays.ts` 머리 주석.
 - 2028년 이후 선거일은 계산값(선관위 공고 전). 임시공휴일은 발표 시 `TEMPORARY` 표에 추가.
 
-### 1-2. 실기기 확인: `improve-calendar-weekends-and-resets`
+### 1-2. (완료) 실기기 확인·아카이브: `improve-calendar-weekends-and-resets`
 1. `npm run build:adtest` → `/ait:test-on-device`로 업로드·테스트 푸시(검토 신청 금지).
 2. 확인: 달력 주말·공휴일 색과 칸 축약 이름(360px 폭에서 겹침 없음), 날짜 화면 공휴일 이름, 근무 패턴 설정·화면 설정 아래 초기화 버튼, 초기화 화면은 전체 초기화만, 확인 창에서 뒤로가기.
 3. 이상 없으면 `/opsx:archive improve-calendar-weekends-and-resets`(Sync now — 새 명세 calendar-holidays, settings-reset·display-settings 수정).
 
-### 1-3. v1 출시 후보
+### 1-3. v1 출시 후보 — 1~3 완료(`20261013-5`), 4부터 남음
 1. `.env.production.local`에 `VITE_TOSS_BANNER_AD_GROUP_ID=ait.v2.live.319dbf4b189e4745` 작성(커밋 금지, `git check-ignore`로 확인).
 2. `npm run build` → 산출물에 실제 ID가 있고 테스트 ID가 없는지 `dist/assets/*.js`에서 확인.
 3. `/ait:test-on-device` 절차로 업로드(`bundle_upload` → PUT → `bundle_upload_complete` → `bundle_list`로 CREATED → `bundle_test_push`). 실제 광고는 **열어 확인만**, 반복 클릭·새로고침 금지.
