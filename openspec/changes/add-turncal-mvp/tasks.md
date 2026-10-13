@@ -2,12 +2,12 @@
 
 ## 1. 프로젝트 전환 (React 18 + TS + TDS + Devtools)
 
-- [ ] 1.1 현재 미커밋 파일(`openspec/`, `.claude/`, `.agents/`, `.gemini/`)을 커밋해 전환 전 기준점을 만들고 `git status`가 깨끗한지 확인한다
-- [ ] 1.2 `react@^18`, `react-dom@^18`, `@toss/tds-mobile@2.4.1`, `@toss/tds-mobile-ait@2.4.1`, `@emotion/react@^11`과 개발 의존성 `typescript`, `@types/react@^18`, `@types/react-dom@^18`, Vite 8 호환 `@vitejs/plugin-react`·`vitest`를 설치하고 `npm ls react`가 18.x, peer 경고가 없는지 확인한다
-- [ ] 1.3 `vite.config.ts`(`aitDevtools.vite()` + `react()`)와 `tsconfig.json`(`strict`, `jsx: react-jsx`)을 추가하고 `npx tsc --noEmit`이 통과하는지 확인한다
-- [ ] 1.4 `index.html`을 수정한다(진입 `/src/main.tsx`, `<title>턴캘</title>`, viewport `maximum-scale=1, user-scalable=no`, `color-scheme: light`) — 브라우저 개발자 도구에서 meta 값을 확인한다
-- [ ] 1.5 `src/main.js`, `src/counter.js`, 미사용 `src/assets/*`를 제거하고 `main.tsx`·빈 `App.tsx`를 만든다. TDS WebView 문서에서 Provider 필요 여부를 확인해 `main.tsx`에 적용한다 — `npm run dev`에서 앱이 렌더링되고 우측 하단 AIT Devtools 패널이 보이는지 확인한다
-- [ ] 1.6 `package.json`에 `typecheck`, `test`, `test:tz` 스크립트를 추가하고 `build`를 `tsc --noEmit && vite build && ait build`로 바꾼다 — `npm run build`가 성공하는지 확인한다(Windows에서 `TZ` 미반영 시 `cross-env` 추가)
+- [x] 1.1 현재 미커밋 파일(`openspec/`, `.claude/`, `.agents/`, `.gemini/`)을 커밋해 전환 전 기준점을 만들고 `git status`가 깨끗한지 확인한다
+- [x] 1.2 `react@^18`, `react-dom@^18`, `@toss/tds-mobile@2.4.1`, `@toss/tds-mobile-ait@2.4.1`, `@emotion/react@^11`과 개발 의존성 `typescript`, `@types/react@^18`, `@types/react-dom@^18`, Vite 8 호환 `@vitejs/plugin-react`·`vitest`를 설치하고 `npm ls react`가 18.x, peer 경고가 없는지 확인한다
+- [x] 1.3 `vite.config.ts`(`aitDevtools.vite()` + `react()`)와 `tsconfig.json`(`strict`, `jsx: react-jsx`)을 추가하고 `npx tsc --noEmit`이 통과하는지 확인한다
+- [x] 1.4 `index.html`을 수정한다(진입 `/src/main.tsx`, `<title>턴캘</title>`, viewport `maximum-scale=1, user-scalable=no`, `color-scheme: light`) — 브라우저 개발자 도구에서 meta 값을 확인한다
+- [x] 1.5 `src/main.js`, `src/counter.js`, 미사용 `src/assets/*`를 제거하고 `main.tsx`·빈 `App.tsx`를 만든다. TDS WebView 문서에서 Provider 필요 여부를 확인해 `main.tsx`에 적용한다 — `npm run dev`에서 앱이 렌더링되고 우측 하단 AIT Devtools 패널이 보이는지 확인한다
+- [x] 1.6 `package.json`에 `typecheck`, `test`, `test:tz` 스크립트를 추가하고 `build`를 `tsc --noEmit && vite build && ait build`로 바꾼다 — `npm run build`가 성공하는지 확인한다(Windows에서 `TZ` 미반영 시 `cross-env` 추가)
 
 ## 2. 도메인: 날짜·근무 계산 (`shift-schedule`)
 
