@@ -16,14 +16,14 @@
 
 ### 사용자가 새로 요청한 것 (실기기 확인 후, 2026-10-14)
 
-**① 패턴 초기화 후 "일정이 비어 있는 달력" 표시 — 필요, 착수 전**
+**① 패턴 초기화 후 "일정이 비어 있는 달력" 표시 — 제안서 작성 완료, 구현 전**(change `show-empty-calendar-after-reset`, 브랜치 `feat/show-empty-calendar-after-reset`, `openspec/changes/show-empty-calendar-after-reset/`의 proposal·specs·design·tasks 12개 작업. `/opsx:apply`로 구현)
 - 지금은 근무 패턴 초기화 직후 초기 안내 화면(`setup-intro`)이 뜬다. 요구는 달력이 보이되 근무가 비어 있는 상태다.
-- 방향 제안(별도 change 권장, 예: `show-empty-calendar-after-reset`):
+- 방향(제안서에 반영됨):
   - 설정이 저장돼 있으면 패턴이 없어도 **달력이 최초 화면**이 된다(`miniapp-shell`의 최초 화면·뒤로가기 종료 규칙 수정). 저장된 설정이 전혀 없는 첫 실행은 지금처럼 초기 안내.
   - 근무 계산이 "패턴 없음"(null)을 표현해야 한다: `resolvePattern`이 패턴이 없는 날짜에 null을 돌려주고(이력이 있으면 마지막 `until` 이전은 이력대로, 그 이후는 빈 칸), `getEffectiveShift`는 `shift: ShiftType | null`을 허용한다. 날짜 세부 내용 분류가 있는 날은 그 근무가 그대로 보인다.
   - 달력 칸은 근무 배지 없이 날짜만, 위쪽에 안내 카드 "근무 패턴이 없어요 [근무 패턴 등록하기]"(설정 목록을 거치지 않고 패턴 설정 화면으로). 오늘·내일 요약 카드는 "패턴 없음" 표시, 날짜 화면 근무 줄은 "근무 패턴이 없어요".
   - 영향 명세: `shift-calendar`(근무 유형 표시), `today-summary`, `miniapp-shell`(최초 화면), `settings-reset`(초기화 후 화면), `shift-pattern-settings`(첫 등록 진입). 영향 코드: `App.tsx`(뷰 분기 `pattern` 가드), `domain/patternHistory.ts`, `dayEntries.ts`, `summary.ts`, `Calendar/CalendarScreen/DayScreen/TodaySummary`.
-  - 이 변경은 이력 기능(남은 이력은 과거 날짜에 계속 표시)과 맞물리므로 **이력 change를 먼저 병합한 뒤** 그 위에서 진행하는 것을 권장한다.
+  - 이력 change는 이미 `main`에 병합돼 있어서 `main` 위에서 바로 진행한다(이 브랜치는 `main` 기준으로 만들었다).
 
 **② 이력 항목을 누르면 그 패턴으로 바뀌는 "퀵스왑" — 판단: 이번 출시에는 미적용, 변형안을 v1.2 후보로**
 - 이유: (a) 이력의 패턴을 그대로 쓰면 **위상(오늘이 몇 번째 칸인지)이 맞지 않는다** — 이전 패턴의 기준일은 과거 날짜라 "오늘 위치"를 다시 고르게 해야 하므로 결국 편집 화면과 같은 단계가 필요하다. (b) 바로 저장되는 동작은 **적용 범위(오늘부터/전체)를 정하고 새 이력을 만드는** 저장 흐름과 겹쳐 오조작 시 이력이 늘거나 지워진다. (c) 이력 목록은 사용자가 정한 "읽기 전용" 범위이고, 이번 변경은 이미 실기기 확인을 마쳐 범위를 늘리면 재검증이 필요하다.
@@ -33,7 +33,7 @@
 
 ### 권장 진행 순서
 1. ~~`add-pattern-history` 마무리~~ — **완료(2026-10-14)**: 아카이브(명세 `pattern-history` 신규, `shift-pattern-settings`·`settings-persistence`·`settings-reset` 수정) → `main` `--no-ff` 병합·푸시.
-2. ① 빈 달력(새 change, `/opsx:propose`)과 ③ 바로가기(새 change)를 `main` 위 기능 브랜치에서 구현. ②는 사용자가 원하면 변형안으로 v1.2.
+2. ① 빈 달력은 `feat/show-empty-calendar-after-reset`에서 `/opsx:apply show-empty-calendar-after-reset`로 구현(제안서 완료). ③ 바로가기는 새 change(`/opsx:propose`)부터. ②는 사용자가 원하면 변형안으로 v1.2.
 3. 모든 업데이트가 끝나면 한 번에 출시: `.env.production.local`(저장소에 없음, 2-1절)로 실제 광고 ID 번들 빌드 → 업로드 → 실기기에서 실제 광고 노출 확인 → 사용자가 요청할 때 업데이트 검토 신청. 출시 전 "확인 필요 2건"(내비 바 로고·이름/더보기, 메모리·네트워크)도 확인을 권한다.
 4. 이력 기능은 저장 형식이 `version: 3` 호환이라 번들 롤백이 안전하다.
 
@@ -51,7 +51,7 @@
 | 브랜치 | `main` = `origin/main`: 오늘·내일 요약과 패턴 변경 이력이 병합돼 있다(둘 다 미출시). 출시된 v1 빌드는 `1ef8258` 병합본 기준 |
 | 콘솔 앱 등록 폼 | 제출·승인 완료(2026-10-13 16:39 제출, 사용자가 콘솔 웹에서 "검토 요청하기") |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
-| OpenSpec | 진행 중 change 없음 — `add-pattern-history` 아카이브(2026-10-14, 명세 `pattern-history` 신규 + 3개 수정), `add-today-tomorrow-summary` 아카이브(2026-10-14), `add-anonymous-user-key`까지(2026-10-13) |
+| OpenSpec | **진행 중 change: `show-empty-calendar-after-reset`**(제안서만 작성, 구현 전, 브랜치 `feat/show-empty-calendar-after-reset`). 아카이브: `add-pattern-history`(2026-10-14, 명세 `pattern-history` 신규 + 3개 수정), `add-today-tomorrow-summary`(2026-10-14), `add-anonymous-user-key`까지(2026-10-13) |
 | 정식 명세 | `openspec/specs/` 14개(+user-identity, today-summary, pattern-history) |
 | 테스트 | 단위 264개(서울·뉴욕·UTC 3개 시간대 모두 통과), 브라우저 E2E 7종 271개(58·39·59·19·6·37·53) — 전부 통과(2026-10-14, `feat/add-pattern-history` 기준). 출시된 v1 번들(`20261013-8`)은 단위 198개·E2E 5종 기준이라 오늘·내일 요약과 패턴 이력은 아직 미출시 |
 | 실기기 | v1 `20261013-8` 실제 광고 노출·정상 작동 확인(사용자, 2026-10-13). 요약·이력 테스트 번들 `20261014-9`·`-10`·`-11`은 사용자가 확인(2026-10-14, `-11`에서 새 요구사항 2건 외 정상). 메모리·네트워크 수치는 측정 안 함 |
@@ -218,12 +218,12 @@ v1은 출시됐다. 아래 1-1~1-5(출시 준비 기록)는 완료된 이력이�
 
 ## 2-1. 새 PC·새 위치에서 이어 작업하기
 
-저장소에 **없는 것**을 먼저 알아 둔다.
+저장소에 **없는 것**을 먼저 알아 둔다(2026-10-14 `git status --ignored`로 확인: 실제로 없는 파일은 `.env.production.local`, 빌드 산출물 `dist/`·`node_modules/`·`ait-turncal.ait`뿐이다).
 
 | 없는 것 | 이유 | 새 PC에서 하는 법 |
 |---|---|---|
 | `.env.production.local` | 실제 광고 ID라 `.gitignore`(`*.local`) | 파일을 만들고 `VITE_TOSS_BANNER_AD_GROUP_ID=ait.v2.live.319dbf4b189e4745` 한 줄만 넣는다(값은 위 "배너 광고 그룹"). 출시 빌드(`npm run build`) 직전에만 쓰고 커밋하지 않는다 |
-| `.env.adtest` | `.gitignore`에 있어 커밋 안 됨 | `VITE_TOSS_BANNER_AD_GROUP_ID=<토스 애즈 테스트 ID>` 한 줄. 테스트 ID 값은 `src/ads/adConfig.ts`의 `TEST_BANNER_AD_GROUP_ID`와 같다. **이 파일이 없으면 `npm run build:adtest` 번들에는 광고가 나오지 않는다**(개발 서버 `npm run dev`는 코드 안 기본값으로 테스트 ID 사용) |
+| (참고) `.env.adtest` | `.gitignore`에 이름이 있지만 **이미 커밋된 파일이라 저장소에 있다**(테스트 광고 ID만 들어 있음) | 별도 준비 불필요. `npm run build:adtest`가 그대로 쓴다 |
 | `node_modules`, `dist`, `ait-turncal.ait` | 빌드 산출물 | `npm install` 후 `npm run build`/`build:adtest`로 다시 만든다 |
 | 기획서 원본 | 저장소 밖(`C:\Users\USER\Downloads\TurnCal_개발_계획서.md`, v1.3) | 필요하면 사용자에게 파일을 받아 `docs/`에 넣는다. 현재 기능은 `openspec/specs/`가 정본이다 |
 | 콘솔·MCP·Chrome 연동 | 계정·확장 설정은 PC별 | Claude Code에서 앱인토스 콘솔 MCP(`mcp__plugin_ait_apps-in-toss-console__*`)·docs MCP 로그인 상태를 확인한다. 콘솔 웹 작업이 필요하면 Chrome 확장 연결과 콘솔 로그인이 있어야 한다(없으면 사용자가 직접 입력) |
