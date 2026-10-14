@@ -5,6 +5,7 @@ import { scheduleTitle } from "../domain/names";
 import type { WeekStart, WorkPattern } from "../domain/types";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
+import { TodaySummary } from "./TodaySummary";
 
 interface Props {
   pattern: WorkPattern;
@@ -49,6 +50,8 @@ export function CalendarScreen({
           {entriesNotice}
         </p>
       )}
+
+      <TodaySummary pattern={pattern} today={today} days={days} onSelectDate={onSelectDate} />
 
       <div className="month-nav">
         <button
