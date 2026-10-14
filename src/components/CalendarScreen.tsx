@@ -2,13 +2,14 @@ import { Button } from "@toss/tds-mobile";
 import { CalendarBanner } from "../ads/CalendarBanner";
 import { addMonths, yearMonthOf, type YearMonth } from "../domain/calendar";
 import { scheduleTitle } from "../domain/names";
-import type { WeekStart, WorkPattern } from "../domain/types";
+import type { PatternTimeline } from "../domain/patternHistory";
+import type { WeekStart } from "../domain/types";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
 import { TodaySummary } from "./TodaySummary";
 
 interface Props {
-  pattern: WorkPattern;
+  timeline: PatternTimeline;
   weekStart: WeekStart;
   today: string;
   /** 날짜 화면에 다녀와도 보던 달을 유지하려고 상위(App)에서 관리한다. */
@@ -23,7 +24,7 @@ interface Props {
 }
 
 export function CalendarScreen({
-  pattern,
+  timeline,
   weekStart,
   today,
   month,
@@ -51,7 +52,7 @@ export function CalendarScreen({
         </p>
       )}
 
-      <TodaySummary pattern={pattern} today={today} days={days} onSelectDate={onSelectDate} />
+      <TodaySummary timeline={timeline} today={today} days={days} onSelectDate={onSelectDate} />
 
       <div className="month-nav">
         <button
@@ -84,7 +85,7 @@ export function CalendarScreen({
 
       <Calendar
         month={month}
-        pattern={pattern}
+        timeline={timeline}
         weekStart={weekStart}
         today={today}
         days={days}

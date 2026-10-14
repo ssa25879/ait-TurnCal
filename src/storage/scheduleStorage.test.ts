@@ -11,6 +11,7 @@ const storageMock = vi.hoisted(() => ({
 
 vi.mock("@apps-in-toss/web-framework", () => ({ Storage: storageMock }));
 
+import type { PastPattern } from "../domain/patternHistory";
 import {
   CURRENT_VERSION,
   loadSettings,
@@ -142,5 +143,95 @@ describe("loadSettings", () => {
     const result = await loadSettings();
     expect(result.kind).toBe("error");
     expectNoWrites();
+  });
+});
+
+describe("patternHistory", () => {
+  const pastA: PastPattern = { until: "2026-10-13", pattern: { startDate: "2026-10-01", cycle: ["DAY", "NIGHT", "OFF"] } };
+  const pastB: PastPattern = { until: "2026-11-02", pattern: { startDate: "2026-10-13", cycle: ["DAY", "DAY", "OFF"] } };
+  const withHistory = { ...valid, patternHistory: [pastA, pastB] };
+
+  async function loadRaw(value: unknown) {
+    memory.set(SETTINGS_KEY, JSON.stringify(value));
+    vi.clearAllMocks();
+    storageMock.getItem.mockImplementation(async (key: string) => memory.get(key) ?? null);
+    return loadSettings();
+  }
+
+  it("patternHistory 필드가 없는 기존 v3 설정은 이력 없이 복원하고 저장값을 바꾸지 않는다", async () => {
+    const result = await loadRaw(valid);
+    expect(result).toEqual({ kind: "ok", settings: valid });
+    expect(result.kind === "ok" && result.settings.patternHistory).toBeUndefined();
+    expectNoWrites();
+  });
+
+  it("이력이 있는 설정을 version 3으로 저장하고 같은 값으로 복원한다", async () => {
+    await saveSettings(withHistory);
+    const stored = JSON.parse(memory.get(SETTINGS_KEY)!);
+    expect(stored.version).toBe(3);
+    expect(stored.patternHistory).toEqual([pastA, pastB]);
+    expect(stored.pattern).toEqual(valid.pattern);
+    await expect(loadRaw(stored)).resolves.toEqual({ kind: "ok", settings: withHistory });
+  });
+
+  it("이력이 비어 있으면 저장할 때 필드를 생략한다", async () => {
+    await saveSettings({ ...valid, patternHistory: [] });
+    expect(JSON.parse(memory.get(SETTINGS_KEY)!)).toEqual(valid);
+    expect("patternHistory" in JSON.parse(memory.get(SETTINGS_KEY)!)).toBe(false);
+  });
+
+  it("이전 v3 앱 관점: 이력 필드를 빼면 기존 v3 형식과 같다(현재 패턴이 그대로 있다)", async () => {
+    await saveSettings(withHistory);
+    const { patternHistory, ...legacyView } = JSON.parse(memory.get(SETTINGS_KEY)!);
+    expect(patternHistory).toHaveLength(2);
+    expect(legacyView).toEqual(valid);
+  });
+
+  it("patternHistory는 v1·v2 변환에는 영향을 주지 않는다", async () => {
+    const result = await loadRaw(v2);
+    expect(result.kind === "ok" && result.settings.patternHistory).toBeUndefined();
+  });
+
+  const corruptCases: Array<[string, unknown]> = [
+    ["until이 날짜순으로 증가하지 않음", { ...valid, patternHistory: [pastB, pastA] }],
+    ["until이 같은 항목이 둘", { ...valid, patternHistory: [pastA, { ...pastA }] }],
+    ["until이 유효한 날짜가 아님", { ...valid, patternHistory: [{ ...pastA, until: "2026-02-31" }] }],
+    ["until이 문자열이 아님", { ...valid, patternHistory: [{ ...pastA, until: 20261013 }] }],
+    ["항목 패턴이 비어 있음", { ...valid, patternHistory: [{ ...pastA, pattern: { startDate: "2026-10-01", cycle: [] } }] }],
+    ["항목 패턴에 알 수 없는 근무 유형", { ...valid, patternHistory: [{ ...pastA, pattern: { startDate: "2026-10-01", cycle: ["WEEKEND"] } }] }],
+    ["항목이 객체가 아님", { ...valid, patternHistory: ["2026-10-13"] }],
+    ["이력이 배열이 아님", { ...valid, patternHistory: { until: "2026-10-13" } }],
+    [
+      "이력이 51개",
+      {
+        ...valid,
+        patternHistory: Array.from({ length: 51 }, (_, i) => ({
+          until: new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10),
+          pattern: pastA.pattern,
+        })),
+      },
+    ],
+  ];
+
+  it.each(corruptCases)("손상 데이터로 처리한다: %s", async (_name, value) => {
+    const result = await loadRaw(value);
+    expect(result.kind).toBe("corrupt");
+    expectNoWrites();
+  });
+
+  it("패턴 초기화 후 현재 패턴 없이 이력만 남은 설정은 정상으로 복원한다", async () => {
+    const afterReset = { ...valid, pattern: null, patternHistory: [pastA] };
+    const result = await loadRaw(afterReset);
+    expect(result).toEqual({ kind: "ok", settings: afterReset });
+    expectNoWrites();
+  });
+
+  it("이력이 정확히 50개이면 정상이다", async () => {
+    const fifty = Array.from({ length: 50 }, (_, i) => ({
+      until: new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10),
+      pattern: pastA.pattern,
+    }));
+    const result = await loadRaw({ ...valid, patternHistory: fifty });
+    expect(result.kind).toBe("ok");
   });
 });

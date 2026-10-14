@@ -41,6 +41,30 @@ describe("초기화", () => {
     expect(memory.has(ENTRIES_KEY)).toBe(true);
   });
 
+  it("resetPattern은 현재 패턴만 지우고 패턴 이력은 유지한다", async () => {
+    const withHistory: StoredSettingsV3 = {
+      ...settings,
+      patternHistory: [{ until: "2026-10-13", pattern: { startDate: "2026-10-01", cycle: ["DAY", "NIGHT", "OFF"] } }],
+    };
+    memory.set(SETTINGS_KEY, JSON.stringify(withHistory));
+    const next = await resetPattern(withHistory);
+    expect(next.pattern).toBeNull();
+    expect(next.patternHistory).toEqual(withHistory.patternHistory);
+    const stored = JSON.parse(memory.get(SETTINGS_KEY)!);
+    expect(stored).toEqual({ ...withHistory, pattern: null });
+    expect(memory.has(ENTRIES_KEY)).toBe(true);
+  });
+
+  it("resetDisplay는 패턴 이력을 건드리지 않는다", async () => {
+    const withHistory: StoredSettingsV3 = {
+      ...settings,
+      patternHistory: [{ until: "2026-10-13", pattern: { startDate: "2026-10-01", cycle: ["DAY", "NIGHT", "OFF"] } }],
+    };
+    const next = await resetDisplay(withHistory);
+    expect(next.patternHistory).toEqual(withHistory.patternHistory);
+    expect(JSON.parse(memory.get(SETTINGS_KEY)!).patternHistory).toEqual(withHistory.patternHistory);
+  });
+
   it("resetDisplay는 테마·주 시작 요일만 기본값으로", async () => {
     const next = await resetDisplay(settings);
     expect(next).toEqual({ ...settings, theme: "INDIGO", weekStart: "SUN" });

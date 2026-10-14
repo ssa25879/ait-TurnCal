@@ -8,8 +8,9 @@ import {
   type DayRecord,
 } from "../domain/dayEntries";
 import { getHolidays } from "../domain/holidays";
+import { resolvePattern, type PatternTimeline } from "../domain/patternHistory";
 import { getShift } from "../domain/schedule";
-import { SHIFT_LABELS, type WorkPattern } from "../domain/types";
+import { SHIFT_LABELS } from "../domain/types";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -21,7 +22,7 @@ export function formatDateTitle(date: string): string {
 
 interface Props {
   date: string;
-  pattern: WorkPattern;
+  timeline: PatternTimeline;
   day: DayRecord | undefined;
   /** 세부 내용을 불러오지 못한 상태면 편집을 막는다. */
   entriesBroken: boolean;
@@ -34,7 +35,7 @@ interface Props {
 
 export function DayScreen({
   date,
-  pattern,
+  timeline,
   day,
   entriesBroken,
   error,
@@ -44,6 +45,7 @@ export function DayScreen({
   onStartFresh,
 }: Props) {
   const items = sortEntries(day?.items ?? []);
+  const pattern = resolvePattern(date, timeline);
   const patternShift = getShift(date, pattern);
   const { shift, overridden } = getEffectiveShift(date, pattern, day);
   const source = getShiftSource(day);
