@@ -12,6 +12,7 @@ import { SettingsMenu } from "./components/SettingsMenu";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { SetupIntro } from "./components/SetupIntro";
 import { yearMonthOf, type YearMonth } from "./domain/calendar";
+import { applyPatternChange, type ApplyScope, type PatternTimeline } from "./domain/patternHistory";
 import type { DayEntry, DayRecord } from "./domain/dayEntries";
 import { DEFAULT_THEME, type ThemeId } from "./domain/theme";
 import type { WorkPattern } from "./domain/types";
@@ -107,6 +108,9 @@ function TurnCal({
   const [dayError, setDayError] = useState<string | null>(null);
 
   const pattern = settings?.pattern ?? null;
+  const timeline: PatternTimeline | null = pattern
+    ? { current: pattern, history: settings?.patternHistory ?? [] }
+    : null;
 
   useEffect(() => {
     onThemeChange(settings?.theme ?? DEFAULT_THEME);
@@ -179,8 +183,15 @@ function TurnCal({
   );
 
   // ---------- 설정 저장 ----------
-  const savePattern = async (next: WorkPattern) => {
-    const updated: StoredSettingsV3 = { ...(settings ?? createDefaultSettings()), pattern: next };
+  const savePattern = async (next: WorkPattern, scope: ApplyScope) => {
+    // 적용 범위에 따라 이력을 갱신한다. 저장된 패턴이 없으면(첫 등록·초기화 후) 이력 없이 새 패턴 하나다.
+    const result = applyPatternChange(timeline, next, scope, today);
+    const { patternHistory: _previousHistory, ...rest } = settings ?? createDefaultSettings();
+    const updated: StoredSettingsV3 = {
+      ...rest,
+      pattern: result.current,
+      ...(result.history.length > 0 ? { patternHistory: result.history } : {}),
+    };
     await saveSettings(updated);
     setSettings(updated);
     toCalendar();
@@ -313,6 +324,7 @@ function TurnCal({
         <SettingsScreen
           key={session}
           saved={pattern}
+          timeline={timeline}
           today={today}
           onSave={savePattern}
           onDirtyChange={handleDirtyChange}
@@ -354,9 +366,9 @@ function TurnCal({
         />
       )}
       {view.kind === "reset" && <ResetScreen key={session} onResetAll={runResetAll} />}
-      {view.kind === "calendar" && settings && pattern && (
+      {view.kind === "calendar" && settings && timeline && (
         <CalendarScreen
-          pattern={pattern}
+          timeline={timeline}
           weekStart={settings.weekStart}
           today={today}
           month={month}
@@ -369,10 +381,10 @@ function TurnCal({
           onOpenSettings={toSettingsMenu}
         />
       )}
-      {view.kind === "day" && pattern && (
+      {view.kind === "day" && timeline && (
         <DayScreen
           date={view.date}
-          pattern={pattern}
+          timeline={timeline}
           day={days[view.date]}
           entriesBroken={entriesBroken}
           error={dayError}

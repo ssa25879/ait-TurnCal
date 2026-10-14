@@ -1,7 +1,8 @@
 import { addDays, isValidDateString } from "./date";
 import { formatTimeRange, getEffectiveShift, sortEntries, type DayRecord } from "./dayEntries";
 import { getHolidays } from "./holidays";
-import type { ShiftType, WorkPattern } from "./types";
+import { resolvePattern, type PatternTimeline } from "./patternHistory";
+import type { ShiftType } from "./types";
 
 /** 달력 화면 위쪽 오늘·내일 카드 하나에 필요한 값 */
 export interface DaySummary {
@@ -16,13 +17,13 @@ export interface DaySummary {
   timeRange: string | null;
 }
 
-/** 달력 칸과 같은 규칙(getEffectiveShift)으로 그날 요약 값을 만든다. */
+/** 달력 칸과 같은 규칙(그날 적용되던 패턴 + getEffectiveShift)으로 그날 요약 값을 만든다. */
 export function buildDaySummary(
   date: string,
-  pattern: WorkPattern,
+  timeline: PatternTimeline,
   day: DayRecord | undefined,
 ): DaySummary {
-  const { shift, overridden } = getEffectiveShift(date, pattern, day);
+  const { shift, overridden } = getEffectiveShift(date, resolvePattern(date, timeline), day);
   const [first] = sortEntries(day?.items ?? []);
   return {
     date,
@@ -39,11 +40,11 @@ export function buildDaySummary(
  */
 export function buildTodaySummary(
   today: string,
-  pattern: WorkPattern,
+  timeline: PatternTimeline,
   days: Record<string, DayRecord>,
 ): DaySummary[] {
   const dates = [today];
   const tomorrow = addDays(today, 1);
   if (isValidDateString(tomorrow)) dates.push(tomorrow);
-  return dates.map((date) => buildDaySummary(date, pattern, days[date]));
+  return dates.map((date) => buildDaySummary(date, timeline, days[date]));
 }

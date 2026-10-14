@@ -1,12 +1,13 @@
 import type { DayRecord } from "../domain/dayEntries";
 import { buildTodaySummary, type DaySummary } from "../domain/summary";
-import { SHIFT_LABELS, type WorkPattern } from "../domain/types";
+import type { PatternTimeline } from "../domain/patternHistory";
+import { SHIFT_LABELS } from "../domain/types";
 import { formatDateTitle } from "./DayScreen";
 
 const LABELS = ["오늘", "내일"];
 
 interface Props {
-  pattern: WorkPattern;
+  timeline: PatternTimeline;
   today: string;
   days: Record<string, DayRecord>;
   onSelectDate(date: string): void;
@@ -29,8 +30,8 @@ function cardLabel(summary: DaySummary, label: string): string {
  * 달력 화면 위쪽의 오늘·내일 근무 요약. 보고 있는 달과 무관하게 항상 오늘 기준이며,
  * props에서 매 렌더 계산하므로 날짜·데이터가 바뀌면 자동으로 갱신된다.
  */
-export function TodaySummary({ pattern, today, days, onSelectDate }: Props) {
-  const summaries = buildTodaySummary(today, pattern, days);
+export function TodaySummary({ timeline, today, days, onSelectDate }: Props) {
+  const summaries = buildTodaySummary(today, timeline, days);
 
   return (
     <div className="today-summary" aria-label="오늘과 내일 근무">

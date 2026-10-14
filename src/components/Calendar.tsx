@@ -1,12 +1,13 @@
 import { buildMonthGrid, getWeekdayLabels, weekdayOf, type YearMonth } from "../domain/calendar";
 import { getCellMarker, getEffectiveShift } from "../domain/dayEntries";
 import { getHolidays } from "../domain/holidays";
-import { SHIFT_LABELS, type WeekStart, type WorkPattern } from "../domain/types";
+import { resolvePattern, type PatternTimeline } from "../domain/patternHistory";
+import { SHIFT_LABELS, type WeekStart } from "../domain/types";
 import type { EntriesByDate } from "../storage/entriesStorage";
 
 interface Props {
   month: YearMonth;
-  pattern: WorkPattern;
+  timeline: PatternTimeline;
   weekStart: WeekStart;
   today: string;
   days: EntriesByDate;
@@ -18,7 +19,7 @@ interface Props {
  * 날짜 숫자는 일요일·공휴일 빨강, 토요일 테마색이고, 그 아래 공휴일 축약 이름 줄(모든 칸에 확보)이 있다.
  * 근무 글자(세부 내용 분류로 바뀐 근무 반영, 바뀐 날은 점) 아래에 첫 세부 내용 이름 앞글자를 보여 준다.
  */
-export function Calendar({ month, pattern, weekStart, today, days, onSelectDate }: Props) {
+export function Calendar({ month, timeline, weekStart, today, days, onSelectDate }: Props) {
   const cells = buildMonthGrid(month, weekStart);
   const labels = getWeekdayLabels(weekStart);
   const monthPrefix = `${month.year}-${String(month.month).padStart(2, "0")}-`;
@@ -40,7 +41,7 @@ export function Calendar({ month, pattern, weekStart, today, days, onSelectDate 
         <div className="calendar-row" role="row" key={week}>
           {cells.slice(week * 7, week * 7 + 7).map((date) => {
             const day = days[date];
-            const { shift, overridden } = getEffectiveShift(date, pattern, day);
+            const { shift, overridden } = getEffectiveShift(date, resolvePattern(date, timeline), day);
             const marker = getCellMarker(day);
             const count = day?.items.length ?? 0;
             const outside = !date.startsWith(monthPrefix);

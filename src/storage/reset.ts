@@ -3,9 +3,10 @@ import { removeEntries } from "./entriesStorage";
 import { removeSettings, saveSettings, type StoredSettingsV3 } from "./scheduleStorage";
 import { removeUserKey } from "./userKeyStorage";
 
-/** 반복 패턴·기준일만 지운다. 화면 설정·이름·세부 내용은 유지된다. */
+/** 반복 패턴·기준일·패턴 이력을 지운다. 화면 설정·이름·세부 내용은 유지된다. */
 export async function resetPattern(settings: StoredSettingsV3): Promise<StoredSettingsV3> {
-  const next: StoredSettingsV3 = { ...settings, pattern: null };
+  const { patternHistory: _patternHistory, ...rest } = settings;
+  const next: StoredSettingsV3 = { ...rest, pattern: null };
   await saveSettings(next);
   return next;
 }
