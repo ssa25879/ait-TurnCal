@@ -464,6 +464,99 @@ body {
   color: var(--color-text-sub);
 }
 
+/* ---------- 오늘·내일 요약 ---------- */
+.today-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.today-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.today-card.is-today {
+  border-color: var(--color-primary);
+  background: var(--color-primary-weak);
+}
+
+.today-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+}
+
+.today-card-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.today-card-date {
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+
+.today-card-shift {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.today-card-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.today-card-name {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.today-card-changed {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--color-bg-sub);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-sub);
+}
+
+.today-card-holiday {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-danger);
+  word-break: keep-all;
+}
+
+.today-card-time {
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+
 /* ---------- 날짜 화면 ---------- */
 .day-holiday {
   margin: -8px 0 12px;
