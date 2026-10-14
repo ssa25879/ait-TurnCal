@@ -9,9 +9,9 @@
 | 브랜치 | `main` = `origin/main`. 출시 빌드는 `1ef8258` 병합본 기준(`feat/v1-enhancements`를 `--no-ff`로 병합). 작업 트리 깨끗 |
 | 콘솔 앱 등록 폼 | 제출·승인 완료(2026-10-13 16:39 제출, 사용자가 콘솔 웹에서 "검토 요청하기") |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
-| OpenSpec | **진행 중 change: `add-today-tomorrow-summary`**(v1.1 오늘·내일 근무 요약, 브랜치 `feat/add-today-tomorrow-summary`) — **tasks 12/12 완료**(구현·자동 테스트·실기기 확인·출시 가이드 대조, 테스트 번들 `20261014-9`). 남은 것은 `/opsx:archive` → `main` 병합 → 실제 광고 ID 출시 빌드·업데이트 검토(사용자 지시 시). 이전까지는 `add-anonymous-user-key`까지 아카이브(2026-10-13) |
-| 정식 명세 | `openspec/specs/` 12개(+user-identity) |
-| 테스트 | 단위 216개(서울·뉴욕·UTC 3개 시간대 모두 통과), 브라우저 E2E 6종 218개(58·39·59·19·6·37) — 전부 통과(2026-10-14, v1.1 요약 기능 브랜치 기준. `main`·출시 번들은 단위 198개·E2E 5종 181개) |
+| OpenSpec | 진행 중 change 없음 — `add-today-tomorrow-summary` 아카이브(2026-10-14, 명세 동기화: `today-summary` 신규). 이전: `add-anonymous-user-key`까지(2026-10-13) |
+| 정식 명세 | `openspec/specs/` 13개(+user-identity, today-summary) |
+| 테스트 | 단위 216개(서울·뉴욕·UTC 3개 시간대 모두 통과), 브라우저 E2E 6종 218개(58·39·59·19·6·37) — 전부 통과(2026-10-14). 출시된 v1 번들(`20261013-8`)은 단위 198개·E2E 5종 기준이라 요약 기능은 아직 미출시 |
 | 실기기 | 출시 후보 `20261013-8` 실제 광고 노출·정상 작동 확인 완료(사용자, 2026-10-13). 메모리·네트워크 수치는 측정 안 함 |
 | 출시 버전 | **`20261013-8`** (실제 광고 ID, 커밋 `54512fb`, deploymentId `01a133eb-b011-7e16-8eff-2e49bd45b7c6`) — **승인·배포됨** |
 | 출시 상태 | **출시 완료(`OPEN`)** — 검토 요청 `250615`(INITIAL)가 2026-10-13 16:51 `APPROVED`, 앱 정보 `APPROVED`·`isInitialRegistrationCompleted: true`·`isDeployed: true`. 사용자가 출시 완료 확인, MCP(`miniapp_meta_status`·`miniapp_get_status`·`review_list`)로 2026-10-13 재확인. 신청 시점에 "확인 필요 2건"(내비 바 로고·이름/더보기, 메모리·네트워크)은 미해소였고, 반려 없이 승인됨 |
@@ -141,7 +141,7 @@ v1은 출시됐다. 아래 1-1~1-5(출시 준비 기록)는 완료된 이력이�
 ## 2. 알려진 개선 후보 (v1 이후, 모두 선택 사항)
 
 ### 기능 후보 (기획서 `TurnCal_개발_계획서.md` v1.3의 우선순위 기준)
-- **오늘/내일 근무 요약(P1)** — **구현됨(`feat/add-today-tomorrow-summary`, 미병합·미출시)**: 달력 위 오늘·내일 카드(바뀐 근무·시간·공휴일, 누르면 날짜 화면). 명세는 `openspec/changes/add-today-tomorrow-summary/`(아카이브 전). 남은 일은 실기기 확인 → 아카이브 → `main` 병합 → 새 번들 출시.
+- **오늘/내일 근무 요약(P1)** — **구현·`main` 병합 완료(미출시)**: 달력 위 오늘·내일 카드(바뀐 근무·시간·공휴일, 누르면 날짜 화면). 정식 명세 `openspec/specs/today-summary/`. 남은 일은 실제 광고 ID 출시 빌드 → 업로드 → 업데이트 검토(사용자 지시 시).
 - 날짜별 예외 수정(P1)은 구현됨(날짜 화면 "그날 근무로 적용").
 - 근무 유형 사용자 정의(P2) — 이름·약어·색 직접 지정.
 - 일정 공유·내보내기(P2) — 공유 기능은 출시 가이드·플랫폼 정책 확인 필요(현재 "공유 없음"으로 통과).
