@@ -23,7 +23,7 @@ node $env:TEMP\turncal-e2e\day-entries.mjs        # 세부 내용·이름·초�
 node $env:TEMP\turncal-e2e\banner.mjs             # 달력 하단 배너 19개
 node $env:TEMP\turncal-e2e\user-key.mjs           # 사용자 식별키 저장·초기화 6개
 node $env:TEMP\turncal-e2e\today-summary.mjs      # 오늘·내일 요약 37개(시계 고정, 360px, 자정 갱신)
-node $env:TEMP\turncal-e2e\pattern-history.mjs    # 패턴 이력·적용 범위·초기화·손상 데이터·360px·저장 실패 44개
+node $env:TEMP\turncal-e2e\pattern-history.mjs    # 패턴 이력·적용 범위·초기화(패턴/전체)·손상 데이터·360px·저장 실패 53개
 ```
 
 - 브라우저 경로는 `EDGE_PATH`, 앱 주소는 `APP_URL` 환경 변수로 바꿀 수 있다.

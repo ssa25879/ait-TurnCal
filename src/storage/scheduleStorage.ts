@@ -116,9 +116,6 @@ function parseV3(data: Record<string, unknown>): ParseResult {
   }
   const history = parsePatternHistory(data.patternHistory);
   if (!history.ok) return history;
-  if (history.history.length > 0 && pattern === null) {
-    return { ok: false, reason: "근무 패턴 없이 패턴 이력만 있어요." };
-  }
   if (!isWeekStart(data.weekStart)) return { ok: false, reason: "주 시작 요일 값이 올바르지 않아요." };
   if (!isThemeId(data.theme)) return { ok: false, reason: "테마 값이 올바르지 않아요." };
   const { userName, scheduleName } = data;

@@ -184,8 +184,11 @@ function TurnCal({
 
   // ---------- 설정 저장 ----------
   const savePattern = async (next: WorkPattern, scope: ApplyScope) => {
-    // 적용 범위에 따라 이력을 갱신한다. 저장된 패턴이 없으면(첫 등록·초기화 후) 이력 없이 새 패턴 하나다.
-    const result = applyPatternChange(timeline, next, scope, today);
+    // 적용 범위에 따라 이력을 갱신한다. 저장된 패턴이 없으면(첫 등록·패턴 초기화 후) 적용 범위 없이
+    // 새 패턴을 현재 패턴으로 두고, 패턴 초기화 때 남긴 이력은 그대로 유지한다.
+    const result = timeline
+      ? applyPatternChange(timeline, next, scope, today)
+      : { current: next, history: settings?.patternHistory ?? [] };
     const { patternHistory: _previousHistory, ...rest } = settings ?? createDefaultSettings();
     const updated: StoredSettingsV3 = {
       ...rest,

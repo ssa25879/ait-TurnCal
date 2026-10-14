@@ -201,7 +201,6 @@ describe("patternHistory", () => {
     ["항목 패턴에 알 수 없는 근무 유형", { ...valid, patternHistory: [{ ...pastA, pattern: { startDate: "2026-10-01", cycle: ["WEEKEND"] } }] }],
     ["항목이 객체가 아님", { ...valid, patternHistory: ["2026-10-13"] }],
     ["이력이 배열이 아님", { ...valid, patternHistory: { until: "2026-10-13" } }],
-    ["현재 패턴 없이 이력만 있음", { ...valid, pattern: null, patternHistory: [pastA] }],
     [
       "이력이 51개",
       {
@@ -217,6 +216,13 @@ describe("patternHistory", () => {
   it.each(corruptCases)("손상 데이터로 처리한다: %s", async (_name, value) => {
     const result = await loadRaw(value);
     expect(result.kind).toBe("corrupt");
+    expectNoWrites();
+  });
+
+  it("패턴 초기화 후 현재 패턴 없이 이력만 남은 설정은 정상으로 복원한다", async () => {
+    const afterReset = { ...valid, pattern: null, patternHistory: [pastA] };
+    const result = await loadRaw(afterReset);
+    expect(result).toEqual({ kind: "ok", settings: afterReset });
     expectNoWrites();
   });
 

@@ -41,7 +41,7 @@ describe("초기화", () => {
     expect(memory.has(ENTRIES_KEY)).toBe(true);
   });
 
-  it("resetPattern은 패턴 이력도 함께 지운다", async () => {
+  it("resetPattern은 현재 패턴만 지우고 패턴 이력은 유지한다", async () => {
     const withHistory: StoredSettingsV3 = {
       ...settings,
       patternHistory: [{ until: "2026-10-13", pattern: { startDate: "2026-10-01", cycle: ["DAY", "NIGHT", "OFF"] } }],
@@ -49,10 +49,9 @@ describe("초기화", () => {
     memory.set(SETTINGS_KEY, JSON.stringify(withHistory));
     const next = await resetPattern(withHistory);
     expect(next.pattern).toBeNull();
-    expect("patternHistory" in next).toBe(false);
+    expect(next.patternHistory).toEqual(withHistory.patternHistory);
     const stored = JSON.parse(memory.get(SETTINGS_KEY)!);
-    expect(stored).toEqual({ ...settings, pattern: null });
-    expect("patternHistory" in stored).toBe(false);
+    expect(stored).toEqual({ ...withHistory, pattern: null });
     expect(memory.has(ENTRIES_KEY)).toBe(true);
   });
 

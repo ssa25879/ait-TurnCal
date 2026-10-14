@@ -139,26 +139,60 @@ let afterFromToday;
   await context.close();
 }
 
-// ---------- 5. 패턴 초기화 → 이력 삭제, 재등록은 적용 범위 없음 ----------
+// ---------- 5. 패턴 초기화 → 패턴만 삭제·이력 유지, 재등록은 적용 범위 없음 ----------
 {
+  const before = JSON.parse(afterFromToday);
   const { context, page } = await open(afterFromToday);
   await openPattern(page);
+  check("패턴 초기화 설명: 이력은 남는다고 안내", (await page.getByText("패턴 이력·화면 설정·이름·날짜 세부 내용은 남아요").count()) > 0);
   await page.getByRole("button", { name: "근무 패턴 초기화" }).click();
   await page.getByText("근무 패턴을 초기화할까요?").waitFor({ state: "visible", timeout: 3000 });
   await page.getByRole("button", { name: "초기화하기" }).click();
   await page.waitForTimeout(500);
   const s = await stored(page);
-  check("패턴 초기화: 패턴 null·이력 없음·테마 유지", s.pattern === null && !("patternHistory" in s) && s.theme === "INDIGO", JSON.stringify(s));
+  check("패턴 초기화: 패턴 null·이력 유지·테마 유지", s.pattern === null && JSON.stringify(s.patternHistory) === JSON.stringify(before.patternHistory) && s.theme === "INDIGO", JSON.stringify(s));
   check("패턴 초기화 후 등록 안내 화면", await page.getByText("패턴 등록하기").isVisible());
   await page.getByText("패턴 등록하기").click();
   await page.waitForSelector(".settings");
   for (const name of ["주간", "야간", "휴무"]) await page.locator(".shift-button", { hasText: name }).click();
   await page.locator(".today-cell").nth(0).click();
-  check("첫 등록: 적용 범위 선택·이력 목록 없음", (await page.locator(".scope-options").count()) === 0 && (await page.locator(".history-list").count()) === 0);
+  check("재등록: 적용 범위 선택·이력 목록 없음(저장된 패턴 없음)", (await page.locator(".scope-options").count()) === 0 && (await page.locator(".history-list").count()) === 0);
   await page.getByRole("button", { name: "저장", exact: true }).click();
   await page.waitForSelector(".today-card");
   const after = await stored(page);
-  check("초기화 후 재등록: 이력 없이 새 패턴 하나", !("patternHistory" in after) && after.pattern.cycle.join() === "DAY,NIGHT,OFF", JSON.stringify(after));
+  check("재등록 후: 이력 그대로, 새 패턴이 현재 패턴", after.pattern.cycle.join() === "DAY,NIGHT,OFF" && JSON.stringify(after.patternHistory) === JSON.stringify(before.patternHistory), JSON.stringify(after));
+  check("재등록 후 10/10은 이전 패턴(휴무) 유지", (await cellLabel(page, "2026-10-10")).includes("휴무"));
+  await openPattern(page);
+  const ranges = await page.locator(".history-range").allInnerTexts();
+  check("재등록 후 이력 목록: 새 패턴 + 이전 기록", ranges.length === 2 && ranges[0] === "2026년 10월 13일부터 (현재)" && ranges[1] === "처음부터 2026년 10월 12일까지", JSON.stringify(ranges));
+  await context.close();
+}
+
+// ---------- 5-2. 전체 초기화 → 경고 후 이력까지 삭제 ----------
+{
+  const { context, page } = await open(afterFromToday);
+  await page.getByRole("button", { name: "설정", exact: true }).click();
+  await page.waitForSelector(".settings-menu");
+  await page.getByText("초기화", { exact: true }).click();
+  await page.getByRole("button", { name: "전체 초기화" }).click();
+  await page.getByText("모든 데이터를 지울까요?").waitFor({ state: "visible", timeout: 3000 });
+  const dialog = await page.locator("[role=dialog], [role=alertdialog]").first().innerText();
+  check("전체 초기화 경고문: 패턴 이력 삭제·되돌릴 수 없음 명시", dialog.includes("패턴 이력") && dialog.includes("되돌릴 수 없어요"), dialog.replace(/s+/g, " "));
+  check("경고 전에는 저장값이 그대로", (await raw(page)) === afterFromToday);
+  await page.getByRole("button", { name: "초기화하기" }).click();
+  await page.waitForTimeout(600);
+  check("전체 초기화 후 설정 저장값 삭제", (await raw(page)) === null);
+  check("전체 초기화 후 초기 안내 화면", await page.getByText("패턴 등록하기").isVisible());
+  await page.getByText("패턴 등록하기").click();
+  await page.waitForSelector(".settings");
+  for (const name of ["주간", "휴무"]) await page.locator(".shift-button", { hasText: name }).click();
+  await page.locator(".today-cell").nth(0).click();
+  await page.getByRole("button", { name: "저장", exact: true }).click();
+  await page.waitForSelector(".today-card");
+  const after = await stored(page);
+  check("전체 초기화 후 재등록: 이력 없음", !("patternHistory" in after), JSON.stringify(after));
+  await openPattern(page);
+  check("전체 초기화 후 이력 목록은 안내 문구", (await page.getByText("바꾼 기록이 아직 없어요").isVisible()) && (await page.locator(".history-item").count()) === 1);
   await context.close();
 }
 
