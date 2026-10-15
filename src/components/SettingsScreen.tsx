@@ -108,6 +108,14 @@ export function SettingsScreen({ saved, timeline, today, onSave, onDirtyChange, 
 
       {timeline && <PatternHistoryList timeline={timeline} />}
 
+      <div className="bottom-action">
+        {saveError && <p className="error-text" role="alert">{saveError}</p>}
+        {!check.ok && <p className="hint">{check.reason}</p>}
+        <Button size="xlarge" display="full" disabled={!check.ok} loading={saving} onClick={save}>
+          저장
+        </Button>
+      </div>
+
       <p className="notice">
         설정은 이 기기에만 저장돼요. 앱을 삭제하면 저장된 설정도 함께 삭제되고, 다른 기기와
         자동으로 동기화되지 않아요.
@@ -121,14 +129,6 @@ export function SettingsScreen({ saved, timeline, today, onSave, onDirtyChange, 
           onReset={onResetPattern}
         />
       )}
-
-      <div className="bottom-action">
-        {saveError && <p className="error-text" role="alert">{saveError}</p>}
-        {!check.ok && <p className="hint">{check.reason}</p>}
-        <Button size="xlarge" display="full" disabled={!check.ok} loading={saving} onClick={save}>
-          저장
-        </Button>
-      </div>
     </section>
   );
 }
