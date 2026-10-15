@@ -24,7 +24,8 @@ page.on("console", (m) => logs.push(m.text()));
 page.on("pageerror", (e) => errors.push(String(e)));
 
 const closeCalls = () => logs.filter((l) => l.includes("closeView called")).length;
-const back = () => page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent")));
+// 클릭 직후 변경 여부(dirty) 상태가 반영되기 전에 이벤트가 읽히지 않게 잠깐 기다린다.
+const back = async () => { await page.waitForTimeout(250); await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); };
 const stored = () => page.evaluate((k) => localStorage.getItem(k), KEY);
 const today = await page.evaluate(() => {
   const d = new Date();

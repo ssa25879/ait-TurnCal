@@ -48,7 +48,8 @@ async function open(now, { width = 390, height = 844, stored = {}, noFill = fals
 }
 const card = (page, i) => page.locator(".today-card").nth(i);
 const text = async (page, i) => (await card(page, i).innerText()).replace(/\s+/g, " ").trim();
-const back = async (page) => { await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await page.waitForTimeout(400); };
+// 클릭 직후 변경 여부(dirty) 상태가 반영되기 전에 이벤트가 읽히지 않게 잠깐 기다린다.
+const back = async (page) => { await page.waitForTimeout(250); await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await page.waitForTimeout(400); };
 
 // ---------- 기본 표시 ----------
 {
@@ -65,7 +66,7 @@ const back = async (page) => { await page.evaluate(() => window.dispatchEvent(ne
     const y = (sel) => document.querySelector(sel)?.getBoundingClientRect().y ?? -1;
     return [y(".schedule-header"), y(".today-summary"), y(".month-nav"), y(".calendar"), y(".bottom-action"), y(".calendar-banner")];
   });
-  check("순서: 요약 → 월 이동 → 격자 → 설정 → 광고", order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), JSON.stringify(order.map(Math.round)));
+  check("순서: 요약 → 월 이동 → 격자 → 하단 조작 → 광고", order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), JSON.stringify(order.map(Math.round)));
   const sizes = await page.evaluate(() => [...document.querySelectorAll(".today-card")].map((c) => c.getBoundingClientRect().height));
   check("카드 누름 영역 44px 이상", sizes.every((h) => h >= 44), JSON.stringify(sizes));
   const fonts = await page.evaluate(() => Math.min(...[...document.querySelectorAll(".today-card *")].filter((e) => e.textContent.trim() && e.children.length === 0).map((e) => parseFloat(getComputedStyle(e).fontSize))));
@@ -228,7 +229,7 @@ const back = async (page) => { await page.evaluate(() => window.dispatchEvent(ne
     const a = document.querySelector(".calendar-banner").getBoundingClientRect();
     return a.top - s.bottom;
   });
-  check("[설정]–광고 간격 32px 이상 유지", gap >= 32, `gap=${Math.round(gap)}`);
+  check("하단 조작–광고 간격 32px 이상 유지", gap >= 32, `gap=${Math.round(gap)}`);
   await context.close();
 }
 

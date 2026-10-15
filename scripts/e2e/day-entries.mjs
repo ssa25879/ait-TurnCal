@@ -22,7 +22,8 @@ page.on("pageerror", (e) => errors.push(String(e)));
 
 const wait = (ms = 400) => page.waitForTimeout(ms);
 const closeCalls = () => logs.filter((l) => l.includes("closeView called")).length;
-const back = async () => { await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await wait(); };
+// 클릭 직후 변경 여부(dirty) 상태가 반영되기 전에 이벤트가 읽히지 않게 잠깐 기다린다.
+const back = async () => { await page.waitForTimeout(250); await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await wait(); };
 const get = (k) => page.evaluate((key) => localStorage.getItem(key), k);
 const settingsJson = async () => JSON.parse(await get(SKEY));
 const entriesJson = async () => JSON.parse(await get(EKEY));
@@ -285,7 +286,7 @@ await page.getByRole("button", { name: "세부 내용 추가" }).click();
 await page.getByLabel("이름").fill("실패테스트");
 await page.getByRole("button", { name: "저장", exact: true }).click();
 check("세부 내용 저장 실패 → 편집 유지·안내", (await visible("저장하지 못했어요")) && (await page.getByLabel("이름").inputValue()) === "실패테스트");
-await page.getByLabel("이름").fill("");
+// 저장 실패로 입력이 남아 있는(변경 있는) 상태에서 뒤로가기 → 폐기 확인
 await back(); await page.getByRole("button", { name: "버리기" }).click(); await wait();
 await back();
 await openMenu();

@@ -47,7 +47,7 @@ const userInput = (page) => page.getByLabel("내 호칭");
   const { context, page, back } = await open(base());
   const labels = await page.locator(".shortcut-row button").allInnerTexts();
   check("바로가기 2개: 근무 패턴 수정·이름 수정", labels.length === 2 && labels[0].includes("근무 패턴 수정") && labels[1].includes("이름 수정"), JSON.stringify(labels));
-  check("오늘·내일 카드·[설정] 버튼 유지", (await page.locator(".today-card").count()) === 2 && (await page.getByRole("button", { name: "설정", exact: true }).isVisible()));
+  check("오늘·내일 카드·설정 진입(내비 바 기능 버튼) 유지", (await page.locator(".today-card").count()) === 2 && (await page.locator("button[data-ait-accessory-button-id=settings]").isVisible()));
 
   await page.getByRole("button", { name: "설정", exact: true }).click();
   await page.waitForSelector(".settings-menu");
@@ -168,17 +168,11 @@ for (const [width, height] of [[360, 740], [390, 844]]) {
   const row = await page.locator(".shortcut-row").boundingBox();
   const btns = await page.locator(".shortcut-row button").evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { x: r.x, right: r.right, h: r.height }; }));
   const cal = await page.locator(".calendar").boundingBox();
-  const settingsBtn = await page.getByRole("button", { name: "설정", exact: true }).boundingBox();
   check(`${width}px 버튼이 화면 안·겹치지 않음·높이 36px 이상`, btns.length === 2 && btns[0].x >= 0 && btns[1].right <= width && btns[0].right <= btns[1].x && btns.every((b) => b.h >= 36), JSON.stringify(btns));
-  check(`${width}px 달력 아래·[설정] 버튼 위 순서(겹침 없음)`, cal.y + cal.height <= row.y + 1 && row.y + row.height <= settingsBtn.y + 1, JSON.stringify({ cal, row, settingsBtn }));
+  check(`${width}px 달력 아래 바로가기 줄(겹침 없음)`, cal.y + cal.height <= row.y + 1, JSON.stringify({ cal, row }));
   const small = await page.evaluate(() => [...document.querySelectorAll(".shortcut-row, .shortcut-row *")].filter((e) => parseFloat(getComputedStyle(e).fontSize) < 11).length);
   check(`${width}px 버튼 글자 11px 이상`, small === 0);
-  const gap = await page.evaluate(() => {
-    const ad = document.querySelector(".calendar-banner, [data-banner], .ad-slot");
-    const setting = [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "설정");
-    return { hasAd: !!ad, settingBottom: setting.getBoundingClientRect().bottom };
-  });
-  check(`${width}px [설정] 버튼 유지`, gap.settingBottom > 0);
+  check(`${width}px 하단에는 바로가기만 있고 대체 [설정] 버튼은 없음(내비 바 버튼 등록됨)`, (await page.locator(".bottom-action button").count()) === 2);
   if (width === 360) await page.screenshot({ path: process.env.SHOT ?? "calendar-shortcuts-360.png" });
   await context.close();
 }

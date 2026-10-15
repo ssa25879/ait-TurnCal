@@ -21,7 +21,8 @@ page.on("pageerror", (e) => errors.push(String(e)));
 
 const wait = (ms = 400) => page.waitForTimeout(ms);
 const closeCalls = () => logs.filter((l) => l.includes("closeView called")).length;
-const back = async () => { await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await wait(); };
+// 클릭 직후 변경 여부(dirty) 상태가 반영되기 전에 이벤트가 읽히지 않게 잠깐 기다린다.
+const back = async () => { await page.waitForTimeout(250); await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await wait(); };
 const stored = () => page.evaluate((k) => localStorage.getItem(k), KEY);
 const primaryVar = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim().toUpperCase());
 const bgOf = (locator) => locator.evaluate((el) => getComputedStyle(el).backgroundColor);

@@ -30,13 +30,12 @@
 - 대안: 항상 노출하고 화면별로 동작 분기 — 가이드의 "동작이 명확해야 함"에 어긋날 수 있어 거부.
 
 ### 2. 등록에 실패하면 하단 [설정] 버튼으로 대체
-훅이 등록 성공 여부(`registered`)를 돌려주고, `CalendarScreen`은 `registered`가 아닐 때만 하단 [설정] 버튼을 렌더한다. SDK 함수가 없거나 예외가 나면(구형 토스 앱, 지원하지 않는 환경) 하단 버튼이 그대로 나타난다. 등록이 성공하면 하단 버튼은 렌더되지 않는다.
+훅이 등록 상태(`pending`·`registered`·`failed`)를 돌려주고, `CalendarScreen`은 `failed`일 때만 하단 [설정] 버튼을 렌더한다. `addAccessoryButton`이 비동기라서 결과가 나오기 전(`pending`)에는 하단 버튼을 그리지 않아 버튼이 깜빡이거나 레이아웃이 튀지 않게 하고, 약 1.5초 안에 성공하지 못하면 `failed`로 보고 대체 버튼을 보여 준다(늦게 성공하면 다시 숨김). SDK 함수가 없거나 예외가 나면(구형 토스 앱, 지원하지 않는 환경) 하단 버튼이 그대로 나타난다. 등록이 성공하면 하단 버튼은 렌더되지 않는다.
 - 이유: 기능 버튼이 안 보이면 설정 접근이 불가능해져 데이터 초기화·이름·테마를 못 바꾸게 되는 치명 경로다. 대체 경로를 두면 위험이 없다.
 - 위험: 등록이 "성공했지만 실제로는 안 보이는" 경우는 코드로 알 수 없다 → 실기기 확인 항목으로 둔다.
 
-### 3. 아이콘·이름
-버튼 이름(`title`)은 "설정", 아이콘은 SDK가 제공하는 톱니바퀴 계열 이름(`icon-setting-mono` 등)을 구현 단계에서 문서·Devtools mock으로 확인해 정한다. 이름을 확인하지 못하면 가장 가까운 공식 아이콘을 쓰고 이 문서에 기록한다(아이콘 이름을 임의로 만들지 않는다).
-- 열린 질문: 공식 아이콘 이름 목록(문서 위치) — 구현 첫 단계에서 확인.
+### 3. 아이콘·이름·API 형태(확인 완료)
+버튼 이름(`title`)은 "설정", `id`는 `"settings"`, 아이콘은 `icon-setting-mono`를 쓴다. 근거: 앱인토스 문서(내비게이션 바 설정)는 액세서리 버튼이 **모노톤 아이콘만 지원**한다고 하고 이름은 `icon-<이름>-mono` 형태이며, `@toss/tds-mobile` 패키지 문서에 `icon-setting-mono`가 TDS 아이콘 이름으로 나온다. SDK 타입은 `partner.addAccessoryButton(params): Promise<void>`, `partner.removeAccessoryButton(): Promise<void>`, `tdsEvent.addEventListener("navigationAccessoryEvent", { onEvent: ({ id }) => void, onError? })`(해제 함수 반환)이다. Devtools mock은 `button[data-ait-accessory-button-id]`를 화면 오른쪽 위에 그려 클릭하면 `__ait:navigationAccessoryEvent`를 보내므로 E2E에서 클릭으로 검증할 수 있다(아이콘 표시 자체는 검증 불가).
 
 ### 4. 배너 간격 기준을 "달력 하단 콘텐츠"로
 기능 버튼이 등록된 경우 하단의 마지막 요소는 바로가기 줄이다. 배너와의 간격 32px 규칙은 그 마지막 요소 기준으로 유지한다(규칙 문장은 "[설정] 버튼"에서 "달력 하단의 마지막 조작 요소(바로가기 줄 또는 대체 [설정] 버튼)"로 수정).

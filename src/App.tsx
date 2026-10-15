@@ -22,6 +22,7 @@ import {
 } from "./platform/overlayBack";
 import { useAnonymousKey } from "./platform/useAnonymousKey";
 import { useBackHandler } from "./platform/useBackHandler";
+import { useNavSettingsButton } from "./platform/useNavSettingsButton";
 import { useSafeArea } from "./platform/useSafeArea";
 import { useToday } from "./platform/useToday";
 import { loadEntries, saveEntries, type EntriesByDate } from "./storage/entriesStorage";
@@ -166,6 +167,11 @@ function TurnCal({
     setDayError(null);
     go({ kind: "day", date });
   };
+
+  // 설정 진입은 내비게이션 바 기능 버튼(최대 1개)이며 달력에서만 등록한다. 등록이 안 되는 환경만 하단 버튼을 쓴다.
+  const navSettings = useNavSettingsButton(view.kind === "calendar" && settings !== null, () => {
+    if (view.kind === "calendar") toSettingsMenu();
+  });
 
   useBackHandler(
     () => ({
@@ -392,6 +398,7 @@ function TurnCal({
           days={days}
           entriesNotice={entriesBroken ? ENTRIES_BROKEN_NOTICE : null}
           onSelectDate={toDay}
+          showSettingsButton={navSettings === "failed"}
           onOpenSettings={toSettingsMenu}
           onRegisterPattern={() => openFromCalendar("pattern")}
           onEditPattern={() => openFromCalendar("pattern")}

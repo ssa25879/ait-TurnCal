@@ -20,6 +20,8 @@ interface Props {
   days: EntriesByDate;
   entriesNotice: string | null;
   onSelectDate(date: string): void;
+  /** 내비게이션 바 기능 버튼을 쓸 수 없을 때만 true: 하단에 대체 [설정] 버튼을 보인다. */
+  showSettingsButton: boolean;
   onOpenSettings(): void;
   /** 근무 패턴 설정(첫 등록) 화면을 연다. */
   onRegisterPattern(): void;
@@ -40,6 +42,7 @@ export function CalendarScreen({
   days,
   entriesNotice,
   onSelectDate,
+  showSettingsButton,
   onOpenSettings,
   onRegisterPattern,
   onEditPattern,
@@ -121,9 +124,11 @@ export function CalendarScreen({
             이름 수정
           </Button>
         </div>
-        <Button className="tap-44" size="medium" variant="weak" display="full" onClick={onOpenSettings}>
-          설정
-        </Button>
+        {showSettingsButton && (
+          <Button className="tap-44" size="medium" variant="weak" display="full" onClick={onOpenSettings}>
+            설정
+          </Button>
+        )}
       </div>
 
       <CalendarBanner />
