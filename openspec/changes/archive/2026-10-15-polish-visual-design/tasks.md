@@ -21,8 +21,8 @@
 
 ## 5. 문서·최종 검증
 
-- [ ] 5.1 `docs/NEXT_STEPS.md`(상태 표·테스트 개수·00절)와 `scripts/e2e/README.md`를 갱신한다. 확인: 문서의 테스트 개수가 실제 출력과 일치한다.
-- [ ] 5.2 `typecheck`·`npm test`·`test:tz`·E2E 전 종을 실행하고 `build:adtest` 번들을 실기기에서 확인한 뒤(사용자 확인 결과를 기록) 출시 가이드 대조표를 갱신한다. 확인: 모두 통과·확인 필요 항목 보고.
+- [x] 5.1 `docs/NEXT_STEPS.md`(상태 표·테스트 개수·00절)와 `scripts/e2e/README.md`를 갱신한다. 확인: 문서의 테스트 개수가 실제 출력과 일치한다.
+- [x] 5.2 `typecheck`·`npm test`·`test:tz`·E2E 전 종을 실행하고 `build:adtest` 번들을 실기기에서 확인한 뒤(사용자 확인 결과를 기록) 출시 가이드 대조표를 갱신한다. 확인: 모두 통과·확인 필요 항목 보고.
 
 ## Workflow follow-up
 
