@@ -16,6 +16,23 @@
   --color-on-primary: #ffffff;
   --color-danger: #f04452;
 
+  /* 기준값: 둥근 모서리·간격·글자 크기는 아래 단계만 쓴다(글자는 11px 이상). */
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --font-xs: 12px;
+  --font-s: 13px;
+  --font-m: 15px;
+  --font-l: 17px;
+  --font-xl: 20px;
+  --font-xxl: 24px;
+
   /* 근무 유형 색상: 배경 + 글자. 약어 문자를 항상 함께 표시해 색상에만 의존하지 않는다. */
   --shift-day-bg: #fff3c4;
   --shift-day-fg: #8a5a00;
@@ -93,7 +110,7 @@ body {
 /* ---------- 공통 ---------- */
 .page-title {
   margin: 8px 0 12px;
-  font-size: 24px;
+  font-size: var(--font-xxl);
   font-weight: 700;
   line-height: 1.4;
 }
@@ -103,27 +120,27 @@ body {
 .hint,
 .empty {
   margin: 0 0 12px;
-  font-size: 15px;
+  font-size: var(--font-m);
   line-height: 1.6;
   color: var(--color-text-sub);
 }
 
 .hint,
 .empty {
-  font-size: 14px;
+  font-size: var(--font-m);
 }
 
 .notice {
   margin-top: 24px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-m);
   background: var(--color-bg-sub);
-  font-size: 13px;
+  font-size: var(--font-s);
 }
 
 .error-text {
   margin: 8px 0;
-  font-size: 14px;
+  font-size: var(--font-m);
   color: var(--color-danger);
 }
 
@@ -133,7 +150,7 @@ body {
 
 .section-title {
   margin: 0 0 6px;
-  font-size: 18px;
+  font-size: var(--font-l);
   font-weight: 700;
 }
 
@@ -147,7 +164,7 @@ body {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 10px;
+  border-radius: var(--radius-m);
   font-weight: 700;
 }
 
@@ -160,7 +177,7 @@ body {
 .shift-buttons {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .shift-button {
@@ -170,8 +187,8 @@ body {
   gap: 6px;
   height: 48px;
   border: 0;
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: var(--radius-m);
+  font-size: var(--font-m);
   font-weight: 600;
   cursor: pointer;
 }
@@ -201,8 +218,8 @@ body {
   width: 100%;
   aspect-ratio: 1;
   border: 2px solid transparent;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: var(--radius-m);
+  font-size: var(--font-l);
   font-weight: 700;
   cursor: pointer;
 }
@@ -211,7 +228,7 @@ body {
   position: absolute;
   top: 2px;
   left: 4px;
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 500;
   opacity: 0.7;
 }
@@ -226,10 +243,10 @@ body {
   left: 50%;
   transform: translateX(-50%);
   padding: 1px 5px;
-  border-radius: 6px;
+  border-radius: var(--radius-s);
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 10px;
+  font-size: var(--font-xs);
   white-space: nowrap;
 }
 
@@ -245,14 +262,14 @@ body {
 .month-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   margin: 8px 0 16px;
 }
 
 .month-title {
   flex: 1;
   margin: 0;
-  font-size: 22px;
+  font-size: var(--font-xl);
   font-weight: 700;
   text-align: center;
 }
@@ -261,7 +278,7 @@ body {
   width: 40px;
   height: 40px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-m);
   background: var(--color-bg-sub);
   color: var(--color-text);
   display: inline-flex;
@@ -273,18 +290,18 @@ body {
 
 .calendar {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .calendar-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .calendar-weekday {
   padding: 4px 0;
-  font-size: 13px;
+  font-size: var(--font-s);
   text-align: center;
   color: var(--color-text-sub);
 }
@@ -305,7 +322,7 @@ body {
   min-height: 86px;
   padding: 6px 0 4px;
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--radius-m);
   background: none;
   color: inherit;
   font: inherit;
@@ -325,7 +342,7 @@ body {
 }
 
 .calendar-day {
-  font-size: 13px;
+  font-size: var(--font-s);
   font-weight: 600;
 }
 
@@ -343,7 +360,7 @@ body {
   min-height: 14px;
   max-width: 100%;
   overflow: hidden;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 600;
   line-height: 14px;
   white-space: nowrap;
@@ -358,28 +375,28 @@ body {
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-m);
   font-weight: 700;
 }
 
 /* ---------- 화면 설정 ---------- */
 .theme-options {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .theme-option {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 56px;
   padding: 12px 16px;
   border: 2px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: var(--color-bg);
   color: var(--color-text);
-  font-size: 16px;
+  font-size: var(--font-l);
   text-align: left;
   cursor: pointer;
 }
@@ -402,7 +419,7 @@ body {
 }
 
 .theme-check {
-  font-size: 13px;
+  font-size: var(--font-s);
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -414,23 +431,23 @@ body {
 
 .schedule-title {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--font-m);
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .schedule-owner {
   margin: 2px 0 0;
-  font-size: 13px;
+  font-size: var(--font-s);
   color: var(--color-text-sub);
 }
 
 .notice-inline {
   margin: 8px 0;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-m);
   background: var(--color-bg-sub);
-  font-size: 13px;
+  font-size: var(--font-s);
   color: var(--color-text-sub);
 }
 
@@ -449,7 +466,7 @@ body {
   min-height: 16px;
   max-width: 100%;
   overflow: hidden;
-  font-size: 12px;
+  font-size: var(--font-xs);
   font-weight: 600;
   line-height: 16px;
   white-space: nowrap;
@@ -459,7 +476,7 @@ body {
 /* ---------- 패턴 적용 범위 · 이력 ---------- */
 .scope-options {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .scope-option {
@@ -469,7 +486,7 @@ body {
   min-height: 56px;
   padding: 12px 16px;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: var(--color-bg);
   color: var(--color-text);
   font: inherit;
@@ -483,18 +500,18 @@ body {
 }
 
 .scope-title {
-  font-size: 15px;
+  font-size: var(--font-m);
   font-weight: 700;
 }
 
 .scope-desc {
-  font-size: 13px;
+  font-size: var(--font-s);
   color: var(--color-text-sub);
 }
 
 .history-list {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -503,7 +520,7 @@ body {
 .history-item {
   padding: 12px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: var(--color-bg);
 }
 
@@ -514,14 +531,14 @@ body {
 
 .history-range {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: var(--font-m);
   font-weight: 700;
 }
 
 .history-cycle {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .history-chip {
@@ -530,8 +547,8 @@ body {
   justify-content: center;
   width: 24px;
   height: 24px;
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-xs);
   font-weight: 700;
 }
 
@@ -540,7 +557,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   grid-auto-flow: column;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 12px 0 4px;
 }
 
@@ -552,7 +569,7 @@ body {
   min-height: 72px;
   padding: 10px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: var(--color-bg);
   color: var(--color-text);
   font: inherit;
@@ -573,13 +590,13 @@ body {
 }
 
 .today-card-label {
-  font-size: 13px;
+  font-size: var(--font-s);
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .today-card-date {
-  font-size: 12px;
+  font-size: var(--font-xs);
   color: var(--color-text-sub);
 }
 
@@ -597,41 +614,41 @@ body {
   flex-shrink: 0;
   width: 28px;
   height: 28px;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-m);
   font-weight: 700;
 }
 
 .today-card-name {
-  font-size: 17px;
+  font-size: var(--font-l);
   font-weight: 700;
 }
 
 .today-card-changed {
   padding: 1px 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-s);
   background: var(--color-bg-sub);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--color-text-sub);
 }
 
 .today-card-holiday {
-  font-size: 12px;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--color-danger);
   word-break: keep-all;
 }
 
 .today-card-time {
-  font-size: 12px;
+  font-size: var(--font-xs);
   color: var(--color-text-sub);
 }
 
 /* ---------- 날짜 화면 ---------- */
 .day-holiday {
   margin: -8px 0 12px;
-  font-size: 15px;
+  font-size: var(--font-m);
   font-weight: 600;
   color: var(--color-danger);
 }
@@ -641,14 +658,14 @@ body {
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: var(--color-bg-sub);
-  font-size: 15px;
+  font-size: var(--font-m);
 }
 
 .entry-list {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -657,12 +674,12 @@ body {
 .entry-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
   min-height: 56px;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: var(--color-bg);
   color: var(--color-text);
   font: inherit;
@@ -673,13 +690,13 @@ body {
 .entry-time {
   flex-shrink: 0;
   min-width: 64px;
-  font-size: 13px;
+  font-size: var(--font-s);
   color: var(--color-text-sub);
 }
 
 .entry-name {
   flex: 1;
-  font-size: 16px;
+  font-size: var(--font-l);
   font-weight: 600;
   word-break: keep-all;
 }
@@ -690,14 +707,14 @@ body {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-s);
   font-weight: 700;
 }
 
 .source-options {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 /* ---------- 입력 폼 ---------- */
@@ -709,7 +726,7 @@ body {
 .time-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 16px;
 }
 
@@ -719,8 +736,8 @@ body {
   gap: 6px;
   padding: 10px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  font-size: 13px;
+  border-radius: var(--radius-m);
+  font-size: var(--font-s);
   color: var(--color-text-sub);
 }
 
@@ -734,7 +751,7 @@ body {
   background: none;
   color: var(--color-text);
   font: inherit;
-  font-size: 17px;
+  font-size: var(--font-l);
 }
 
 .time-clear {
@@ -743,7 +760,7 @@ body {
   border: 0;
   background: none;
   color: var(--color-text-sub);
-  font-size: 13px;
+  font-size: var(--font-s);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -751,17 +768,17 @@ body {
 .category-options {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .category-option {
   min-height: 44px;
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--radius-m);
   background: var(--color-bg-sub);
   color: var(--color-text);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--font-m);
   font-weight: 600;
   cursor: pointer;
 }
@@ -772,13 +789,13 @@ body {
 
 .entry-actions {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .name-preview {
   margin-top: 20px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: var(--color-bg-sub);
 }
 
@@ -815,16 +832,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   margin: 8px 0;
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-m);
   background: var(--color-bg-sub);
 }
 
 .no-pattern-text {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-m);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -835,7 +852,7 @@ body {
 
 .shortcut-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0 0 8px;
 }
 

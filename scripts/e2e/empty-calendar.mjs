@@ -36,7 +36,8 @@ async function open(settings, { width = 390, height = 844, entries = null } = {}
   await page.reload({ waitUntil: "networkidle" });
   await page.waitForSelector("main.app > *", { timeout: 10000 });
   await page.waitForTimeout(400);
-  const back = async () => { await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await page.waitForTimeout(400); };
+  // 클릭 직후 변경 여부(dirty) 상태가 반영되기 전에 이벤트가 읽히지 않게 잠깐 기다린다.
+  const back = async () => { await page.waitForTimeout(250); await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await page.waitForTimeout(400); };
   const closeCalls = () => logs.filter((l) => l.includes("closeView called")).length;
   return { context, page, back, closeCalls };
 }
