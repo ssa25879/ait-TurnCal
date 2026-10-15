@@ -10,7 +10,6 @@ import { NamesScreen } from "./components/NamesScreen";
 import { ResetScreen } from "./components/ResetScreen";
 import { SettingsMenu } from "./components/SettingsMenu";
 import { SettingsScreen } from "./components/SettingsScreen";
-import { SetupIntro } from "./components/SetupIntro";
 import { yearMonthOf, type YearMonth } from "./domain/calendar";
 import { applyPatternChange, type ApplyScope, type PatternTimeline } from "./domain/patternHistory";
 import type { DayEntry, DayRecord } from "./domain/dayEntries";
@@ -36,7 +35,6 @@ import {
 
 type View =
   | { kind: "loading" }
-  | { kind: "setup-intro" }
   | { kind: "load-error"; reason: string }
   | { kind: "calendar" }
   | { kind: "settings-menu" }
@@ -133,8 +131,9 @@ function TurnCal({
         setView({ kind: "calendar" });
         break;
       case "empty":
-        setSettings(null);
-        setView({ kind: "setup-intro" });
+        // 저장된 설정이 없으면(첫 실행·전체 초기화 뒤 재실행) 기본 설정으로 빈 달력을 연다. 저장하지 않는다.
+        setSettings(createDefaultSettings());
+        setView({ kind: "calendar" });
         break;
       case "corrupt":
         setSettings(null);
@@ -244,12 +243,12 @@ function TurnCal({
       await applyLoaded(false);
       throw error;
     }
-    // 저장소는 비었지만 뒤로가기로 빈 달력에 갈 수 있게 기본 설정을 메모리에만 둔다(저장하지 않음).
+    // 저장소는 비웠고 기본 설정은 메모리에만 둔다(저장하지 않음). 재실행해도 같은 빈 달력이 열린다.
     setSettings(createDefaultSettings());
     setDays({});
     setEntriesBroken(false);
     setMonth(yearMonthOf(today));
-    go({ kind: "setup-intro" });
+    toCalendar();
   };
 
   /** 편집 중이던 내용도 함께 버리고 빈 달력으로 간다(확인 창이 폐기 확인을 대신한다). */
@@ -332,7 +331,6 @@ function TurnCal({
 
   return (
     <main className="app">
-      {view.kind === "setup-intro" && <SetupIntro onStart={() => go(settings ? { kind: "pattern", fromCalendar: true } : { kind: "pattern" })} />}
       {view.kind === "load-error" && (
         <LoadError reason={view.reason} onReset={() => go({ kind: "pattern" })} />
       )}

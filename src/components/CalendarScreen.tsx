@@ -55,17 +55,6 @@ export function CalendarScreen({
         {userName && <p className="schedule-owner">{userName}님</p>}
       </header>
 
-      <div className="shortcut-row">
-        {timeline.current !== null && (
-          <Button size="medium" variant="weak" display="full" onClick={onEditPattern}>
-            근무 패턴 수정
-          </Button>
-        )}
-        <Button size="medium" variant="weak" display="full" onClick={onEditNames}>
-          이름 수정
-        </Button>
-      </div>
-
       {entriesNotice && (
         <p className="notice-inline" role="status">
           {entriesNotice}
@@ -122,6 +111,16 @@ export function CalendarScreen({
       />
 
       <div className="bottom-action">
+        <div className="shortcut-row">
+          {timeline.current !== null && (
+            <Button size="medium" variant="weak" display="full" onClick={onEditPattern}>
+              근무 패턴 수정
+            </Button>
+          )}
+          <Button size="medium" variant="weak" display="full" onClick={onEditNames}>
+            이름 수정
+          </Button>
+        </div>
         <Button size="large" variant="weak" display="full" onClick={onOpenSettings}>
           설정
         </Button>

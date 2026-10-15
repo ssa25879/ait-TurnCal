@@ -52,7 +52,7 @@ const goDisplay = async () => { await goMenu(); await page.getByText("화면 설
 
 // ---------- 1. 최초 실행 ----------
 await fresh(null);
-check("최초 실행: 초기 안내 화면", await page.getByText("패턴 등록하기").isVisible());
+check("최초 실행: 빈 달력 + 근무 패턴 등록 안내", (await page.locator(".no-pattern-card").isVisible()) && (await page.locator(".calendar").isVisible()));
 check("최초 실행: 바텀시트·다이얼로그 자동 표시 없음", (await page.locator('[role="dialog"]').count()) === 0);
 const safeTop = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--safe-top"));
 check("SafeArea CSS 변수 적용", /px$/.test(safeTop.trim()), `--safe-top=${safeTop.trim()}`);
@@ -64,10 +64,10 @@ check("확대·축소 비활성화 viewport", viewport.includes("user-scalable=n
 let before = closeCalls();
 await back();
 await page.waitForTimeout(200);
-check("초기 안내에서 뒤로가기 → closeView", closeCalls() === before + 1);
+check("최초 빈 달력에서 뒤로가기 → closeView", closeCalls() === before + 1);
 
 // ---------- 2. 패턴 등록 ----------
-await page.getByText("패턴 등록하기").click();
+await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
 await page.waitForSelector(".settings");
 const saveButton = page.getByRole("button", { name: "저장", exact: true });
 check("빈 패턴이면 저장 비활성", await saveButton.isDisabled());
@@ -76,7 +76,9 @@ check("빈 패턴 사유 표시", await page.getByText("근무 유형을 1개 �
 before = closeCalls();
 await back();
 await page.waitForTimeout(200);
-check("첫 설정 화면에서 뒤로가기 → closeView", closeCalls() === before + 1);
+check("첫 설정 화면에서 뒤로가기 → 빈 달력(종료 아님)", (await page.locator(".no-pattern-card").isVisible()) && closeCalls() === before);
+await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
+await page.waitForSelector(".settings");
 
 for (const name of ["주간", "주간", "야간", "야간", "휴무", "휴무"]) {
   await page.locator(".shift-button", { hasText: name }).click();

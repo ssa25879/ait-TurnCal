@@ -28,8 +28,6 @@ function state(screen: Screen, hasSavedSettings: boolean, isDirty = false, hasOv
 describe("decideBackAction", () => {
   it.each<[Screen, boolean, boolean, string]>([
     ["calendar", true, false, "close"],
-    ["setup-intro", false, false, "close"],
-    ["setup-intro", true, false, "to-calendar"], // 전체 초기화 뒤 등록 안내 → 빈 달력
     ["load-error", false, false, "close"],
     ["loading", false, false, "close"],
     ["pattern", false, false, "close"],
@@ -61,13 +59,13 @@ describe("decideBackAction", () => {
   });
 
   it("첫 실행(저장된 설정 없음)은 어느 화면에서든 종료한다", () => {
-    for (const screen of ["setup-intro", "pattern", "load-error", "loading"] as Screen[]) {
+    for (const screen of ["pattern", "load-error", "loading"] as Screen[]) {
       expect(decideBackAction(state(screen, false))).toBe("close");
     }
   });
 
   it("오버레이가 열려 있으면 화면과 무관하게 오버레이를 먼저 닫는다", () => {
-    for (const screen of ["calendar", "pattern", "display", "settings-menu", "setup-intro", "names", "reset", "day", "entry"] as Screen[]) {
+    for (const screen of ["calendar", "pattern", "display", "settings-menu", "names", "reset", "day", "entry"] as Screen[]) {
       expect(decideBackAction(state(screen, true, true, true))).toBe("close-overlay");
     }
   });

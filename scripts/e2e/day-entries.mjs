@@ -220,7 +220,7 @@ await page.getByText("초기화", { exact: true }).click();
 await page.getByRole("button", { name: "전체 초기화" }).click();
 await visible("모든 데이터를 지울까요?");
 await page.getByRole("button", { name: "초기화하기" }).click();
-await page.waitForSelector(".intro");
+await page.waitForSelector(".no-pattern-card");
 check("전체 초기화: 저장 데이터 없음, 인디고", (await get(SKEY)) === null && (await get(EKEY)) === null && (await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim().toUpperCase())) === "#4F46E5");
 
 // ---------- 주말·공휴일 표시 ----------

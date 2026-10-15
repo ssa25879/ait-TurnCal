@@ -166,10 +166,10 @@ for (const [width, height] of [[360, 740], [390, 844]]) {
   check(`${width}px 가로 스크롤 없음`, !overflow);
   const row = await page.locator(".shortcut-row").boundingBox();
   const btns = await page.locator(".shortcut-row button").evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { x: r.x, right: r.right, h: r.height }; }));
-  const header = await page.locator(".schedule-header").boundingBox();
-  const cards = await page.locator(".today-summary").boundingBox();
+  const cal = await page.locator(".calendar").boundingBox();
+  const settingsBtn = await page.getByRole("button", { name: "설정", exact: true }).boundingBox();
   check(`${width}px 버튼이 화면 안·겹치지 않음·높이 36px 이상`, btns.length === 2 && btns[0].x >= 0 && btns[1].right <= width && btns[0].right <= btns[1].x && btns.every((b) => b.h >= 36), JSON.stringify(btns));
-  check(`${width}px 헤더 아래·오늘 요약 위 순서(겹침 없음)`, header.y + header.height <= row.y + 1 && row.y + row.height <= cards.y + 1, JSON.stringify({ header, row, cards }));
+  check(`${width}px 달력 아래·[설정] 버튼 위 순서(겹침 없음)`, cal.y + cal.height <= row.y + 1 && row.y + row.height <= settingsBtn.y + 1, JSON.stringify({ cal, row, settingsBtn }));
   const small = await page.evaluate(() => [...document.querySelectorAll(".shortcut-row, .shortcut-row *")].filter((e) => parseFloat(getComputedStyle(e).fontSize) < 11).length);
   check(`${width}px 버튼 글자 11px 이상`, small === 0);
   const gap = await page.evaluate(() => {

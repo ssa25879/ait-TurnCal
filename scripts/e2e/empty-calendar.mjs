@@ -173,13 +173,14 @@ const stored = async (page) => JSON.parse(await page.evaluate((k) => localStorag
   await context.close();
 }
 
-// ---------- 5. 첫 실행·전체 초기화는 등록 안내 그대로 ----------
+// ---------- 5. 첫 실행·전체 초기화 뒤: 항상 빈 달력(등록 안내 화면 없음) ----------
 {
   const { context, page, back, closeCalls } = await open(null);
-  check("저장값 없음: 등록 안내 화면(달력 아님)", (await page.locator(".intro").isVisible()) && (await page.locator(".calendar").count()) === 0);
+  check("저장값 없음(첫 실행): 빈 달력 + 등록 안내 카드", (await page.locator(".calendar").isVisible()) && (await page.locator(".no-pattern-card").isVisible()) && (await page.locator(".intro").count()) === 0);
+  check("첫 실행 빈 달력을 보여도 저장소는 비어 있음", (await page.evaluate((k) => localStorage.getItem(k), SKEY)) === null);
   const before = closeCalls();
   await back();
-  check("첫 실행 안내에서 뒤로가기 → 종료", closeCalls() === before + 1);
+  check("첫 실행 빈 달력에서 뒤로가기 → 종료", closeCalls() === before + 1);
   await context.close();
 }
 {
@@ -189,15 +190,22 @@ const stored = async (page) => JSON.parse(await page.evaluate((k) => localStorag
   await page.getByText("초기화", { exact: true }).click();
   await page.getByRole("button", { name: "전체 초기화" }).click();
   await page.getByRole("button", { name: "초기화하기" }).click();
-  await page.waitForSelector(".intro");
-  check("전체 초기화 후 등록 안내 화면", (await page.locator(".calendar").count()) === 0);
-  check("전체 초기화 후 저장값 없음", (await page.evaluate((k) => localStorage.getItem(k), SKEY)) === null);
-  await back();
-  check("전체 초기화 후 뒤로가기 → 빈 달력(앱 종료 아님)", (await page.locator(".calendar").isVisible()) && (await page.locator(".no-pattern-card").isVisible()) && closeCalls() === 0);
-  check("빈 달력 표시 뒤에도 저장값 없음·근무 배지 없음·이름 수정만", (await page.evaluate((k) => localStorage.getItem(k), SKEY)) === null && (await page.locator(".shortcut-row button").count()) === 1 && (await page.locator(".calendar-shift").allInnerTexts()).join("").trim() === "");
+  await page.waitForSelector(".no-pattern-card");
+  check("전체 초기화 후 바로 빈 달력(등록 안내 화면 없음)", (await page.locator(".calendar").isVisible()) && (await page.locator(".intro").count()) === 0);
+  check("전체 초기화 후 저장값 없음·근무 배지 없음·이름 수정만", (await page.evaluate((k) => localStorage.getItem(k), SKEY)) === null && (await page.locator(".shortcut-row button").count()) === 1 && (await page.locator(".calendar-shift").allInnerTexts()).join("").trim() === "");
   const beforeClose = closeCalls();
   await back();
   check("전체 초기화 뒤 달력에서 뒤로가기 → 종료", closeCalls() === beforeClose + 1);
+  // 재실행해도 같은 빈 달력, 뒤로가기는 종료
+  await page.reload({ waitUntil: "networkidle" });
+  await page.waitForSelector(".no-pattern-card");
+  const beforeReopen = closeCalls();
+  await back();
+  check("전체 초기화 뒤 앱을 다시 열어도 빈 달력, 뒤로가기 → 종료", closeCalls() === beforeReopen + 1 && (await page.evaluate((k) => localStorage.getItem(k), SKEY)) === null);
+  await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
+  await page.waitForSelector(".settings");
+  await back();
+  check("등록 화면에서 뒤로가기 → 빈 달력(종료 아님)", (await page.locator(".no-pattern-card").isVisible()) && closeCalls() === beforeReopen + 1);
   await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
   await page.waitForSelector(".settings");
   await page.locator(".shift-button", { hasText: "주간" }).click();
@@ -206,21 +214,6 @@ const stored = async (page) => JSON.parse(await page.evaluate((k) => localStorag
   await page.getByRole("button", { name: "저장", exact: true }).click();
   await page.waitForSelector(".today-card");
   check("빈 달력에서 등록 → 저장되고 달력에 근무 표시", (await page.evaluate((k) => JSON.parse(localStorage.getItem(k)).pattern.cycle.length, SKEY)) === 2 && (await page.locator(".calendar-shift").allInnerTexts()).join("").trim() !== "");
-  await context.close();
-}
-{
-  // 전체 초기화 → 등록 안내 → 패턴 등록 화면에서 뒤로가기 → 빈 달력
-  const { context, page, back, closeCalls } = await open(none({ pattern: A }));
-  await page.getByRole("button", { name: "설정", exact: true }).click();
-  await page.waitForSelector(".settings-menu");
-  await page.getByText("초기화", { exact: true }).click();
-  await page.getByRole("button", { name: "전체 초기화" }).click();
-  await page.getByRole("button", { name: "초기화하기" }).click();
-  await page.waitForSelector(".intro");
-  await page.getByText("패턴 등록하기").click();
-  await page.waitForSelector(".settings");
-  await back();
-  check("초기화 뒤 등록 화면에서 뒤로가기 → 빈 달력", (await page.locator(".no-pattern-card").isVisible()) && closeCalls() === 0);
   await context.close();
 }
 
