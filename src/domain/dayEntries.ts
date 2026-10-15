@@ -56,12 +56,12 @@ export function getShiftSource(day: DayRecord | undefined): DayEntry | null {
 
 export function getEffectiveShift(
   date: string,
-  pattern: WorkPattern,
+  pattern: WorkPattern | null,
   day: DayRecord | undefined,
-): { shift: ShiftType; overridden: boolean } {
+): { shift: ShiftType | null; overridden: boolean } {
   const source = getShiftSource(day);
   if (source?.shift) return { shift: source.shift, overridden: true };
-  return { shift: getShift(date, pattern), overridden: false };
+  return { shift: pattern ? getShift(date, pattern) : null, overridden: false };
 }
 
 /** 정렬 첫 항목 이름의 첫 글자, 항목이 여러 개면 +n */

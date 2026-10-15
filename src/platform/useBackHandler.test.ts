@@ -49,6 +49,22 @@ describe("decideBackAction", () => {
     expect(decideBackAction(state(screen, hasSavedSettings, isDirty))).toBe(expected);
   });
 
+  // 패턴 초기화 뒤에도 저장된 설정이 있으므로 hasSavedSettings는 true이고 패턴 유무와 무관하게 같은 계층을 쓴다.
+  it("패턴이 없는 설정(저장된 설정 있음): 달력은 종료, 설정 계층은 한 단계씩 올라간다", () => {
+    expect(decideBackAction(state("calendar", true))).toBe("close");
+    expect(decideBackAction(state("settings-menu", true))).toBe("to-calendar");
+    expect(decideBackAction(state("pattern", true))).toBe("to-settings-menu");
+    expect(decideBackAction(state("names", true))).toBe("to-settings-menu");
+    expect(decideBackAction(state("display", true))).toBe("to-settings-menu");
+    expect(decideBackAction(state("day", true))).toBe("to-calendar");
+  });
+
+  it("첫 실행(저장된 설정 없음)은 어느 화면에서든 종료한다", () => {
+    for (const screen of ["setup-intro", "pattern", "load-error", "loading"] as Screen[]) {
+      expect(decideBackAction(state(screen, false))).toBe("close");
+    }
+  });
+
   it("오버레이가 열려 있으면 화면과 무관하게 오버레이를 먼저 닫는다", () => {
     for (const screen of ["calendar", "pattern", "display", "settings-menu", "setup-intro", "names", "reset", "day", "entry"] as Screen[]) {
       expect(decideBackAction(state(screen, true, true, true))).toBe("close-overlay");

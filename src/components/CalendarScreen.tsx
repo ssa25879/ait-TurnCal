@@ -21,6 +21,8 @@ interface Props {
   entriesNotice: string | null;
   onSelectDate(date: string): void;
   onOpenSettings(): void;
+  /** 근무 패턴 설정(첫 등록) 화면을 연다. */
+  onRegisterPattern(): void;
 }
 
 export function CalendarScreen({
@@ -35,6 +37,7 @@ export function CalendarScreen({
   entriesNotice,
   onSelectDate,
   onOpenSettings,
+  onRegisterPattern,
 }: Props) {
   const todayMonth = yearMonthOf(today);
   const isTodayMonth = month.year === todayMonth.year && month.month === todayMonth.month;
@@ -50,6 +53,15 @@ export function CalendarScreen({
         <p className="notice-inline" role="status">
           {entriesNotice}
         </p>
+      )}
+
+      {timeline.current === null && (
+        <div className="no-pattern-card">
+          <p className="no-pattern-text">근무 패턴이 없어요</p>
+          <Button size="small" variant="weak" onClick={onRegisterPattern}>
+            근무 패턴 등록하기
+          </Button>
+        </div>
       )}
 
       <TodaySummary timeline={timeline} today={today} days={days} onSelectDate={onSelectDate} />

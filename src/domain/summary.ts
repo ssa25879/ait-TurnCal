@@ -8,7 +8,8 @@ import type { ShiftType } from "./types";
 export interface DaySummary {
   /** YYYY-MM-DD */
   date: string;
-  shift: ShiftType;
+  /** 패턴 없음(근무를 정할 수 없음)이면 null */
+  shift: ShiftType | null;
   /** 세부 내용 분류로 패턴 근무가 바뀐 날 */
   overridden: boolean;
   /** 공휴일 전체 이름(여러 개면 모두). 근무 계산에는 영향이 없다. */

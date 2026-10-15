@@ -159,12 +159,36 @@ describe("패턴 이력이 있는 경우", () => {
 
   it("요약과 날짜별 패턴 계산이 항상 같다", () => {
     for (const date of ["2026-09-30", "2026-10-12", "2026-10-13", "2026-10-20"]) {
-      expect(buildDaySummary(date, withHistory, undefined).shift).toBe(getShift(date, resolvePattern(date, withHistory)));
+      expect(buildDaySummary(date, withHistory, undefined).shift).toBe(getShift(date, resolvePattern(date, withHistory)!));
     }
   });
 
   it("이력이 있어도 분류 세부 내용이 근무를 바꾸는 규칙은 같다", () => {
     const day: DayRecord = { items: [entry("연차", { shift: "OFF" })] };
     expect(buildDaySummary("2026-10-10", withHistory, day)).toMatchObject({ shift: "OFF", overridden: true });
+  });
+});
+
+describe("패턴이 없을 때의 요약", () => {
+  const none: PatternTimeline = { current: null, history: [] };
+
+  it("이력 없이 패턴이 없으면 오늘·내일 모두 근무 없음이다", () => {
+    const [today, tomorrow] = buildTodaySummary("2026-10-14", none, {});
+    expect(today).toMatchObject({ date: "2026-10-14", shift: null, overridden: false });
+    expect(tomorrow).toMatchObject({ date: "2026-10-15", shift: null, overridden: false });
+  });
+
+  it("분류 세부 내용이 있는 날만 그 근무를 보여 준다", () => {
+    const days: Record<string, DayRecord> = { "2026-10-15": { items: [entry("연차", { shift: "OFF" })] } };
+    const [today, tomorrow] = buildTodaySummary("2026-10-14", none, days);
+    expect(today.shift).toBeNull();
+    expect(tomorrow).toMatchObject({ shift: "OFF", overridden: true });
+  });
+
+  it("이력 기간에 속한 오늘은 이력 패턴, 이후 내일은 패턴 없음이다", () => {
+    const timelineWithEnd: PatternTimeline = { current: null, history: [{ until: "2026-10-15", pattern }] };
+    const [today, tomorrow] = buildTodaySummary("2026-10-14", timelineWithEnd, {});
+    expect(today.shift).toBe(getShift("2026-10-14", pattern));
+    expect(tomorrow.shift).toBeNull();
   });
 });

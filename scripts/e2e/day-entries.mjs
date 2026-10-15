@@ -10,7 +10,8 @@ const check = (name, ok, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  (${detail})` : ""}`);
 };
 
-const browser = await chromium.launch({ executablePath: EDGE, headless: true });
+// Edge 155+는 옛 --headless와 --remote-debugging-pipe로 실행되지 않아, CDP_URL이 있으면 떠 있는 Edge에 연결한다.
+const browser = process.env.CDP_URL ? await chromium.connectOverCDP(process.env.CDP_URL) : await chromium.launch({ executablePath: EDGE, headless: true });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
 await context.addInitScript(() => { history.back = () => {}; });
 const page = await context.newPage();
@@ -199,13 +200,13 @@ await wait(200);
 await page.getByRole("button", { name: "근무 패턴 초기화" }).click();
 await visible("근무 패턴을 초기화할까요?");
 await page.getByRole("button", { name: "초기화하기" }).click();
-await page.waitForSelector(".intro");
+await page.waitForSelector(".no-pattern-card");
 const s3 = await settingsJson();
 check("편집 중 근무 패턴 초기화: 패턴 null, 이름·세부 내용 유지", s3.pattern === null && s3.scheduleName === "병동 3교대" && (await entriesJson()).days[D].items.length === 3);
 let before = closeCalls();
 await back();
-check("패턴 초기화 후 안내 화면 뒤로가기 → 종료", closeCalls() === before + 1);
-await page.getByText("패턴 등록하기").click();
+check("패턴 초기화 후 빈 달력 뒤로가기 → 종료", closeCalls() === before + 1);
+await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
 await page.waitForSelector(".settings");
 check("최초 등록 화면: 근무 패턴 초기화 없음", (await page.getByRole("button", { name: "근무 패턴 초기화" }).count()) === 0);
 await page.locator(".shift-button", { hasText: "주간" }).click();

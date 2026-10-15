@@ -3,7 +3,8 @@ import { THEMES, type ThemeId } from "../domain/theme";
 import type { WeekStart } from "../domain/types";
 
 interface Props {
-  cycleLength: number;
+  /** 근무 패턴이 없으면(패턴 초기화 뒤) null */
+  cycleLength: number | null;
   theme: ThemeId;
   weekStart: WeekStart;
   scheduleName: string | null;
@@ -26,7 +27,7 @@ export function SettingsMenu({
 }: Props) {
   const rows = [
     { top: "이름", bottom: scheduleName ?? "설정 안 함", onClick: onOpenNames },
-    { top: "근무 패턴", bottom: `${cycleLength}일 주기`, onClick: onOpenPattern },
+    { top: "근무 패턴", bottom: cycleLength === null ? "등록되지 않음" : `${cycleLength}일 주기`, onClick: onOpenPattern },
     {
       top: "화면 설정",
       bottom: `${THEMES[theme].name} · ${weekStart === "SUN" ? "일요일" : "월요일"} 시작`,

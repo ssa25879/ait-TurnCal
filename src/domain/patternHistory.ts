@@ -13,15 +13,16 @@ export interface PastPattern {
 
 /** 날짜별로 어떤 패턴이 적용되는지 정하는 입력. history는 until 오름차순이다. */
 export interface PatternTimeline {
-  current: WorkPattern;
+  /** 현재 패턴. 패턴 초기화 뒤에는 null(마지막 이력 종료일 이후는 패턴 없음) */
+  current: WorkPattern | null;
   history: PastPattern[];
 }
 
 /** 저장 시 적용 범위: 오늘부터(지난 날짜 유지) 또는 전체 기간(이력을 지우고 모든 날짜) */
 export type ApplyScope = "FROM_TODAY" | "ALL";
 
-/** 그 날짜에 적용되던 패턴. `date < until`인 첫 이력 항목, 없으면 현재 패턴이다. */
-export function resolvePattern(date: string, timeline: PatternTimeline): WorkPattern {
+/** 그 날짜에 적용되던 패턴. `date < until`인 첫 이력 항목, 없으면 현재 패턴이다(패턴 없음이면 null). */
+export function resolvePattern(date: string, timeline: PatternTimeline): WorkPattern | null {
   for (const past of timeline.history) {
     if (date < past.until) return past.pattern;
   }
@@ -54,13 +55,18 @@ export function applyPatternChange(
 ): PatternTimeline {
   if (!timeline || scope === "ALL") return { current: next, history: [] };
 
+  // 현재 패턴이 없으면(패턴 초기화 뒤) 이력을 그대로 두고 새 패턴을 현재 패턴으로 등록한다.
+  if (!timeline.current) return { current: next, history: timeline.history };
+
   const effective = resolvePattern(today, timeline);
-  if (isSameSchedule(effective, next)) return timeline;
+  if (effective && isSameSchedule(effective, next)) return timeline;
 
   // 기기 날짜가 과거로 바뀐 경우를 위해 오늘 이후 종료되는 기록은 버린다(날짜순 유지).
   const kept = timeline.history.filter((past) => past.until <= today);
   const last = kept[kept.length - 1];
   if (last && last.until === today) return { current: next, history: kept };
+
+  if (!effective) return { current: next, history: kept };
 
   const history = [...kept, { until: today, pattern: effective }].slice(-MAX_PATTERN_HISTORY);
   return { current: next, history };
@@ -76,17 +82,19 @@ export interface TimelineRow {
   cycle: ShiftType[];
 }
 
-/** 현재 패턴을 맨 위에 두고 이전 패턴을 최신순으로 나열한다. */
+/** 현재 패턴을 맨 위에 두고 이전 패턴을 최신순으로 나열한다. 현재 패턴이 없으면 그 행은 생략한다. */
 export function describeTimeline(timeline: PatternTimeline): TimelineRow[] {
   const { history, current } = timeline;
-  const rows: TimelineRow[] = [
-    {
-      from: history.length > 0 ? history[history.length - 1].until : null,
-      to: null,
-      current: true,
-      cycle: current.cycle,
-    },
-  ];
+  const rows: TimelineRow[] = current
+    ? [
+        {
+          from: history.length > 0 ? history[history.length - 1].until : null,
+          to: null,
+          current: true,
+          cycle: current.cycle,
+        },
+      ]
+    : [];
   for (let i = history.length - 1; i >= 0; i -= 1) {
     rows.push({
       from: i > 0 ? history[i - 1].until : null,

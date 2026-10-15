@@ -10,7 +10,8 @@ const check = (name, ok, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  (${detail})` : ""}`);
 };
 
-const browser = await chromium.launch({ executablePath: EDGE, headless: true });
+// Edge 155+는 옛 --headless와 --remote-debugging-pipe로 실행되지 않아, CDP_URL이 있으면 떠 있는 Edge에 연결한다.
+const browser = process.env.CDP_URL ? await chromium.connectOverCDP(process.env.CDP_URL) : await chromium.launch({ executablePath: EDGE, headless: true });
 const errors = [];
 
 // 2026-10-11 주간 시작: 주·주·오·야·야·비·휴 → 10/13 오후, 10/14 야간, 10/9 비번, 10/4·10/5 주간

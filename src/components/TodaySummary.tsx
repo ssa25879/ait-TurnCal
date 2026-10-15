@@ -17,7 +17,7 @@ function cardLabel(summary: DaySummary, label: string): string {
   return [
     label,
     formatDateTitle(summary.date),
-    SHIFT_LABELS[summary.shift].name,
+    summary.shift ? SHIFT_LABELS[summary.shift].name : "근무 패턴 없음",
     summary.overridden ? "바뀐 근무" : null,
     ...summary.holidays,
     summary.timeRange,
@@ -36,7 +36,7 @@ export function TodaySummary({ timeline, today, days, onSelectDate }: Props) {
   return (
     <div className="today-summary" aria-label="오늘과 내일 근무">
       {summaries.map((summary, index) => {
-        const { name, short } = SHIFT_LABELS[summary.shift];
+        const labels = summary.shift ? SHIFT_LABELS[summary.shift] : null;
         return (
           <button
             key={summary.date}
@@ -51,8 +51,10 @@ export function TodaySummary({ timeline, today, days, onSelectDate }: Props) {
               <span className="today-card-date">{formatDateTitle(summary.date)}</span>
             </span>
             <span className="today-card-shift">
-              <span className={`today-card-badge shift-${summary.shift}`}>{short}</span>
-              <span className="today-card-name">{name}</span>
+              {labels && summary.shift && (
+                <span className={`today-card-badge shift-${summary.shift}`}>{labels.short}</span>
+              )}
+              <span className={`today-card-name${labels ? "" : " is-none"}`}>{labels?.name ?? "근무 패턴 없음"}</span>
               {summary.overridden && <span className="today-card-changed">바뀐 근무</span>}
             </span>
             {summary.holidays.length > 0 && (
