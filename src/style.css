@@ -840,3 +840,14 @@ body {
 .today-card-name.is-none {
   color: var(--color-text-sub);
 }
+
+.shortcut-row {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.shortcut-row > * {
+  flex: 1 1 0;
+  min-width: 0;
+}

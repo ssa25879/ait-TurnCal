@@ -25,6 +25,7 @@ node $env:TEMP\turncal-e2e\user-key.mjs           # 사용자 식별키 저장·
 node $env:TEMP\turncal-e2e\today-summary.mjs      # 오늘·내일 요약 37개(시계 고정, 360px, 자정 갱신)
 node $env:TEMP\turncal-e2e\pattern-history.mjs    # 패턴 이력·적용 범위·초기화(패턴/전체)·손상 데이터·360px·저장 실패 53개
 node $env:TEMP\turncal-e2e\empty-calendar.mjs    # 패턴 없음 빈 달력·안내 카드·설정/뒤로가기 계층·첫 실행 불변·360px 39개
+node $env:TEMP\turncal-e2e\calendar-shortcuts.mjs # 달력 바로가기(패턴·이름 수정)·뒤로가기/폐기/저장 후 달력 복귀·설정 경로 불변·360px 33개
 ```
 
 - Edge 155+는 Playwright 1.49의 옛 `--headless`·`--remote-debugging-pipe` 실행이 안 돼(실행 직후 종료) 직접 띄운 Edge에 CDP로 연결한다: `msedge.exe --headless=new --hide-scrollbars --mute-audio --disable-gpu --remote-debugging-port=9333 --user-data-dir=%TEMP%edge-cdp about:blank` 후 `CDP_URL=http://127.0.0.1:9333`을 주고 스크립트를 실행한다(`--hide-scrollbars`가 없으면 세로 스크롤바가 폭을 차지해 360px 가로 스크롤 검사가 틀어진다). `CDP_URL`이 없으면 예전처럼 직접 실행한다.
