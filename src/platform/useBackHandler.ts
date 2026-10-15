@@ -55,6 +55,9 @@ export function decideBackAction({
     case "settings-menu":
     case "day":
       return "to-calendar";
+    case "setup-intro":
+      // 전체 초기화 뒤의 등록 안내(설정이 메모리에만 있는 상태)에서는 빈 달력으로 간다. 첫 실행은 위에서 종료된다.
+      return "to-calendar";
     case "entry":
       return isDirty ? "confirm-discard" : "to-day";
     default:

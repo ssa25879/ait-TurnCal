@@ -244,7 +244,8 @@ function TurnCal({
       await applyLoaded(false);
       throw error;
     }
-    setSettings(null);
+    // 저장소는 비었지만 뒤로가기로 빈 달력에 갈 수 있게 기본 설정을 메모리에만 둔다(저장하지 않음).
+    setSettings(createDefaultSettings());
     setDays({});
     setEntriesBroken(false);
     setMonth(yearMonthOf(today));
@@ -331,7 +332,7 @@ function TurnCal({
 
   return (
     <main className="app">
-      {view.kind === "setup-intro" && <SetupIntro onStart={() => go({ kind: "pattern" })} />}
+      {view.kind === "setup-intro" && <SetupIntro onStart={() => go(settings ? { kind: "pattern", fromCalendar: true } : { kind: "pattern" })} />}
       {view.kind === "load-error" && (
         <LoadError reason={view.reason} onReset={() => go({ kind: "pattern" })} />
       )}

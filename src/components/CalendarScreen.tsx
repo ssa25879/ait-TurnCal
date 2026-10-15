@@ -57,11 +57,11 @@ export function CalendarScreen({
 
       <div className="shortcut-row">
         {timeline.current !== null && (
-          <Button size="large" variant="weak" display="full" onClick={onEditPattern}>
+          <Button size="medium" variant="weak" display="full" onClick={onEditPattern}>
             근무 패턴 수정
           </Button>
         )}
-        <Button size="large" variant="weak" display="full" onClick={onEditNames}>
+        <Button size="medium" variant="weak" display="full" onClick={onEditNames}>
           이름 수정
         </Button>
       </div>

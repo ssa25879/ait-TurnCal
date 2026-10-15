@@ -29,6 +29,7 @@ describe("decideBackAction", () => {
   it.each<[Screen, boolean, boolean, string]>([
     ["calendar", true, false, "close"],
     ["setup-intro", false, false, "close"],
+    ["setup-intro", true, false, "to-calendar"], // 전체 초기화 뒤 등록 안내 → 빈 달력
     ["load-error", false, false, "close"],
     ["loading", false, false, "close"],
     ["pattern", false, false, "close"],
