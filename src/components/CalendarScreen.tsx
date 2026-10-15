@@ -64,7 +64,7 @@ export function CalendarScreen({
       {timeline.current === null && (
         <div className="no-pattern-card">
           <p className="no-pattern-text">근무 패턴이 없어요</p>
-          <Button size="small" variant="weak" onClick={onRegisterPattern}>
+          <Button className="tap-44" size="small" variant="weak" onClick={onRegisterPattern}>
             근무 패턴 등록하기
           </Button>
         </div>
@@ -96,7 +96,7 @@ export function CalendarScreen({
             <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <Button size="small" variant="weak" disabled={isTodayMonth} onClick={() => onMonthChange(todayMonth)}>
+        <Button className="month-today" size="small" variant="weak" disabled={isTodayMonth} onClick={() => onMonthChange(todayMonth)}>
           오늘
         </Button>
       </div>
@@ -121,7 +121,7 @@ export function CalendarScreen({
             이름 수정
           </Button>
         </div>
-        <Button size="large" variant="weak" display="full" onClick={onOpenSettings}>
+        <Button className="tap-44" size="medium" variant="weak" display="full" onClick={onOpenSettings}>
           설정
         </Button>
       </div>

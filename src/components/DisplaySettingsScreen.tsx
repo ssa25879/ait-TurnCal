@@ -56,7 +56,7 @@ export function DisplaySettingsScreen({
         <h2 className="section-title">달력</h2>
         <p className="section-desc">한 주를 시작할 요일을 골라 주세요.</p>
         <SegmentedControl
-          size="small"
+          size="large"
           value={weekStart}
           onChange={(value) => {
             if (value === "SUN" || value === "MON") onWeekStartChange(value);

@@ -7,17 +7,17 @@
 
 ## 2. 가이드 위반(P0)
 
-- [ ] 2.1 10px 글자(`.cycle-item-order`, `.today-badge`)를 11px 이상으로, `.month-nav-button`과 `.time-clear`의 누르는 영역을 44px 이상으로, `.calendar-holiday` 글자색 대비를 4.5:1 이상으로, `.calendar-cell.is-outside` 투명도를 올린다. 확인: E2E에 11px 미만 글자·44px 터치 영역 검사 추가, 360px 가로 스크롤 없음, 모든 E2E 통과(일요일 숫자 색 등 기존 기대값 유지).
+- [x] 2.1 10px 글자(`.cycle-item-order`, `.today-badge`)를 11px 이상으로, `.month-nav-button`과 `.time-clear`의 누르는 영역을 44px 이상으로, `.calendar-holiday` 글자색 대비를 4.5:1 이상으로, `.calendar-cell.is-outside` 투명도를 올린다. 확인: E2E에 11px 미만 글자·44px 터치 영역 검사 추가, 360px 가로 스크롤 없음, 모든 E2E 통과(일요일 숫자 색 등 기존 기대값 유지).
 
 ## 3. 달력 첫 화면
 
-- [ ] 3.1 칸 높이·줄 간격을 줄이고 배지 크기를 통일하고 오늘 표시(테두리 유지 + 연한 배경)를 칸·카드에 맞춘다. 이름 헤더를 한 줄 위계로 정리한다. 확인: 360×740·390×844에서 6주 격자가 스크롤 없이 모두 보임, 20자 이름 겹침 없음, 배너·[설정] 간격 32px 유지, E2E 통과(필요한 선택자·기대값만 수정).
-- [ ] 3.2 하단 버튼 줄(바로가기 2개 + [설정])의 무게·크기를 맞춘다(동작·순서 유지). 확인: `calendar-shortcuts`·`banner` E2E 통과, 터치 영역 44px 이상 또는 사용자 승인한 크기.
+- [x] 3.1 칸 높이·줄 간격을 줄이고 배지 크기를 통일하고 오늘 표시(테두리 유지 + 연한 배경)를 칸·카드에 맞춘다. 이름 헤더를 한 줄 위계로 정리한다. 확인: 360×740·390×844에서 6주 격자가 스크롤 없이 모두 보임, 20자 이름 겹침 없음, 배너·[설정] 간격 32px 유지, E2E 통과(필요한 선택자·기대값만 수정).
+- [x] 3.2 하단 버튼 줄(바로가기 2개 + [설정])의 무게·크기를 맞춘다(동작·순서 유지). 확인: `calendar-shortcuts`·`banner` E2E 통과, 터치 영역 44px 이상 또는 사용자 승인한 크기.
 
 ## 4. 날짜·편집·설정 화면
 
-- [ ] 4.1 `.option-card`·`.is-selected` 공용 스타일을 만들고 `.theme-option`·`.scope-option`·`.category-option`을 같은 규칙으로 묶는다. DayScreen의 "그날 근무로 적용"이 `.theme-*`를 쓰지 않게 한다. 분류 선택지 줄바꿈을 정리한다. 확인: `day-entries`·`display-settings`·`pattern-history` E2E 통과.
-- [ ] 4.2 SettingsScreen·DisplaySettingsScreen의 [저장]을 [초기화] 영역 위로 올리고 초기화를 위험 영역으로 구분한다. 날짜 화면·세부 내용 편집의 간격·위계를 기준값으로 정리한다. 확인: 스크롤 없이도 주 동작이 보임(360×740), E2E 통과.
+- [x] 4.1 `.option-card`·`.is-selected` 공용 스타일을 만들고 `.theme-option`·`.scope-option`·`.category-option`을 같은 규칙으로 묶는다. DayScreen의 "그날 근무로 적용"이 `.theme-*`를 쓰지 않게 한다. 분류 선택지 줄바꿈을 정리한다. 확인: `day-entries`·`display-settings`·`pattern-history` E2E 통과.
+- [x] 4.2 SettingsScreen·DisplaySettingsScreen의 [저장]을 [초기화] 영역 위로 올리고 초기화를 위험 영역으로 구분한다. 날짜 화면·세부 내용 편집의 간격·위계를 기준값으로 정리한다. 확인: 스크롤 없이도 주 동작이 보임(360×740), E2E 통과.
 
 ## 5. 문서·최종 검증
 

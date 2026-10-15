@@ -124,12 +124,12 @@ export function DayScreen({
                       type="button"
                       role="radio"
                       aria-checked={selected}
-                      className={`theme-option${selected ? " is-selected" : ""}`}
+                      className={`option-card${selected ? " is-selected" : ""}`}
                       onClick={() => onSelectShiftSource(item.id)}
                     >
                       <span className={`chip shift-${item.shift}`}>{SHIFT_LABELS[item.shift!].short}</span>
-                      <span className="theme-name">{item.name}</span>
-                      {selected && <span className="theme-check">적용 중</span>}
+                      <span className="option-name">{item.name}</span>
+                      {selected && <span className="option-check">적용 중</span>}
                     </button>
                   );
                 })}
