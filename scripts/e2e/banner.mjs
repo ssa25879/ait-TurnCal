@@ -17,7 +17,8 @@ const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 const wait = (ms = 400) => page.waitForTimeout(ms);
-const back = async () => { await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await wait(); };
+// 클릭 직후 변경 여부(dirty) 상태가 반영되기 전에 이벤트가 읽히지 않게 잠깐 기다린다.
+const back = async () => { await page.waitForTimeout(250); await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent"))); await wait(); };
 const calls = (api) => page.evaluate((name) => window.__ait.state.sdkCallLog.filter((e) => JSON.stringify(e).includes(name)).length, api);
 const banners = () => page.locator(".calendar-banner").count();
 const bannerBox = () => page.locator(".calendar-banner").boundingBox();
@@ -34,11 +35,12 @@ check("달력에 배너 영역 1개", (await banners()) === 1);
 const box = await bannerBox();
 check("렌더링 후 높이 96px로 표시", Math.round(box.height) === 96 && (await page.locator(".calendar-banner").getAttribute("data-state")) === "shown", JSON.stringify(box));
 check("배너 너비 = 화면 너비, 좌우 끝까지", Math.round(box.width) === 390 && Math.round(box.x) === 0);
-const settingsBox = await page.getByRole("button", { name: "설정", exact: true }).boundingBox();
+// 설정 진입은 내비게이션 바 기능 버튼이라 달력 하단의 마지막 조작 요소는 바로가기 줄(.bottom-action)이다.
+const settingsBox = await page.locator(".bottom-action").boundingBox();
 const gap = box.y - (settingsBox.y + settingsBox.height);
-check("[설정] 버튼 아래 32px 이상 간격", gap >= 32, `gap=${Math.round(gap)}`);
+check("하단 조작 영역 아래 32px 이상 간격", gap >= 32, `gap=${Math.round(gap)}`);
 const gridBox = await page.locator(".calendar").boundingBox();
-check("달력 격자·[설정] 버튼이 배너보다 위", gridBox.y + gridBox.height <= settingsBox.y && settingsBox.y < box.y);
+check("달력 격자·하단 조작 영역이 배너보다 위", gridBox.y + gridBox.height <= settingsBox.y && settingsBox.y < box.y);
 const attachArgs = await page.evaluate(() => JSON.stringify(window.__ait.state.sdkCallLog.filter((e) => JSON.stringify(e).includes("attachBanner")).at(-1)));
 check("테스트 ID로 요청", attachArgs.includes("ait-ad-test-banner-id"), attachArgs.slice(0, 200));
 check("theme light 고정(다크모드 기기)", attachArgs.includes('"theme":"light"') && (await page.locator(".calendar-banner").innerText()).includes("Banner Ad"));
@@ -71,6 +73,7 @@ check("달력 복귀 시 배너 1개(슬롯 1개)", (await banners()) === 1 && (
 // 광고 없음 → 숨김
 await page.evaluate(() => window.__ait.patch("ads", { forceNoFill: true }));
 await page.getByRole("button", { name: "설정", exact: true }).click();
+await page.waitForSelector(".settings-menu");
 await back();
 await wait(500);
 const noFillBox = await bannerBox();
