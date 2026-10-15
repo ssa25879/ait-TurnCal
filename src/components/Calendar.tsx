@@ -53,7 +53,7 @@ export function Calendar({ month, timeline, weekStart, today, days, onSelectDate
             const label = [
               date,
               ...holidays.map((holiday) => holiday.name),
-              SHIFT_LABELS[shift].name,
+              shift ? SHIFT_LABELS[shift].name : "근무 패턴 없음",
               overridden ? "근무 변경됨" : null,
               count > 0 ? `세부 내용 ${count}개` : null,
               isToday ? "오늘" : null,
@@ -75,8 +75,8 @@ export function Calendar({ month, timeline, weekStart, today, days, onSelectDate
                 <span className="calendar-holiday" aria-hidden="true">
                   {holidays[0]?.short ?? ""}
                 </span>
-                <span className={`calendar-shift shift-${shift}`}>
-                  {SHIFT_LABELS[shift].short}
+                <span className={`calendar-shift${shift ? ` shift-${shift}` : ""}`}>
+                  {shift ? SHIFT_LABELS[shift].short : ""}
                   {overridden && <span className="calendar-changed" aria-hidden="true" />}
                 </span>
                 <span className="calendar-marker" aria-hidden="true">

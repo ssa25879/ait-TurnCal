@@ -17,7 +17,7 @@ const B: WorkPattern = { startDate: "2026-10-13", cycle: ["DAY", "NIGHT", "NIGHT
 const C: WorkPattern = { startDate: "2026-10-13", cycle: ["OFF", "DAY"] };
 const TODAY = "2026-10-13";
 
-const shiftOn = (date: string, timeline: PatternTimeline) => getShift(date, resolvePattern(date, timeline));
+const shiftOn = (date: string, timeline: PatternTimeline) => getShift(date, resolvePattern(date, timeline)!);
 
 describe("resolvePattern", () => {
   it("이력이 없으면 현재 패턴으로 모든 날짜를 계산한다", () => {
@@ -224,5 +224,42 @@ describe("describeTimeline", () => {
   it("연초 until의 마지막 적용일은 전년 12월 31일이다", () => {
     const rows = describeTimeline({ current: B, history: [{ until: "2027-01-01", pattern: A }] });
     expect(rows[1].to).toBe("2026-12-31");
+  });
+});
+
+describe("패턴이 없는 날짜", () => {
+  it("이력도 현재 패턴도 없으면 모든 날짜가 패턴 없음이다", () => {
+    const none: PatternTimeline = { current: null, history: [] };
+    for (const date of ["2026-01-01", "2026-10-13", "2030-12-31"]) {
+      expect(resolvePattern(date, none)).toBeNull();
+    }
+  });
+
+  it("이력 종료일 경계: until 전날은 이력 패턴, until부터 패턴 없음", () => {
+    const timeline: PatternTimeline = { current: null, history: [{ until: "2026-10-13", pattern: A }] };
+    expect(resolvePattern("2026-10-12", timeline)).toBe(A);
+    expect(resolvePattern("2026-10-13", timeline)).toBeNull();
+    expect(resolvePattern("2027-01-01", timeline)).toBeNull();
+  });
+
+  it("다시 등록하면 이력을 유지하고 마지막 이력 이후는 새 패턴이다", () => {
+    const none: PatternTimeline = { current: null, history: [{ until: "2026-10-13", pattern: A }] };
+    const next = applyPatternChange(none, B, "FROM_TODAY", "2026-10-20");
+    expect(next).toEqual({ current: B, history: [{ until: "2026-10-13", pattern: A }] });
+    expect(resolvePattern("2026-10-12", next)).toBe(A);
+    expect(resolvePattern("2026-10-13", next)).toBe(B);
+  });
+
+  it("이력이 없는 패턴 없음에서 등록하면 새 패턴 하나다", () => {
+    expect(applyPatternChange({ current: null, history: [] }, B, "FROM_TODAY", TODAY)).toEqual({
+      current: B,
+      history: [],
+    });
+  });
+
+  it("describeTimeline은 현재 패턴 행을 생략한다", () => {
+    const rows = describeTimeline({ current: null, history: [{ until: "2026-10-13", pattern: A }] });
+    expect(rows).toEqual([{ from: null, to: "2026-10-12", current: false, cycle: A.cycle }]);
+    expect(describeTimeline({ current: null, history: [] })).toEqual([]);
   });
 });

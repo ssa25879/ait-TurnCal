@@ -9,7 +9,8 @@ const check = (name, ok, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  (${detail})` : ""}`);
 };
 
-const browser = await chromium.launch({ executablePath: EDGE, headless: true });
+// Edge 155+는 옛 --headless와 --remote-debugging-pipe로 실행되지 않아, CDP_URL이 있으면 떠 있는 Edge에 연결한다.
+const browser = process.env.CDP_URL ? await chromium.connectOverCDP(process.env.CDP_URL) : await chromium.launch({ executablePath: EDGE, headless: true });
 const errors = [];
 
 // 패턴 A: 2026-10-11 시작 주·주·오·야·야·비·휴 → 10-10 휴무, 10-13 오후(오늘 위치 인덱스 2)
@@ -151,8 +152,8 @@ let afterFromToday;
   await page.waitForTimeout(500);
   const s = await stored(page);
   check("패턴 초기화: 패턴 null·이력 유지·테마 유지", s.pattern === null && JSON.stringify(s.patternHistory) === JSON.stringify(before.patternHistory) && s.theme === "INDIGO", JSON.stringify(s));
-  check("패턴 초기화 후 등록 안내 화면", await page.getByText("패턴 등록하기").isVisible());
-  await page.getByText("패턴 등록하기").click();
+  check("패턴 초기화 후 빈 달력 + 등록 안내 카드", (await page.locator(".no-pattern-card").isVisible()) && (await page.locator(".intro").count()) === 0);
+  await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
   await page.waitForSelector(".settings");
   for (const name of ["주간", "야간", "휴무"]) await page.locator(".shift-button", { hasText: name }).click();
   await page.locator(".today-cell").nth(0).click();

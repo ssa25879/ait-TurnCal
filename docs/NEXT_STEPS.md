@@ -12,11 +12,11 @@
 | `feat/add-pattern-history` | `cc6375b`까지 | `main`에 병합 완료. 원격에 남아 있으나 삭제해도 된다 |
 | 콘솔 테스트 번들 | `20261014-11` (deploymentId `01a13854-7c74-7ae3-86d5-feabbec048c7`) | 위 브랜치 기준, 테스트 광고 ID. 라이브는 여전히 `20261013-8` |
 
-**검증 현황:** 단위 264개(3개 시간대)·E2E 7종 271개 통과. 사용자가 `20261014-11`을 실기기에서 확인했고 아래 두 요구사항 외에는 정상이라고 확인했다.
+**검증 현황:** 단위 264개(3개 시간대)·E2E 7종 271개 통과(2026-10-14 `add-pattern-history` 기준; 빈 달력 구현 뒤 현황은 0절 참고). 사용자가 `20261014-11`을 실기기에서 확인했고 아래 두 요구사항 외에는 정상이라고 확인했다.
 
 ### 사용자가 새로 요청한 것 (실기기 확인 후, 2026-10-14)
 
-**① 패턴 초기화 후 "일정이 비어 있는 달력" 표시 — 제안서 작성 완료, 구현 전**(change `show-empty-calendar-after-reset`, 브랜치 `feat/show-empty-calendar-after-reset`, `openspec/changes/show-empty-calendar-after-reset/`의 proposal·specs·design·tasks 12개 작업. `/opsx:apply`로 구현)
+**① 패턴 초기화 후 "일정이 비어 있는 달력" 표시 — 구현·자동 테스트·실기기 확인 완료(2026-10-15), 아카이브·`main` 병합 완료**(change `show-empty-calendar-after-reset`, 브랜치 `feat/show-empty-calendar-after-reset`, `openspec/changes/show-empty-calendar-after-reset/`의 proposal·specs·design·tasks 12개 작업. `/opsx:apply`로 구현)
 - 지금은 근무 패턴 초기화 직후 초기 안내 화면(`setup-intro`)이 뜬다. 요구는 달력이 보이되 근무가 비어 있는 상태다.
 - 방향(제안서에 반영됨):
   - 설정이 저장돼 있으면 패턴이 없어도 **달력이 최초 화면**이 된다(`miniapp-shell`의 최초 화면·뒤로가기 종료 규칙 수정). 저장된 설정이 전혀 없는 첫 실행은 지금처럼 초기 안내.
@@ -51,9 +51,9 @@
 | 브랜치 | `main` = `origin/main`: 오늘·내일 요약과 패턴 변경 이력이 병합돼 있다(둘 다 미출시). 출시된 v1 빌드는 `1ef8258` 병합본 기준 |
 | 콘솔 앱 등록 폼 | 제출·승인 완료(2026-10-13 16:39 제출, 사용자가 콘솔 웹에서 "검토 요청하기") |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
-| OpenSpec | **진행 중 change: `show-empty-calendar-after-reset`**(제안서만 작성, 구현 전, 브랜치 `feat/show-empty-calendar-after-reset`). 아카이브: `add-pattern-history`(2026-10-14, 명세 `pattern-history` 신규 + 3개 수정), `add-today-tomorrow-summary`(2026-10-14), `add-anonymous-user-key`까지(2026-10-13) |
+| OpenSpec | **진행 중 change: `show-empty-calendar-after-reset`**(구현·자동 테스트·실기기 확인 완료, 아카이브·병합 완료, 브랜치 `feat/show-empty-calendar-after-reset`). 아카이브: `add-pattern-history`(2026-10-14, 명세 `pattern-history` 신규 + 3개 수정), `add-today-tomorrow-summary`(2026-10-14), `add-anonymous-user-key`까지(2026-10-13) |
 | 정식 명세 | `openspec/specs/` 14개(+user-identity, today-summary, pattern-history) |
-| 테스트 | 단위 264개(서울·뉴욕·UTC 3개 시간대 모두 통과), 브라우저 E2E 7종 271개(58·39·59·19·6·37·53) — 전부 통과(2026-10-14, `feat/add-pattern-history` 기준). 출시된 v1 번들(`20261013-8`)은 단위 198개·E2E 5종 기준이라 오늘·내일 요약과 패턴 이력은 아직 미출시 |
+| 테스트 | 단위 275개(서울·뉴욕·UTC 3개 시간대 모두 통과), 브라우저 E2E 8종 310개(58·39·59·19·6·37·53·39) — 전부 통과(2026-10-15, `feat/show-empty-calendar-after-reset` 기준). 출시된 v1 번들(`20261013-8`)은 단위 198개·E2E 5종 기준이라 오늘·내일 요약과 패턴 이력은 아직 미출시 |
 | 실기기 | v1 `20261013-8` 실제 광고 노출·정상 작동 확인(사용자, 2026-10-13). 요약·이력 테스트 번들 `20261014-9`·`-10`·`-11`은 사용자가 확인(2026-10-14, `-11`에서 새 요구사항 2건 외 정상). 메모리·네트워크 수치는 측정 안 함 |
 | 출시 버전 | **`20261013-8`** (실제 광고 ID, 커밋 `54512fb`, deploymentId `01a133eb-b011-7e16-8eff-2e49bd45b7c6`) — **승인·배포됨** |
 | 출시 상태 | **출시 완료(`OPEN`)** — 검토 요청 `250615`(INITIAL)가 2026-10-13 16:51 `APPROVED`, 앱 정보 `APPROVED`·`isInitialRegistrationCompleted: true`·`isDeployed: true`. 사용자가 출시 완료 확인, MCP(`miniapp_meta_status`·`miniapp_get_status`·`review_list`)로 2026-10-13 재확인. 신청 시점에 "확인 필요 2건"(내비 바 로고·이름/더보기, 메모리·네트워크)은 미해소였고, 반려 없이 승인됨 |
@@ -113,6 +113,19 @@ v1은 출시됐다. 아래 1-1~1-5(출시 준비 기록)는 완료된 이력이�
 | 보안·안정성 | 통과 | 변경분(`git diff main...`)에 `eval`·위치 이동·iframe·WebSocket·fetch·외부 URL 없음, 의존성 변경 없음, 저장은 기기 로컬 `turncal.settings`(`version: 3` 호환) |
 | 서비스 이용 동작 | 통과 / **확인 필요(v1 이월)** | 라이트 전용·확대 비활성 유지, 권한 없음, 이전 번들 롤백 시에도 데이터 호환. 메모리·네트워크 수치는 여전히 미측정 |
 | UX | 통과 | 바텀시트·자사 유도 없음. 초기화 확인 창은 기존 ConfirmDialog이고 사용자가 누른 뒤에만 열림. 전체 초기화는 이력 삭제를 경고 |
+| 사용자 식별키·인앱 광고 | 통과 | 변경 없음 |
+
+→ 확인 필요는 v1에서 이월된 2건(내비 바 로고·이름/더보기, 메모리·네트워크)뿐이며 이번 변경이 새로 만든 위험은 없다.
+
+#### 패턴 초기화 후 빈 달력 추가분(`show-empty-calendar-after-reset`, tasks 4.3) — 2026-10-15
+같은 원문(위 표의 출처) 기준. 대상 번들은 테스트 번들 `20261015-12`(테스트 광고 ID, deploymentId `01a13d1e-1566-77a2-90c8-f58d45eb7b80`)이며 사용자가 실기기에서 확인했다. **출시 직전에 원문을 다시 받아 한 번 더 대조한다.**
+
+| 절 | 판정 | 근거 |
+|---|---|---|
+| 네비게이션 바·뒤로가기 | 통과 | 설정이 있으면 패턴이 없어도 달력이 최초 화면이라 달력에서 뒤로가기는 앱 종료(규칙 유지). 달력의 [근무 패턴 등록하기]로 연 화면은 뒤로가기 시 달력으로 돌아간다(E2E + 실기기). 첫 실행은 그대로 종료 |
+| 보안·안정성 | 통과 | 새 오버레이·외부 이동·권한·네트워크 없음, 저장 형식·`version` 변경 없음(`pattern: null`은 기존 유효 상태) |
+| 서비스 이용 동작 | 통과 / **확인 필요(v1 이월)** | 라이트 전용·확대 비활성 유지, 권한 없음. 안내 카드 글자 11px 이상·360px 가로 스크롤 없음(E2E). 메모리·네트워크 수치는 측정 안 함 |
+| UX | 통과 | 안내는 달력 위 카드 하나(진입 바텀시트·자사 유도·전면 광고 없음), CTA는 한 번 눌러 근무 패턴 등록으로 이동해 예측 가능 |
 | 사용자 식별키·인앱 광고 | 통과 | 변경 없음 |
 
 → 확인 필요는 v1에서 이월된 2건(내비 바 로고·이름/더보기, 메모리·네트워크)뿐이며 이번 변경이 새로 만든 위험은 없다.

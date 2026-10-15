@@ -9,7 +9,8 @@ const check = (name, ok, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  (${detail})` : ""}`);
 };
 
-const browser = await chromium.launch({ executablePath: EDGE, headless: true });
+// Edge 155+는 옛 --headless와 --remote-debugging-pipe로 실행되지 않아, CDP_URL이 있으면 떠 있는 Edge에 연결한다.
+const browser = process.env.CDP_URL ? await chromium.connectOverCDP(process.env.CDP_URL) : await chromium.launch({ executablePath: EDGE, headless: true });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "dark" });
 await context.addInitScript(() => { history.back = () => {}; });
 const page = await context.newPage();

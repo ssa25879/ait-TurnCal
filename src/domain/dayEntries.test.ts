@@ -66,6 +66,13 @@ describe("getShiftSource / getEffectiveShift", () => {
     expect(getShiftSource({ items: [duty, off], shiftSourceId: off.id })?.id).toBe(duty.id);
     expect(getShiftSource({ items: [duty], shiftSourceId: "gone" })?.id).toBe(duty.id);
   });
+
+  it("패턴이 없으면 근무 없음이고, 분류 항목이 있으면 그 근무를 쓴다", () => {
+    expect(getEffectiveShift("2026-10-15", null, undefined)).toEqual({ shift: null, overridden: false });
+    expect(getEffectiveShift("2026-10-15", null, { items: [entry("택배")] })).toEqual({ shift: null, overridden: false });
+    const day: DayRecord = { items: [entry("휴가", { shift: "OFF" })] };
+    expect(getEffectiveShift("2026-10-15", null, day)).toEqual({ shift: "OFF", overridden: true });
+  });
 });
 
 describe("getCellMarker", () => {

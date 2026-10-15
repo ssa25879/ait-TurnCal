@@ -41,14 +41,14 @@ type View =
   | { kind: "calendar" }
   | { kind: "settings-menu" }
   | { kind: "names" }
-  | { kind: "pattern" }
+  | { kind: "pattern"; fromCalendar?: boolean }
   | { kind: "display" }
   | { kind: "reset" }
   | { kind: "day"; date: string }
   | { kind: "entry"; date: string; entryId: string | null };
 
 type DisplayPatch = Partial<Pick<StoredSettingsV3, "theme" | "weekStart">>;
-type DiscardTarget = { kind: "settings-menu" } | { kind: "day"; date: string };
+type DiscardTarget = { kind: "settings-menu" } | { kind: "calendar" } | { kind: "day"; date: string };
 
 const ENTRIES_BROKEN_NOTICE = "날짜 세부 내용을 불러오지 못했어요. 근무는 패턴대로 보여요.";
 
@@ -108,8 +108,9 @@ function TurnCal({
   const [dayError, setDayError] = useState<string | null>(null);
 
   const pattern = settings?.pattern ?? null;
-  const timeline: PatternTimeline | null = pattern
-    ? { current: pattern, history: settings?.patternHistory ?? [] }
+  // 설정이 저장돼 있으면 패턴이 없어도(패턴 초기화 뒤) 타임라인이 있다. current가 null이면 패턴 없음이다.
+  const timeline: PatternTimeline | null = settings
+    ? { current: pattern, history: settings.patternHistory ?? [] }
     : null;
 
   useEffect(() => {
@@ -129,7 +130,7 @@ function TurnCal({
     switch (settingsResult.kind) {
       case "ok":
         setSettings(settingsResult.settings);
-        setView(settingsResult.settings.pattern ? { kind: "calendar" } : { kind: "setup-intro" });
+        setView({ kind: "calendar" });
         break;
       case "empty":
         setSettings(null);
@@ -166,19 +167,26 @@ function TurnCal({
   useBackHandler(
     () => ({
       screen: view.kind,
-      hasSavedSettings: pattern !== null,
+      hasSavedSettings: settings !== null,
       isDirty: dirty,
       hasOverlay: hasOpenOverlay(),
     }),
     {
       closeOverlay: closeTopOverlay,
       toCalendar,
-      toSettingsMenu,
+      // 달력의 [근무 패턴 등록하기]로 연 설정 화면은 설정 목록을 거치지 않았으니 달력으로 돌아간다.
+      toSettingsMenu: () => (view.kind === "pattern" && view.fromCalendar ? toCalendar() : toSettingsMenu()),
       toDay: () => {
         if (view.kind === "entry") toDay(view.date);
       },
       confirmDiscard: () =>
-        setDiscard(view.kind === "entry" ? { kind: "day", date: view.date } : { kind: "settings-menu" }),
+        setDiscard(
+          view.kind === "entry"
+            ? { kind: "day", date: view.date }
+            : view.kind === "pattern" && view.fromCalendar
+              ? { kind: "calendar" }
+              : { kind: "settings-menu" },
+        ),
     },
   );
 
@@ -186,9 +194,7 @@ function TurnCal({
   const savePattern = async (next: WorkPattern, scope: ApplyScope) => {
     // 적용 범위에 따라 이력을 갱신한다. 저장된 패턴이 없으면(첫 등록·패턴 초기화 후) 적용 범위 없이
     // 새 패턴을 현재 패턴으로 두고, 패턴 초기화 때 남긴 이력은 그대로 유지한다.
-    const result = timeline
-      ? applyPatternChange(timeline, next, scope, today)
-      : { current: next, history: settings?.patternHistory ?? [] };
+    const result = applyPatternChange(timeline, next, scope, today);
     const { patternHistory: _previousHistory, ...rest } = settings ?? createDefaultSettings();
     const updated: StoredSettingsV3 = {
       ...rest,
@@ -240,11 +246,11 @@ function TurnCal({
     go({ kind: "setup-intro" });
   };
 
-  /** 편집 중이던 내용도 함께 버리고 등록 안내로 간다(확인 창이 폐기 확인을 대신한다). */
+  /** 편집 중이던 내용도 함께 버리고 빈 달력으로 간다(확인 창이 폐기 확인을 대신한다). */
   const runResetPattern = async () => {
     if (!settings) return;
     setSettings(await resetPattern(settings));
-    go({ kind: "setup-intro" });
+    toCalendar();
   };
 
   /** 저장에 성공했을 때만 반영하고 화면 설정에 머문다. */
@@ -314,6 +320,7 @@ function TurnCal({
   const discardAndLeave = () => {
     if (!discard) return;
     if (discard.kind === "day") toDay(discard.date);
+    else if (discard.kind === "calendar") toCalendar();
     else toSettingsMenu();
   };
 
@@ -327,16 +334,16 @@ function TurnCal({
         <SettingsScreen
           key={session}
           saved={pattern}
-          timeline={timeline}
+          timeline={pattern ? timeline : null}
           today={today}
           onSave={savePattern}
           onDirtyChange={handleDirtyChange}
           onResetPattern={pattern ? runResetPattern : undefined}
         />
       )}
-      {view.kind === "settings-menu" && settings && pattern && (
+      {view.kind === "settings-menu" && settings && (
         <SettingsMenu
-          cycleLength={pattern.cycle.length}
+          cycleLength={pattern?.cycle.length ?? null}
           theme={settings.theme}
           weekStart={settings.weekStart}
           scheduleName={settings.scheduleName}
@@ -382,6 +389,7 @@ function TurnCal({
           entriesNotice={entriesBroken ? ENTRIES_BROKEN_NOTICE : null}
           onSelectDate={toDay}
           onOpenSettings={toSettingsMenu}
+          onRegisterPattern={() => go({ kind: "pattern", fromCalendar: true })}
         />
       )}
       {view.kind === "day" && timeline && (

@@ -46,7 +46,7 @@ export function DayScreen({
 }: Props) {
   const items = sortEntries(day?.items ?? []);
   const pattern = resolvePattern(date, timeline);
-  const patternShift = getShift(date, pattern);
+  const patternShift = pattern ? getShift(date, pattern) : null;
   const { shift, overridden } = getEffectiveShift(date, pattern, day);
   const source = getShiftSource(day);
   const categorized = items.filter((item) => item.shift);
@@ -60,9 +60,11 @@ export function DayScreen({
       )}
 
       <div className="day-shift">
-        <span className={`chip shift-${shift}`}>{SHIFT_LABELS[shift].short}</span>
+        {shift && <span className={`chip shift-${shift}`}>{SHIFT_LABELS[shift].short}</span>}
         <span>
-          {overridden ? (
+          {!shift ? (
+            "근무 패턴이 없어요"
+          ) : overridden && patternShift ? (
             <>
               근무 변경: {SHIFT_LABELS[patternShift].name} → <strong>{SHIFT_LABELS[shift].name}</strong>
             </>
