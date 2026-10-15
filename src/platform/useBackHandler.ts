@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 
 export type Screen =
   | "loading"
-  | "setup-intro"
   | "load-error"
   | "calendar"
   | "settings-menu"

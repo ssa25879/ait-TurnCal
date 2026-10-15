@@ -10,7 +10,6 @@ import { NamesScreen } from "./components/NamesScreen";
 import { ResetScreen } from "./components/ResetScreen";
 import { SettingsMenu } from "./components/SettingsMenu";
 import { SettingsScreen } from "./components/SettingsScreen";
-import { SetupIntro } from "./components/SetupIntro";
 import { yearMonthOf, type YearMonth } from "./domain/calendar";
 import { applyPatternChange, type ApplyScope, type PatternTimeline } from "./domain/patternHistory";
 import type { DayEntry, DayRecord } from "./domain/dayEntries";
@@ -36,11 +35,10 @@ import {
 
 type View =
   | { kind: "loading" }
-  | { kind: "setup-intro" }
   | { kind: "load-error"; reason: string }
   | { kind: "calendar" }
   | { kind: "settings-menu" }
-  | { kind: "names" }
+  | { kind: "names"; fromCalendar?: boolean }
   | { kind: "pattern"; fromCalendar?: boolean }
   | { kind: "display" }
   | { kind: "reset" }
@@ -133,8 +131,9 @@ function TurnCal({
         setView({ kind: "calendar" });
         break;
       case "empty":
-        setSettings(null);
-        setView({ kind: "setup-intro" });
+        // 저장된 설정이 없으면(첫 실행·전체 초기화 뒤 재실행) 기본 설정으로 빈 달력을 연다. 저장하지 않는다.
+        setSettings(createDefaultSettings());
+        setView({ kind: "calendar" });
         break;
       case "corrupt":
         setSettings(null);
@@ -159,6 +158,10 @@ function TurnCal({
   };
   const toCalendar = () => go({ kind: "calendar" });
   const toSettingsMenu = () => go({ kind: "settings-menu" });
+  /** 달력의 바로가기로 연 설정 화면은 설정 목록을 거치지 않았으니 뒤로가기·폐기·저장 뒤에 달력으로 돌아간다. */
+  const openFromCalendar = (kind: "pattern" | "names") => go({ kind, fromCalendar: true });
+  const isFromCalendar = (current: View) =>
+    (current.kind === "pattern" || current.kind === "names") && current.fromCalendar === true;
   const toDay = (date: string) => {
     setDayError(null);
     go({ kind: "day", date });
@@ -175,7 +178,7 @@ function TurnCal({
       closeOverlay: closeTopOverlay,
       toCalendar,
       // 달력의 [근무 패턴 등록하기]로 연 설정 화면은 설정 목록을 거치지 않았으니 달력으로 돌아간다.
-      toSettingsMenu: () => (view.kind === "pattern" && view.fromCalendar ? toCalendar() : toSettingsMenu()),
+      toSettingsMenu: () => (isFromCalendar(view) ? toCalendar() : toSettingsMenu()),
       toDay: () => {
         if (view.kind === "entry") toDay(view.date);
       },
@@ -183,7 +186,7 @@ function TurnCal({
         setDiscard(
           view.kind === "entry"
             ? { kind: "day", date: view.date }
-            : view.kind === "pattern" && view.fromCalendar
+            : isFromCalendar(view)
               ? { kind: "calendar" }
               : { kind: "settings-menu" },
         ),
@@ -211,7 +214,8 @@ function TurnCal({
     const updated = { ...settings, ...names };
     await saveSettings(updated);
     setSettings(updated);
-    toSettingsMenu();
+    if (isFromCalendar(view)) toCalendar();
+    else toSettingsMenu();
   };
 
   /** 테마·주 시작 요일 공통: 낙관적으로 반영하고, 저장에 실패하면 이전 값으로 되돌린다. */
@@ -239,11 +243,12 @@ function TurnCal({
       await applyLoaded(false);
       throw error;
     }
-    setSettings(null);
+    // 저장소는 비웠고 기본 설정은 메모리에만 둔다(저장하지 않음). 재실행해도 같은 빈 달력이 열린다.
+    setSettings(createDefaultSettings());
     setDays({});
     setEntriesBroken(false);
     setMonth(yearMonthOf(today));
-    go({ kind: "setup-intro" });
+    toCalendar();
   };
 
   /** 편집 중이던 내용도 함께 버리고 빈 달력으로 간다(확인 창이 폐기 확인을 대신한다). */
@@ -326,7 +331,6 @@ function TurnCal({
 
   return (
     <main className="app">
-      {view.kind === "setup-intro" && <SetupIntro onStart={() => go({ kind: "pattern" })} />}
       {view.kind === "load-error" && (
         <LoadError reason={view.reason} onReset={() => go({ kind: "pattern" })} />
       )}
@@ -389,7 +393,9 @@ function TurnCal({
           entriesNotice={entriesBroken ? ENTRIES_BROKEN_NOTICE : null}
           onSelectDate={toDay}
           onOpenSettings={toSettingsMenu}
-          onRegisterPattern={() => go({ kind: "pattern", fromCalendar: true })}
+          onRegisterPattern={() => openFromCalendar("pattern")}
+          onEditPattern={() => openFromCalendar("pattern")}
+          onEditNames={() => openFromCalendar("names")}
         />
       )}
       {view.kind === "day" && timeline && (

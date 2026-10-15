@@ -91,15 +91,13 @@ body {
 }
 
 /* ---------- 공통 ---------- */
-.page-title,
-.intro-title {
+.page-title {
   margin: 8px 0 12px;
   font-size: 24px;
   font-weight: 700;
   line-height: 1.4;
 }
 
-.intro-desc,
 .section-desc,
 .notice,
 .hint,
@@ -153,15 +151,9 @@ body {
   font-weight: 700;
 }
 
-/* ---------- 초기 안내 ---------- */
-.intro {
+/* ---------- 설정 읽기 오류 ---------- */
+.load-error {
   padding-top: 24px;
-}
-
-.intro-example {
-  display: flex;
-  gap: 6px;
-  margin: 24px 0 8px;
 }
 
 /* ---------- 패턴 편집 ---------- */
@@ -839,4 +831,15 @@ body {
 
 .today-card-name.is-none {
   color: var(--color-text-sub);
+}
+
+.shortcut-row {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.shortcut-row > * {
+  flex: 1 1 0;
+  min-width: 0;
 }

@@ -80,11 +80,11 @@ await page.evaluate(() => window.__ait.patch("ads", { forceNoFill: false }));
 // 초기 안내·오류 화면
 await page.evaluate((k) => localStorage.removeItem(k), SKEY);
 await page.reload({ waitUntil: "networkidle" });
-await page.waitForSelector(".intro");
-check("초기 안내에 배너 없음", (await banners()) === 0);
+await page.waitForSelector(".no-pattern-card");
+check("첫 실행 빈 달력은 달력 화면이라 배너 영역이 있음", (await banners()) === 1);
 await page.evaluate((k) => localStorage.setItem(k, "{bad"), SKEY);
 await page.reload({ waitUntil: "networkidle" });
-await page.waitForSelector(".intro");
+await page.waitForSelector(".load-error");
 check("오류 화면에 배너 없음", (await banners()) === 0);
 
 check("페이지 오류 없음", errors.length === 0, errors.join(" | "));

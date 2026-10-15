@@ -23,6 +23,10 @@ interface Props {
   onOpenSettings(): void;
   /** 근무 패턴 설정(첫 등록) 화면을 연다. */
   onRegisterPattern(): void;
+  /** 설정 목록을 거치지 않고 근무 패턴 설정 화면을 연다. */
+  onEditPattern(): void;
+  /** 설정 목록을 거치지 않고 이름 화면을 연다. */
+  onEditNames(): void;
 }
 
 export function CalendarScreen({
@@ -38,6 +42,8 @@ export function CalendarScreen({
   onSelectDate,
   onOpenSettings,
   onRegisterPattern,
+  onEditPattern,
+  onEditNames,
 }: Props) {
   const todayMonth = yearMonthOf(today);
   const isTodayMonth = month.year === todayMonth.year && month.month === todayMonth.month;
@@ -105,6 +111,16 @@ export function CalendarScreen({
       />
 
       <div className="bottom-action">
+        <div className="shortcut-row">
+          {timeline.current !== null && (
+            <Button size="medium" variant="weak" display="full" onClick={onEditPattern}>
+              근무 패턴 수정
+            </Button>
+          )}
+          <Button size="medium" variant="weak" display="full" onClick={onEditNames}>
+            이름 수정
+          </Button>
+        </div>
         <Button size="large" variant="weak" display="full" onClick={onOpenSettings}>
           설정
         </Button>

@@ -47,14 +47,16 @@ const v2 = (extra = {}) => JSON.stringify({ version: 2, pattern: { startDate: "2
 
 // ---------- 최초 등록 흐름 (MVP 회귀, 설정 목록을 거치지 않음) ----------
 await fresh(null);
-check("최초: 초기 안내", await page.getByText("패턴 등록하기").isVisible());
+check("최초: 빈 달력 + 등록 안내", await page.locator(".no-pattern-card").isVisible());
 check("최초: 기본 테마 인디고", (await primaryVar()) === "#4F46E5");
-await page.getByText("패턴 등록하기").click();
+await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
 await page.waitForSelector(".settings");
 check("최초: 안내 → 근무 패턴 화면으로 바로 진입", (await page.locator(".settings-menu").count()) === 0);
 let before = closeCalls();
 await back();
-check("최초: 근무 패턴에서 뒤로가기 → 종료", closeCalls() === before + 1);
+check("최초: 근무 패턴에서 뒤로가기 → 빈 달력(종료 아님)", (await page.locator(".no-pattern-card").isVisible()) && closeCalls() === before);
+await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
+await page.waitForSelector(".settings");
 for (const n of ["주간", "주간", "야간", "야간", "휴무", "휴무"]) await page.locator(".shift-button", { hasText: n }).click();
 await page.locator(".today-cell").nth(2).click();
 await page.getByRole("button", { name: "저장", exact: true }).click();
