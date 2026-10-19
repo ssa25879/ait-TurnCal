@@ -6,7 +6,7 @@
 - 달력 칸의 근무는 `Calendar.tsx`에서 `getEffectiveShift(date, resolvePattern(date, timeline), days[date])`로 정한다. 표시값은 `useShiftLabels()`(근무 유형 사용자 정의), 날짜 격자는 `buildMonthGrid(month, weekStart)`, 요일 이름은 `getWeekdayLabels(weekStart)`.
 - 달력 하단 `.bottom-action` 안에 바로가기 줄(`.shortcut-row`)과 대체 [설정]이 있다. 배너 E2E는 `.bottom-action` 아래와 배너 사이가 32px 이상인지 본다.
 - SDK: `saveBase64Data({ data, fileName, mimeType })`(`isSupported()` 있음, Android 5.218.0·iOS 5.216.0), `Share.createLink({ path })` → 문자열 링크. Devtools 흉내 구현은 `saveBase64Data`를 브라우저 다운로드(`a[download]`)로, `createLink`를 `https://toss.im/share/mock<path>`로 돌려준다.
-- **실기기 확인(2026-10-19, 임시 번들 `20261019-21`, 브랜치 `spike/save-location`):** Android에서 `saveBase64Data`는 기기에 바로 저장하지 않고 **파일 공유 창**을 연다(카카오톡·구글 드라이브 등으로 보냄). PNG·.ics·.txt 모두 공유 창으로 정상 전달됐다. 사용자가 공유 창을 **취소해도 Promise는 성공으로 끝난다** → 앱은 실제로 보냈는지 알 수 없다. `Share.createLink`는 링크 문자열을 정상 반환했다(복사·공유는 하지 않으므로 화면에 표시만 됨). 같은 코드로 브라우저에서 만든 PNG는 내용이 정확했다. .ics를 캘린더 앱으로 가져오는 흐름은 아직 미확인.
+- **실기기 확인(2026-10-19, 임시 번들 `20261019-21`, 브랜치 `spike/save-location`):** Android에서 `saveBase64Data`는 기기에 바로 저장하지 않고 **파일 공유 창**을 연다(카카오톡·구글 드라이브 등으로 보냄). PNG·.ics·.txt 모두 공유 창으로 정상 전달됐다. 사용자가 공유 창을 **취소해도 Promise는 성공으로 끝난다** → 앱은 실제로 보냈는지 알 수 없다. `Share.createLink`는 링크 문자열을 정상 반환했다(복사·공유는 하지 않으므로 화면에 표시만 됨). 같은 코드로 브라우저에서 만든 PNG는 내용이 정확했다. 받은 PNG(카카오톡 나와의 채팅)는 내용이 정확했다. **.ics는 공유 창에 캘린더 앱이 나오지 않는다.** 나와의 채팅으로 보낸 뒤 내려받아 열면 캘린더 앱이 선택지로 나온다 → 사용자 결정(2026-10-19): .ics 선택지는 유지하고 "나와의 채팅·드라이브로 보낸 뒤 파일을 열면 캘린더에 추가할 수 있어요" 안내를 붙인다. 일정이 실제로 추가되는지는 실기기 확인(4.3)에서 다시 본다.
 - 새 npm 의존성은 쓰지 않는다(번들 1.19MB 문제가 이미 있음).
 
 ## Goals / Non-Goals
