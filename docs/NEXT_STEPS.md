@@ -94,7 +94,7 @@
 | 콘솔 앱 등록 폼 | 제출·승인 완료(2026-10-13 16:39 제출, 사용자가 콘솔 웹에서 "검토 요청하기") |
 | OpenSpec 아카이브 완료 | `add-day-entries-and-names`, `add-calendar-banner-ad` (2026-10-13, 명세 동기화) |
 | OpenSpec | **구현 중인 change 없음.** `polish-visual-design`(외형 전용, 실기기 확인·아카이브·병합 완료; 달력 6주 격자가 360×740 첫 화면 안에 들어오게 칸 72px, 11px 미만 글자·44px 미만 터치 영역 제거, 기준 변수 도입, 선택 카드 통일, 설정 화면 [저장]을 [초기화] 위로). `move-settings-to-navbar`(설정 진입을 내비 바 기능 버튼 1개로, 등록 실패 시 하단 [설정] 대체; 실기기 확인·아카이브·병합 완료). 아카이브: `add-calendar-shortcuts`·`show-empty-calendar-after-reset`(2026-10-15), `add-pattern-history`(2026-10-14, 명세 `pattern-history` 신규 + 3개 수정), `add-today-tomorrow-summary`(2026-10-14), `add-anonymous-user-key`까지(2026-10-13) |
-| 정식 명세 | `openspec/specs/` 15개(+user-identity, today-summary, pattern-history, shift-labels) |
+| 정식 명세 | `openspec/specs/` 16개(+user-identity, today-summary, pattern-history, shift-labels, schedule-export) |
 | 테스트 | 단위 283개(서울·뉴욕·UTC 3개 시간대 모두 통과), 브라우저 E2E 11종 439개(58·39·59·19·6·37·53·45·33·57·33) — 전부 통과(2026-10-15, `feat/move-settings-to-navbar` 기준). v1.1 `20261015-18`이 이 기준으로 출시됨 |
 | 실기기 | v1 `20261013-8` 실제 광고 노출·정상 작동 확인(사용자, 2026-10-13). 요약·이력 테스트 번들 `20261014-9`·`-10`·`-11`은 사용자가 확인(2026-10-14, `-11`에서 새 요구사항 2건 외 정상). 메모리·네트워크 수치는 측정 안 함 |
 | 출시 버전 | **`20261015-18`** (v1.1, 실제 광고 ID, 커밋 `f862cc9`, deploymentId `01a13e19-a052-73d0-a1bc-607f2be71fb7`) — 2026-10-15 15:17 배포. 이전 v1 `20261013-8`은 롤백 대상 |
