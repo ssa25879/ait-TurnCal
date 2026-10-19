@@ -1,16 +1,18 @@
-import { Button } from "@toss/tds-mobile";
-import { useEffect, useState } from "react";
+import { Button, ConfirmDialog } from "@toss/tds-mobile";
+import { useEffect, useRef, useState } from "react";
 import {
   adjustTodayIndex,
   canSaveDraft,
   createDraft,
   draftToPattern,
   isDraftDirty,
+  loadCycleIntoDraft,
   setStartDateOnDraft,
   type PatternDraft,
 } from "../domain/settingsDraft";
 import type { ApplyScope, PatternTimeline } from "../domain/patternHistory";
 import type { ShiftType, WorkPattern } from "../domain/types";
+import { useCloseOnBack } from "../platform/overlayBack";
 import { PatternEditor } from "./PatternEditor";
 import { PatternHistoryList } from "./PatternHistoryList";
 import { ResetAction } from "./ResetAction";
@@ -24,7 +26,7 @@ const SCOPE_OPTIONS: ReadonlyArray<{ id: ApplyScope; title: string; desc: string
 
 interface Props {
   saved: WorkPattern | null;
-  /** 저장된 패턴과 이력. 이력 목록 표시에 쓴다(저장된 패턴이 없으면 null). */
+  /** 저장된 패턴과 이력. 이력 목록 표시에 쓴다(패턴도 이력도 없으면 null). */
   timeline: PatternTimeline | null;
   today: string;
   onSave(pattern: WorkPattern, scope: ApplyScope): Promise<void>;
@@ -39,6 +41,11 @@ export function SettingsScreen({ saved, timeline, today, onSave, onDirtyChange, 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [scope, setScope] = useState<ApplyScope>("FROM_TODAY");
+  // 편집 중에 이력을 눌렀을 때 덮어쓰기 확인을 기다리는 근무 순서
+  const [pendingLoad, setPendingLoad] = useState<ShiftType[] | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const topRef = useRef<HTMLElement>(null);
+  useCloseOnBack(pendingLoad !== null, () => setPendingLoad(null));
 
   const dirty = isDraftDirty(draft, saved, today);
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
@@ -47,15 +54,34 @@ export function SettingsScreen({ saved, timeline, today, onSave, onDirtyChange, 
   // 저장된 패턴을 바꾼 경우에만 적용 범위를 고른다. 변경이 없으면 항상 이력을 건드리지 않는 값이다.
   const askScope = saved !== null && dirty;
 
+  const edit = (update: (prev: PatternDraft) => PatternDraft) => {
+    setLoaded(false);
+    setDraft(update);
+  };
+
   const changeCycle = (cycle: ShiftType[]) => {
-    setDraft((prev) => ({
+    edit((prev) => ({
       cycle,
       todayIndex: adjustTodayIndex(prev.todayIndex, cycle.length),
     }));
   };
 
+  // 불러오기는 편집 내용만 바꾸고 저장하지 않는다. 결과가 보이도록 편집기로 올라간다.
+  const applyLoad = (cycle: ShiftType[]) => {
+    setPendingLoad(null);
+    setDraft(loadCycleIntoDraft(cycle));
+    setLoaded(true);
+    topRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+  };
+
+  const requestLoad = (cycle: ShiftType[]) => {
+    if (dirty) setPendingLoad(cycle);
+    else applyLoad(cycle);
+  };
+
   const save = async () => {
     if (!check.ok || saving) return;
+    setLoaded(false);
     setSaving(true);
     setSaveError(null);
     try {
@@ -67,19 +93,25 @@ export function SettingsScreen({ saved, timeline, today, onSave, onDirtyChange, 
   };
 
   return (
-    <section className="settings">
+    <section className="settings" ref={topRef}>
       <h1 className="page-title">근무 패턴 설정</h1>
 
       <PatternEditor cycle={draft.cycle} onChange={changeCycle} />
 
+      {loaded && (
+        <p className="notice-inline" role="status">
+          불러온 근무 순서예요. 오늘에 해당하는 칸을 골라 주세요.
+        </p>
+      )}
+
       <TodayPositionPicker
         cycle={draft.cycle}
         todayIndex={draft.todayIndex}
-        onSelect={(todayIndex) => setDraft((prev) => ({ ...prev, todayIndex }))}
+        onSelect={(todayIndex) => edit((prev) => ({ ...prev, todayIndex }))}
       />
       <StartDatePicker
         disabled={draft.cycle.length === 0}
-        onPick={(startDate) => setDraft((prev) => setStartDateOnDraft(prev, startDate, today))}
+        onPick={(startDate) => edit((prev) => setStartDateOnDraft(prev, startDate, today))}
       />
 
       {askScope && (
@@ -106,7 +138,20 @@ export function SettingsScreen({ saved, timeline, today, onSave, onDirtyChange, 
         </section>
       )}
 
-      {timeline && <PatternHistoryList timeline={timeline} />}
+      {timeline && <PatternHistoryList timeline={timeline} onLoad={requestLoad} />}
+
+      <ConfirmDialog
+        open={pendingLoad !== null}
+        title="편집 중인 내용을 바꿀까요?"
+        description="저장하지 않은 근무 순서가 불러온 패턴으로 바뀌어요."
+        onClose={() => setPendingLoad(null)}
+        cancelButton={<ConfirmDialog.CancelButton onClick={() => setPendingLoad(null)}>취소</ConfirmDialog.CancelButton>}
+        confirmButton={
+          <ConfirmDialog.ConfirmButton onClick={() => pendingLoad && applyLoad(pendingLoad)}>
+            불러오기
+          </ConfirmDialog.ConfirmButton>
+        }
+      />
 
       <div className="bottom-action">
         {saveError && <p className="error-text" role="alert">{saveError}</p>}

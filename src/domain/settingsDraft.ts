@@ -13,6 +13,11 @@ export function createDraft(saved: WorkPattern | null, today: string): PatternDr
   return { cycle: saved.cycle, todayIndex: getTodayIndex(today, saved) };
 }
 
+/** 이력의 근무 순서를 편집기에 불러온다. 위상은 다시 골라야 하므로 오늘 위치는 비운다. */
+export function loadCycleIntoDraft(cycle: readonly ShiftType[]): PatternDraft {
+  return { cycle: [...cycle], todayIndex: null };
+}
+
 /** 패턴 길이가 바뀌면 오늘 위치를 index mod length로 보정한다. */
 export function adjustTodayIndex(index: number | null, length: number): number | null {
   if (index === null || length === 0) return null;

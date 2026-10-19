@@ -96,14 +96,78 @@ let afterFromToday;
   const ranges = await page.locator(".history-range").allInnerTexts();
   check("이력 목록: 현재·이전 순서와 기간 문구", ranges.length === 2 && ranges[0] === "2026년 10월 13일부터 (현재)" && ranges[1] === "처음부터 2026년 10월 12일까지", JSON.stringify(ranges));
   check("이력 목록: 근무 칩 색과 약어(이전 패턴 7칸)", (await page.locator(".history-item").nth(1).locator(".history-chip").count()) === 7 && (await page.locator(".history-item").nth(1).locator(".history-chip.shift-EVENING").innerText()) === "오");
-  // 읽기 전용: 눌러도 아무것도 열리지 않는다
-  await page.locator(".history-item").nth(1).click();
+  // 현재 패턴 행은 누를 수 없다(불러오기는 2-2에서 따로 검사)
+  await page.locator(".history-item.is-current").click();
   await page.waitForTimeout(250);
-  check("이력 항목 누르기: 화면·창 변화 없음(읽기 전용)", (await page.locator(".settings").isVisible()) && (await page.locator("[role=dialog], [role=alertdialog]").count()) === 0 && (await page.locator(".history-item button, .history-item a").count()) === 0);
+  check("현재 행 누르기: 화면·창 변화 없음·버튼 아님", (await page.locator(".settings").isVisible()) && (await page.locator("[role=dialog], [role=alertdialog]").count()) === 0 && (await page.locator(".history-item.is-current button, .history-item.is-current a").count()) === 0 && (await page.locator(".scope-options").count()) === 0);
   // 변경 없이 저장 → 이력·저장값 불변
   await page.getByRole("button", { name: "저장", exact: true }).click();
   await page.waitForSelector(".today-card");
   check("변경 없이 저장: 이력 불변·저장값 동일", (await raw(page)) === afterFromToday);
+  await context.close();
+}
+
+// ---------- 2-2. 이력 패턴 불러오기(저장 안 함·오늘 위치 비움·편집 중 확인) ----------
+{
+  // 현재 패턴 C(10-13부터 주·야·휴), 이전 패턴 A(10-12까지)
+  const C = { startDate: "2026-10-13", cycle: ["DAY", "NIGHT", "OFF"] };
+  const original = JSON.stringify(base({ pattern: C, patternHistory: [{ until: "2026-10-13", pattern: A }] }));
+  const { context, page } = await open(original);
+  await openPattern(page);
+  const cycleClasses = () => page.locator(".cycle-item").evaluateAll((els) => els.map((e) => [...e.classList].find((c) => c.startsWith("shift-")).slice(6)).join());
+  const loadButton = page.locator(".history-item.is-loadable .history-load");
+  const dialogs = () => page.locator("[role=dialog], [role=alertdialog]").count();
+  check("이전 행만 불러오기 버튼(1개)·현재 행은 버튼 없음", (await loadButton.count()) === 1 && (await page.locator(".history-item.is-current button").count()) === 0);
+  check("불러오기 버튼 이름: 기간·근무 순서·편집기에 불러오기", ((await loadButton.getAttribute("aria-label")) ?? "").startsWith("처음부터 2026년 10월 12일까지, 근무 순서 주간") && (await loadButton.getAttribute("aria-label")).endsWith("편집기에 불러오기"));
+  check("편집기 처음 상태 = 현재 패턴 C", (await cycleClasses()) === C.cycle.join());
+
+  // 편집 내용이 없으면 바로 불러온다
+  await loadButton.click();
+  await page.waitForTimeout(300);
+  check("불러오기: 확인 창 없이 편집기가 패턴 A(7칸)", (await dialogs()) === 0 && (await cycleClasses()) === A.cycle.join(), await cycleClasses());
+  check("불러오기: 오늘 위치 미선택", (await page.locator('.today-cell[aria-checked="true"]').count()) === 0);
+  check("불러오기: [저장] 비활성 + 오늘 칸 안내", (await page.getByRole("button", { name: "저장", exact: true }).isDisabled()) && (await page.getByText("오늘에 해당하는 칸을 선택해 주세요.").isVisible()));
+  check("불러오기: 안내 문구(role=status)", await page.getByRole("status").filter({ hasText: "불러온 근무 순서예요" }).isVisible());
+  check("불러오기: 저장값 그대로", (await raw(page)) === original);
+
+  // 불러온 뒤 뒤로가기 → 변경 폐기 확인
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent")));
+  await page.getByText("변경한 내용을 버릴까요?").waitFor({ state: "visible", timeout: 3000 });
+  check("불러온 뒤 뒤로가기: 변경 폐기 확인 창", true);
+  await page.getByRole("button", { name: "계속 편집하기" }).click();
+  await page.waitForTimeout(300);
+  check("계속 편집하기: 불러온 내용 유지", (await page.locator(".settings").isVisible()) && (await cycleClasses()) === A.cycle.join());
+
+  // 편집 중에 누르면 확인 창: 뒤로가기·취소는 편집 유지, 불러오기는 교체
+  await page.locator(".shift-button", { hasText: "휴무" }).click();
+  check("편집하면 불러오기 안내가 사라짐", (await page.getByText("불러온 근무 순서예요").count()) === 0 && (await page.locator(".cycle-item").count()) === 8);
+  await loadButton.click();
+  await page.getByText("편집 중인 내용을 바꿀까요?").waitFor({ state: "visible", timeout: 3000 });
+  check("편집 중 불러오기: 확인 창", true);
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent("__ait:backEvent")));
+  await page.waitForTimeout(400);
+  check("확인 창 뒤로가기: 창만 닫힘·편집 유지·화면 유지", (await page.getByText("편집 중인 내용을 바꿀까요?").isVisible().catch(() => false)) === false && (await page.getByText("변경한 내용을 버릴까요?").count()) === 0 && (await page.locator(".settings").isVisible()) && (await page.locator(".cycle-item").count()) === 8);
+  await loadButton.click();
+  await page.getByText("편집 중인 내용을 바꿀까요?").waitFor({ state: "visible", timeout: 3000 });
+  await page.getByRole("button", { name: "취소", exact: true }).click();
+  await page.waitForTimeout(300);
+  check("확인 창 취소: 편집 유지", (await page.locator(".cycle-item").count()) === 8);
+  await loadButton.click();
+  await page.getByText("편집 중인 내용을 바꿀까요?").waitFor({ state: "visible", timeout: 3000 });
+  await page.getByRole("button", { name: "불러오기", exact: true }).click();
+  await page.waitForTimeout(300);
+  check("확인 창 불러오기: 패턴 A로 교체·오늘 위치 미선택", (await cycleClasses()) === A.cycle.join() && (await page.locator('.today-cell[aria-checked="true"]').count()) === 0);
+  check("확인 후에도 저장값 그대로", (await raw(page)) === original);
+
+  // 오늘 위치를 고르고 오늘부터 적용으로 저장 → 기존 이력 규칙대로
+  await page.locator(".today-cell").nth(0).click();
+  check("오늘 위치 선택: 안내 사라짐·적용 범위 기본 '오늘부터 적용'", (await page.getByText("불러온 근무 순서예요").count()) === 0 && (await page.locator(".scope-option.is-selected .scope-title").innerText()) === "오늘부터 적용");
+  await save(page);
+  const s = await stored(page);
+  // 같은 날(10-13) 시작한 C를 덮어쓰므로 이력은 A 하나 그대로다.
+  check("불러와 저장: 현재 패턴 = A의 근무 순서·기준일 10-13", s.pattern.startDate === "2026-10-13" && s.pattern.cycle.join() === A.cycle.join(), JSON.stringify(s.pattern));
+  check("불러와 저장: 이력 규칙대로(같은 날 덮어쓰기, A 하나)", s.patternHistory.length === 1 && s.patternHistory[0].until === "2026-10-13" && s.patternHistory[0].pattern.startDate === "2026-10-11", JSON.stringify(s.patternHistory));
+  check("불러와 저장: 10/13 주간·10/14 주간·10/15 오후, 10/10은 이전 패턴(휴무)", (await cellLabel(page, "2026-10-13")).includes("주간") && (await cellLabel(page, "2026-10-14")).includes("주간") && (await cellLabel(page, "2026-10-15")).includes("오후") && (await cellLabel(page, "2026-10-10")).includes("휴무"));
   await context.close();
 }
 
@@ -157,7 +221,8 @@ let afterFromToday;
   await page.waitForSelector(".settings");
   for (const name of ["주간", "야간", "휴무"]) await page.locator(".shift-button", { hasText: name }).click();
   await page.locator(".today-cell").nth(0).click();
-  check("재등록: 적용 범위 선택·이력 목록 없음(저장된 패턴 없음)", (await page.locator(".scope-options").count()) === 0 && (await page.locator(".history-list").count()) === 0);
+  const resetRanges = await page.locator(".history-range").allInnerTexts();
+  check("재등록: 적용 범위 선택 없음·이력 목록은 현재 행 없이 이전 패턴만", (await page.locator(".scope-options").count()) === 0 && (await page.locator(".history-item.is-current").count()) === 0 && resetRanges.length === 1 && resetRanges[0] === "처음부터 2026년 10월 12일까지", JSON.stringify(resetRanges));
   await page.getByRole("button", { name: "저장", exact: true }).click();
   await page.waitForSelector(".today-card");
   const after = await stored(page);
@@ -166,6 +231,27 @@ let afterFromToday;
   await openPattern(page);
   const ranges = await page.locator(".history-range").allInnerTexts();
   check("재등록 후 이력 목록: 새 패턴 + 이전 기록", ranges.length === 2 && ranges[0] === "2026년 10월 13일부터 (현재)" && ranges[1] === "처음부터 2026년 10월 12일까지", JSON.stringify(ranges));
+  await context.close();
+}
+
+// ---------- 5-3. 패턴 초기화 뒤 이력 패턴을 불러와 재등록 ----------
+{
+  const before = JSON.parse(afterFromToday);
+  const { context, page } = await open(JSON.stringify({ ...before, pattern: null }));
+  check("초기화 상태(패턴 없음·이력 있음): 빈 달력", await page.locator(".no-pattern-card").isVisible());
+  await page.getByRole("button", { name: "근무 패턴 등록하기" }).click();
+  await page.waitForSelector(".settings");
+  check("초기화 뒤 설정: 편집기 비어 있음·불러오기 버튼 1개", (await page.locator(".cycle-item").count()) === 0 && (await page.locator(".history-load").count()) === 1);
+  await page.locator(".history-load").click();
+  await page.waitForTimeout(300);
+  check("초기화 뒤 불러오기: 확인 창 없이 패턴 A 7칸", (await page.locator("[role=dialog], [role=alertdialog]").count()) === 0 && (await page.locator(".cycle-item").count()) === 7);
+  await page.locator(".today-cell").nth(2).click();
+  check("초기화 뒤 재등록: 적용 범위 선택 없음", (await page.locator(".scope-options").count()) === 0);
+  await page.getByRole("button", { name: "저장", exact: true }).click();
+  await page.waitForSelector(".today-card");
+  const after = await stored(page);
+  check("초기화 뒤 불러와 재등록: 이력 그대로·현재 패턴 = A 근무 순서", JSON.stringify(after.patternHistory) === JSON.stringify(before.patternHistory) && after.pattern.cycle.join() === A.cycle.join() && after.pattern.startDate === "2026-10-11", JSON.stringify(after));
+  check("초기화 뒤 불러와 재등록: 10/13 오후·10/10 휴무", (await cellLabel(page, "2026-10-13")).includes("오후") && (await cellLabel(page, "2026-10-10")).includes("휴무"));
   await context.close();
 }
 
@@ -238,6 +324,8 @@ let afterFromToday;
   check("360px: 이력 4행(현재+3) 표시", m.items === 4, `items=${m.items}`);
   check("360px: 가로 스크롤 없음·칩이 화면 안(56칸 줄바꿈)", m.sw <= m.cw && m.chipsRight <= 360, JSON.stringify(m));
   check("이력 목록 글자 11px 이상", m.minFont >= 11, `min=${m.minFont}`);
+  const loads = await page.locator(".history-load").evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { h: r.height, right: r.right }; }));
+  check("360px: 불러오기 행 3개·높이 44px 이상·화면 안", loads.length === 3 && loads.every((b) => b.h >= 44 && b.right <= 360), JSON.stringify(loads));
   await context.close();
 }
 

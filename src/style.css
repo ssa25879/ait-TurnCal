@@ -560,6 +560,47 @@ body {
   font-weight: 700;
 }
 
+/* 불러오기 행: 행 전체가 버튼(터치 영역 44px 이상) */
+.history-item.is-loadable {
+  padding: 0;
+}
+
+.history-load {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: none;
+  border-radius: var(--radius-l);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-load:active {
+  background: var(--color-bg-sub);
+}
+
+.history-load-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.history-load-head .history-range {
+  display: block;
+}
+
+.history-load-label {
+  flex-shrink: 0;
+  font-size: var(--font-s);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
 .history-cycle {
   display: flex;
   flex-wrap: wrap;

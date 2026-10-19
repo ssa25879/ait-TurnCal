@@ -23,7 +23,7 @@ node $env:TEMP\turncal-e2e\day-entries.mjs        # 세부 내용·이름·초�
 node $env:TEMP\turncal-e2e\banner.mjs             # 달력 하단 배너 19개
 node $env:TEMP\turncal-e2e\user-key.mjs           # 사용자 식별키 저장·초기화 6개
 node $env:TEMP\turncal-e2e\today-summary.mjs      # 오늘·내일 요약 37개(시계 고정, 360px, 자정 갱신)
-node $env:TEMP\turncal-e2e\pattern-history.mjs    # 패턴 이력·적용 범위·초기화(패턴/전체)·손상 데이터·360px·저장 실패 53개
+node $env:TEMP\turncal-e2e\pattern-history.mjs    # 패턴 이력·적용 범위·초기화(패턴/전체)·이력 불러오기·손상 데이터·360px·저장 실패 80개
 node $env:TEMP\turncal-e2e\empty-calendar.mjs    # 패턴 없음 빈 달력·안내 카드·설정/뒤로가기 계층·첫 실행·전체 초기화·재실행 빈 달력·뒤로가기 종료·360px 45개
 node $env:TEMP\turncal-e2e\calendar-shortcuts.mjs # 달력 바로가기(패턴·이름 수정)·뒤로가기/폐기/저장 후 달력 복귀·설정 경로 불변·360px 33개
 node $env:TEMP\turncal-e2e\visual-audit.mjs # 화면 감사: 11px 미만 글자·터치 영역 44px·가로 스크롤·6주 격자가 첫 화면 안(360×740·390×844) 57개
