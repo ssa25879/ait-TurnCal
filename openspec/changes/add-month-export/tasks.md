@@ -21,7 +21,7 @@
 
 - [x] 4.1 `typecheck`·`npm test`·`test:tz`·E2E 전 종(13종, 개발 서버 실행 중 `src` 수정 금지)을 돌린다. 확인: 전부 통과, 개수 기록.
 - [x] 4.2 `docs/NEXT_STEPS.md`(00절 선택 사항 3번 상태·테스트 개수·이 change의 출시 가이드 대조표, docs MCP `getPage`로 원문 새로 받아 대조 — 특히 공유 링크 `intoss://`)와 `scripts/e2e/README.md`를 갱신한다. 확인: 문서 개수가 4.1 출력과 일치.
-- [ ] 4.3 `npm run build:adtest` 번들을 `/ait:test-on-device`로 올려 사용자가 실기기에서 이미지 보내기(공유 창·받은 이미지 화질·내용)와 .ics 보내기·캘린더 앱 가져오기를 확인한다(검토 신청 금지). .ics 가져오기가 안 되면 선택지를 빼는 방안을 사용자와 정한다. 확인: 사용자 확인 결과를 NEXT_STEPS에 기록.
+- [x] 4.3 `npm run build:adtest` 번들을 `/ait:test-on-device`로 올려 사용자가 실기기에서 이미지 보내기(공유 창·받은 이미지 화질·내용)와 .ics 보내기·캘린더 앱 가져오기를 확인한다(검토 신청 금지). .ics 가져오기가 안 되면 선택지를 빼는 방안을 사용자와 정한다. 확인: 사용자 확인 결과를 NEXT_STEPS에 기록.
 
 ## Workflow follow-up
 

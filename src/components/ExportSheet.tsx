@@ -14,7 +14,7 @@ const OPTIONS: ReadonlyArray<{ kind: ExportKind; title: string; desc: string }> 
   {
     kind: "calendar",
     title: "캘린더 파일 보내기",
-    desc: "공유 창에는 캘린더 앱이 없어요. 나와의 채팅·드라이브 등으로 보낸 뒤 받은 파일을 열면 캘린더에 추가할 수 있어요.",
+    desc: "공유 창에는 캘린더 앱이 없을 수 있어요.\n나와의 채팅, 드라이브 등으로 보낸 뒤 받은 파일을 열면 캘린더 앱에 추가할 수 있어요.",
   },
 ];
 

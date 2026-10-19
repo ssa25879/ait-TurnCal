@@ -656,6 +656,8 @@ body {
   font-size: var(--font-s);
   line-height: 1.5;
   color: var(--color-text-sub);
+  /* 설명의 \n을 줄바꿈으로 보여 준다 */
+  white-space: pre-line;
 }
 
 .bottom-action .notice-inline {
