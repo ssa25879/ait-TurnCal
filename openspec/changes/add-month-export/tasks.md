@@ -14,14 +14,14 @@
 
 ## 3. 화면 연결
 
-- [ ] 3.1 `ExportSheet`(TDS BottomSheet, 선택지 두 개, `useCloseOnBack`)와 `CalendarScreen`의 [이번 달 내보내기](현재 패턴 있을 때만, `.bottom-action` 안 바로가기 줄 다음), 저장 흐름(`isSupported` 확인 → 링크 2초 제한 → `saveBase64Data` → 결과 안내 `role=status`/`alert`, 달 이동·화면 이동 시 안내 지움)을 만든다. 스타일 추가. 확인: `npm run typecheck` 통과.
-- [ ] 3.2 E2E 새 스크립트 `scripts/e2e/month-export.mjs`: 버튼 표시(패턴 있음)·숨김(첫 실행·패턴 초기화 뒤), 바텀시트 선택지·뒤로가기로 닫힘(저장 없음), 이미지 저장 → 다운로드 이름 `turncal-2026-10.png`·PNG 서명·폭 1080·안내, 11월로 넘겨 저장 → `turncal-2026-11.png`, .ics 저장 → 이름·VEVENT 수·10/13 SUMMARY·사용자 정의 이름·바뀐 근무 반영·세부 내용 이름/메모 없음·DESCRIPTION에 mock 공유 링크(`intoss://ait-turncal`)·`intoss-private` 없음, 링크 실패(createLink를 실패시킴) → 링크 없이 저장, 저장 실패(saveBase64Data 실패) → 실패 안내·저장값 그대로, 지원 안 함(isSupported false) → 업데이트 안내·다운로드 없음, 360px 가로 스크롤 없음·버튼 글자 11px 이상. 기존 `banner`(32px 간격)·`visual-audit`(6주 격자 첫 화면·터치 영역)·`calendar-shortcuts`·`empty-calendar` 통과 확인, 필요하면 기대값 조정. 확인: 새 스크립트·기존 스크립트 통과.
+- [ ] 3.1 `ExportSheet`(TDS BottomSheet, 선택지 두 개, `useCloseOnBack`)와 `CalendarScreen`의 [이번 달 내보내기](현재 패턴 있을 때만, `.bottom-action` 안 바로가기 줄 다음), 보내기 흐름(`isSupported` 확인 → 링크 2초 제한 → `saveBase64Data` → 성공 안내 없음, 실패·미지원만 `role=alert` 안내, 달 이동·화면 이동 시 안내 지움)을 만든다. 스타일 추가. 확인: `npm run typecheck` 통과.
+- [ ] 3.2 E2E 새 스크립트 `scripts/e2e/month-export.mjs`: 버튼 표시(패턴 있음)·숨김(첫 실행·패턴 초기화 뒤), 바텀시트 선택지·뒤로가기로 닫힘(저장 없음), 이미지 보내기 → 다운로드 이름 `turncal-2026-10.png`·PNG 서명·폭 1080·완료 안내 없음, 11월로 넘겨 저장 → `turncal-2026-11.png`, .ics 저장 → 이름·VEVENT 수·10/13 SUMMARY·사용자 정의 이름·바뀐 근무 반영·세부 내용 이름/메모 없음·DESCRIPTION에 mock 공유 링크(`intoss://ait-turncal`)·`intoss-private` 없음, 링크 실패(createLink를 실패시킴) → 링크 없이 저장, 저장 실패(saveBase64Data 실패) → 실패 안내·저장값 그대로, 지원 안 함(isSupported false) → 업데이트 안내·다운로드 없음, 360px 가로 스크롤 없음·버튼 글자 11px 이상. 기존 `banner`(32px 간격)·`visual-audit`(6주 격자 첫 화면·터치 영역)·`calendar-shortcuts`·`empty-calendar` 통과 확인, 필요하면 기대값 조정. 확인: 새 스크립트·기존 스크립트 통과.
 
 ## 4. 통합 확인·문서
 
 - [ ] 4.1 `typecheck`·`npm test`·`test:tz`·E2E 전 종(13종, 개발 서버 실행 중 `src` 수정 금지)을 돌린다. 확인: 전부 통과, 개수 기록.
 - [ ] 4.2 `docs/NEXT_STEPS.md`(00절 선택 사항 3번 상태·테스트 개수·이 change의 출시 가이드 대조표, docs MCP `getPage`로 원문 새로 받아 대조 — 특히 공유 링크 `intoss://`)와 `scripts/e2e/README.md`를 갱신한다. 확인: 문서 개수가 4.1 출력과 일치.
-- [ ] 4.3 `npm run build:adtest` 번들을 `/ait:test-on-device`로 올려 사용자가 실기기에서 이미지 저장(저장 위치·갤러리 표시·화질)과 .ics 저장·캘린더 앱 가져오기를 확인한다(검토 신청 금지). .ics 가져오기가 안 되면 선택지를 빼는 방안을 사용자와 정한다. 확인: 사용자 확인 결과를 NEXT_STEPS에 기록.
+- [ ] 4.3 `npm run build:adtest` 번들을 `/ait:test-on-device`로 올려 사용자가 실기기에서 이미지 보내기(공유 창·받은 이미지 화질·내용)와 .ics 보내기·캘린더 앱 가져오기를 확인한다(검토 신청 금지). .ics 가져오기가 안 되면 선택지를 빼는 방안을 사용자와 정한다. 확인: 사용자 확인 결과를 NEXT_STEPS에 기록.
 
 ## Workflow follow-up
 
