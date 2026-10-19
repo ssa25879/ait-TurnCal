@@ -1,8 +1,12 @@
 # Tasks
 
+## 0. 저장 위치 확인(본 구현 전)
+
+- [ ] 0.1 임시 확인용 번들(브랜치 `spike/save-location`, `main`에 병합하지 않음)로 실기기에서 `saveBase64Data`가 작은 PNG·`.ics`·`.txt`를 어디에 저장하는지, 저장 직후 토스 앱이 보여 주는 화면·알림, 갤러리·파일 앱·다운로드 폴더 표시 여부, `.ics`를 눌렀을 때 캘린더 앱으로 열리는지를 사용자가 확인한다. 확인: 결과를 `design.md` Context와 NEXT_STEPS에 기록하고, 결과에 따라 안내 문구·.ics 선택지 유지 여부를 정한 뒤 1단계로 간다.
+
 ## 1. 도메인: 날짜별 근무·.ics·인코딩
 
-- [ ] 1.1 `src/domain/monthExport.ts`에 `buildMonthShifts`, `buildIcs`, `toBase64Utf8`, 파일 이름 함수(`turncal-YYYY-MM.png/.ics`)를 만든다. `monthExport.test.ts`: 달 길이(2월·윤년·31일), 이력 경계·패턴 없는 날 null, 세부 내용 분류 우선, .ics 구조(BEGIN/END 짝, VERSION·PRODID, 근무 있는 날만 VEVENT, 종일 DTSTART/DTEND 다음 날·월말→다음 달 1일, UID 날짜 고정, SUMMARY=사용자 정의 이름, 링크 있음/없음, CRLF, 이스케이프, 75옥텟 접기), 세부 내용 이름·메모가 결과에 없음, base64 왕복(한글). 확인: `npm test`·`npm run test:tz` 통과.
+- [ ] 1.1 `src/domain/monthExport.ts`에 `buildMonthShifts`, `buildIcs`, `toBase64Utf8`, 파일 이름 함수(`turncal-YYYY-MM.png/.ics`, 인자는 연·월·확장자뿐)를 만든다. `monthExport.test.ts`: 달 길이(2월·윤년·31일), 이력 경계·패턴 없는 날 null, 세부 내용 분류 우선, .ics 구조(BEGIN/END 짝, VERSION·PRODID, 근무 있는 날만 VEVENT, 종일 DTSTART/DTEND 다음 날·월말→다음 달 1일, UID 날짜 고정, SUMMARY=사용자 정의 이름, 링크 있음/없음, CRLF, 이스케이프, 75옥텟 접기), 세부 내용 이름·메모가 결과에 없음, 파일 이름이 근무표 이름과 무관, base64 왕복(한글). 확인: `npm test`·`npm run test:tz` 통과.
 
 ## 2. 이미지 그리기
 
