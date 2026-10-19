@@ -29,12 +29,14 @@ node $env:TEMP\turncal-e2e\calendar-shortcuts.mjs # 달력 바로가기(패턴·
 node $env:TEMP\turncal-e2e\visual-audit.mjs # 화면 감사: 11px 미만 글자·터치 영역 44px·가로 스크롤·6주 격자가 첫 화면 안(360×740·390×844)·근무 유형 화면 63개
 node $env:TEMP\turncal-e2e\navbar-settings.mjs # 설정 진입 내비 바 기능 버튼(달력에서만·해제·클릭·대체 하단 버튼) 35개
 node $env:TEMP\turncal-e2e\shift-labels.mjs   # 근무 유형 이름·약어·색(메뉴·입력 규칙·앱 전체 반영·저장값·되돌리기·폐기·초기화·손상·360px) 57개
+node $env:TEMP\turncal-e2e\month-export.mjs   # 이번 달 내보내기(버튼 표시·시트·뒤로가기·PNG/ics 다운로드 내용·실패 안내·360px) 28개, OUT_DIR을 주면 받은 PNG 저장
 ```
 
 - Edge 155+는 Playwright 1.49의 옛 `--headless`·`--remote-debugging-pipe` 실행이 안 돼(실행 직후 종료) 직접 띄운 Edge에 CDP로 연결한다: `msedge.exe --headless=new --hide-scrollbars --mute-audio --disable-gpu --remote-debugging-port=9333 --user-data-dir=%TEMP%edge-cdp about:blank` 후 `CDP_URL=http://127.0.0.1:9333`을 주고 스크립트를 실행한다(`--hide-scrollbars`가 없으면 세로 스크롤바가 폭을 차지해 360px 가로 스크롤 검사가 틀어진다). `CDP_URL`이 없으면 예전처럼 직접 실행한다.
 - 브라우저 경로는 `EDGE_PATH`, 앱 주소는 `APP_URL` 환경 변수로 바꿀 수 있다.
 - mock의 `closeView`는 `history.back()`을 호출하므로 스크립트가 `history.back`을 무력화하고 콘솔 로그(`closeView called`)로 종료를 판정한다.
 - 뒤로가기는 `window.dispatchEvent(new CustomEvent("__ait:backEvent"))`, 저장값은 `localStorage`의 `__ait_storage:` 접두어 키, SDK 호출 기록은 `window.__ait.state.sdkCallLog`, 광고 없음 강제는 `window.__ait.patch("ads", { forceNoFill: true })`.
+- `page.clock.setFixedTime`은 `Date.now`를 멈춰 TDS 바텀시트 닫힘 애니메이션이 끝나지 않는다(닫힌 시트가 화면을 덮음). 시트를 열고 닫는 스크립트는 `page.clock.install({ time })`으로 시작 시각만 정한다(`month-export.mjs`). 시트는 열림 애니메이션(약 0.3초) 중의 닫기 요청을 무시하니 열린 뒤에 뒤로가기를 보낸다.
 - 기능이 바뀌면(예: 초기화 버튼 위치) 해당 스크립트의 선택자·기대값을 함께 고친다.
 
 `render-logo.mjs`는 `assets/logo.svg`를 정확히 600×600 PNG로 렌더링한다:

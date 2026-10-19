@@ -1,0 +1,43 @@
+import { BottomSheet } from "@toss/tds-mobile";
+import type { ExportKind } from "../export/exportMonth";
+import { useCloseOnBack } from "../platform/overlayBack";
+
+interface Props {
+  open: boolean;
+  busy: boolean;
+  onClose(): void;
+  onSelect(kind: ExportKind): void;
+}
+
+const OPTIONS: ReadonlyArray<{ kind: ExportKind; title: string; desc: string }> = [
+  { kind: "image", title: "달력 이미지 보내기", desc: "이번 달 근무표를 사진 한 장으로 보내요." },
+  {
+    kind: "calendar",
+    title: "캘린더 파일 보내기",
+    desc: "공유 창에는 캘린더 앱이 없어요. 나와의 채팅·드라이브 등으로 보낸 뒤 받은 파일을 열면 캘린더에 추가할 수 있어요.",
+  },
+];
+
+/** 이번 달 내보내기 선택지. 고르면 기기의 파일 공유 창이 열린다(취소해도 결과를 알 수 없다). */
+export function ExportSheet({ open, busy, onClose, onSelect }: Props) {
+  useCloseOnBack(open, onClose);
+  return (
+    <BottomSheet open={open} onClose={onClose} header={<BottomSheet.Header>이번 달 내보내기</BottomSheet.Header>}>
+      <div className="export-sheet">
+        <p className="section-desc">공유 창에서 카카오톡·드라이브 등 보낼 곳을 골라요. 근무만 담기고 세부 내용은 들어가지 않아요.</p>
+        {OPTIONS.map((option) => (
+          <button
+            key={option.kind}
+            type="button"
+            className="export-option"
+            disabled={busy}
+            onClick={() => onSelect(option.kind)}
+          >
+            <span className="export-title">{option.title}</span>
+            <span className="export-desc">{option.desc}</span>
+          </button>
+        ))}
+      </div>
+    </BottomSheet>
+  );
+}

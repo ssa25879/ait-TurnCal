@@ -172,7 +172,7 @@ for (const [width, height] of [[360, 740], [390, 844]]) {
   check(`${width}px 달력 아래 바로가기 줄(겹침 없음)`, cal.y + cal.height <= row.y + 1, JSON.stringify({ cal, row }));
   const small = await page.evaluate(() => [...document.querySelectorAll(".shortcut-row, .shortcut-row *")].filter((e) => parseFloat(getComputedStyle(e).fontSize) < 11).length);
   check(`${width}px 버튼 글자 11px 이상`, small === 0);
-  check(`${width}px 하단에는 바로가기만 있고 대체 [설정] 버튼은 없음(내비 바 버튼 등록됨)`, (await page.locator(".bottom-action button").count()) === 2);
+  check(`${width}px 하단에는 바로가기 2개와 [이번 달 내보내기]만, 대체 [설정] 버튼은 없음(내비 바 버튼 등록됨)`, (await page.locator(".bottom-action button").count()) === 3 && (await page.locator(".bottom-action").getByRole("button", { name: "설정", exact: true }).count()) === 0);
   if (width === 360) await page.screenshot({ path: process.env.SHOT ?? "calendar-shortcuts-360.png" });
   await context.close();
 }

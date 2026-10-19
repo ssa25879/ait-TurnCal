@@ -618,6 +618,50 @@ body {
   font-weight: 700;
 }
 
+/* ---------- 이번 달 내보내기 ---------- */
+.export-sheet {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0 24px 16px;
+}
+
+.export-option {
+  display: grid;
+  gap: var(--space-1);
+  min-height: 56px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-l);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.export-option:active {
+  background: var(--color-bg-sub);
+}
+
+.export-option:disabled {
+  opacity: 0.5;
+}
+
+.export-title {
+  font-size: var(--font-l);
+  font-weight: 700;
+}
+
+.export-desc {
+  font-size: var(--font-s);
+  line-height: 1.5;
+  color: var(--color-text-sub);
+}
+
+.bottom-action .notice-inline {
+  margin: 8px 0 0;
+}
+
 /* ---------- 근무 유형 ---------- */
 .shift-label-card {
   padding-bottom: var(--space-4);
