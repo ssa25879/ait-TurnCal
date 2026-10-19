@@ -22,7 +22,7 @@
 
 - [x] 5.1 `typecheck`·`npm test`·`test:tz`·E2E 전 종(새 스크립트 포함 12종, 개발 서버 실행 중 `src` 수정 금지)을 돌린다. 확인: 전부 통과, 개수 기록.
 - [x] 5.2 `docs/NEXT_STEPS.md`(00절 선택 사항 2번 상태·테스트 개수·롤백 시 사용자 정의 소실 주의·이 change의 출시 가이드 대조표, docs MCP `getPage`로 원문 새로 받아 대조)와 `scripts/e2e/README.md`(새 스크립트·개수)를 갱신한다. 확인: 문서 개수가 5.1 출력과 일치.
-- [ ] 5.3 `npm run build:adtest` 번들을 `/ait:test-on-device`로 올려 사용자가 실기기에서 근무 유형 화면(입력·색 선택·되돌리기)과 달력·요약·날짜 화면 반영을 확인한다(검토 신청 금지). 확인: 사용자 확인 결과를 NEXT_STEPS에 기록.
+- [x] 5.3 `npm run build:adtest` 번들을 `/ait:test-on-device`로 올려 사용자가 실기기에서 근무 유형 화면(입력·색 선택·되돌리기)과 달력·요약·날짜 화면 반영을 확인한다(검토 신청 금지). 확인: 사용자 확인 결과를 NEXT_STEPS에 기록.
 
 ## Workflow follow-up
 
