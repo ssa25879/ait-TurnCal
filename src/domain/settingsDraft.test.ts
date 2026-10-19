@@ -5,6 +5,7 @@ import {
   createDraft,
   draftToPattern,
   isDraftDirty,
+  loadCycleIntoDraft,
   setStartDateOnDraft,
   type PatternDraft,
 } from "./settingsDraft";
@@ -85,5 +86,33 @@ describe("isDraftDirty", () => {
   it("저장된 설정이 없으면 패턴이 있을 때 변경 있음이다", () => {
     expect(isDraftDirty({ cycle: [], todayIndex: null }, null, "2026-10-15")).toBe(false);
     expect(isDraftDirty({ cycle: ["DAY"], todayIndex: null }, null, "2026-10-15")).toBe(true);
+  });
+});
+
+describe("loadCycleIntoDraft", () => {
+  const past: WorkPattern = { startDate: "2026-10-01", cycle: ["DAY", "NIGHT", "OFF"] };
+
+  it("이력 패턴의 근무 순서를 불러오고 오늘 위치는 비운다", () => {
+    expect(loadCycleIntoDraft(past.cycle)).toEqual({ cycle: ["DAY", "NIGHT", "OFF"], todayIndex: null });
+  });
+
+  it("원본 이력 배열과 분리된 복사본을 만든다", () => {
+    const draft = loadCycleIntoDraft(past.cycle);
+    expect(draft.cycle).not.toBe(past.cycle);
+    draft.cycle.push("OFF");
+    expect(past.cycle).toEqual(["DAY", "NIGHT", "OFF"]);
+  });
+
+  it("오늘 위치를 고르기 전에는 저장할 수 없다", () => {
+    expect(canSaveDraft(loadCycleIntoDraft(past.cycle))).toEqual({
+      ok: false,
+      reason: "오늘에 해당하는 칸을 선택해 주세요.",
+    });
+  });
+
+  it("저장된 패턴과 같은 근무 순서를 불러와도 편집 중으로 본다", () => {
+    expect(isDraftDirty(loadCycleIntoDraft(saved.cycle), saved, "2026-10-15")).toBe(true);
+    expect(isDraftDirty(loadCycleIntoDraft(past.cycle), saved, "2026-10-15")).toBe(true);
+    expect(isDraftDirty(loadCycleIntoDraft(past.cycle), null, "2026-10-15")).toBe(true);
   });
 });

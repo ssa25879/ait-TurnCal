@@ -344,7 +344,7 @@ function TurnCal({
         <SettingsScreen
           key={session}
           saved={pattern}
-          timeline={pattern ? timeline : null}
+          timeline={pattern || (timeline?.history.length ?? 0) > 0 ? timeline : null}
           today={today}
           onSave={savePattern}
           onDirtyChange={handleDirtyChange}
