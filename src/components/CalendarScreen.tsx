@@ -6,6 +6,7 @@ import type { PatternTimeline } from "../domain/patternHistory";
 import type { WeekStart } from "../domain/types";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
+import { SaveProbe } from "./SaveProbe";
 import { TodaySummary } from "./TodaySummary";
 
 interface Props {
@@ -72,6 +73,8 @@ export function CalendarScreen({
           </Button>
         </div>
       )}
+
+      <SaveProbe />
 
       <TodaySummary timeline={timeline} today={today} days={days} onSelectDate={onSelectDate} />
 
