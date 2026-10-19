@@ -1,8 +1,8 @@
 import type { DayRecord } from "../domain/dayEntries";
 import { buildTodaySummary, type DaySummary } from "../domain/summary";
 import type { PatternTimeline } from "../domain/patternHistory";
-import { SHIFT_LABELS } from "../domain/types";
 import { formatDateTitle } from "./DayScreen";
+import { useShiftLabels } from "./ShiftLabelsContext";
 
 const LABELS = ["오늘", "내일"];
 
@@ -13,11 +13,11 @@ interface Props {
   onSelectDate(date: string): void;
 }
 
-function cardLabel(summary: DaySummary, label: string): string {
+function cardLabel(summary: DaySummary, label: string, shiftName: string | null): string {
   return [
     label,
     formatDateTitle(summary.date),
-    summary.shift ? SHIFT_LABELS[summary.shift].name : "근무 패턴 없음",
+    shiftName ?? "근무 패턴 없음",
     summary.overridden ? "바뀐 근무" : null,
     ...summary.holidays,
     summary.timeRange,
@@ -31,19 +31,20 @@ function cardLabel(summary: DaySummary, label: string): string {
  * props에서 매 렌더 계산하므로 날짜·데이터가 바뀌면 자동으로 갱신된다.
  */
 export function TodaySummary({ timeline, today, days, onSelectDate }: Props) {
+  const shiftLabels = useShiftLabels();
   const summaries = buildTodaySummary(today, timeline, days);
 
   return (
     <div className="today-summary" aria-label="오늘과 내일 근무">
       {summaries.map((summary, index) => {
-        const labels = summary.shift ? SHIFT_LABELS[summary.shift] : null;
+        const labels = summary.shift ? shiftLabels[summary.shift] : null;
         return (
           <button
             key={summary.date}
             type="button"
             className={`today-card${index === 0 ? " is-today" : ""}`}
             data-date={summary.date}
-            aria-label={cardLabel(summary, LABELS[index])}
+            aria-label={cardLabel(summary, LABELS[index], labels?.name ?? null)}
             onClick={() => onSelectDate(summary.date)}
           >
             <span className="today-card-head">

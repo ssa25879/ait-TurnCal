@@ -7,6 +7,7 @@ export type Screen =
   | "calendar"
   | "settings-menu"
   | "names"
+  | "shift-labels"
   | "pattern"
   | "display"
   | "reset"
@@ -47,6 +48,7 @@ export function decideBackAction({
   switch (screen) {
     case "pattern":
     case "names":
+    case "shift-labels":
       return isDirty ? "confirm-discard" : "to-settings-menu";
     case "display":
     case "reset":

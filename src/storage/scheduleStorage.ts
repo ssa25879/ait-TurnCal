@@ -3,6 +3,12 @@ import { isValidDateString } from "../domain/date";
 import { isValidName, SCHEDULE_NAME_MAX, USER_NAME_MAX } from "../domain/names";
 import { MAX_PATTERN_HISTORY, type PastPattern } from "../domain/patternHistory";
 import { isValidPattern } from "../domain/schedule";
+import {
+  resolveShiftLabels,
+  validateShiftLabels,
+  type ShiftLabel,
+  type StoredShiftLabels,
+} from "../domain/shiftLabels";
 import { DEFAULT_THEME, isThemeId, type ThemeId } from "../domain/theme";
 import { isShiftType, type WeekStart, type WorkPattern } from "../domain/types";
 
@@ -23,6 +29,11 @@ export interface StoredSettingsV3 {
   theme: ThemeId;
   userName: string | null;
   scheduleName: string | null;
+  /**
+   * 근무 유형 이름·약어·색 사용자 정의(기본값과 다른 유형만). 없거나 비어 있으면 생략한다.
+   * 이 필드를 모르는 이전 v3 앱은 무시하고 기본 이름으로 보여 준다.
+   */
+  shiftLabels?: StoredShiftLabels;
 }
 
 export type LoadResult =
@@ -77,6 +88,24 @@ function parsePatternHistory(value: unknown): HistoryResult {
   return { ok: true, history };
 }
 
+type ShiftLabelsResult = { ok: true; shiftLabels: StoredShiftLabels | undefined } | { ok: false; reason: string };
+
+/** shiftLabels: 없으면 사용자 정의 없음. 키는 근무 유형, 값은 화면과 같은 입력 규칙을 지켜야 한다. */
+function parseShiftLabels(value: unknown): ShiftLabelsResult {
+  if (value === undefined) return { ok: true, shiftLabels: undefined };
+  const invalid = { ok: false, reason: "근무 유형 설정이 올바르지 않아요." } as const;
+  if (!isRecord(value)) return invalid;
+  const stored: StoredShiftLabels = {};
+  for (const [key, item] of Object.entries(value)) {
+    if (!isShiftType(key) || !isRecord(item)) return invalid;
+    const { name, short, color } = item;
+    if (typeof name !== "string" || typeof short !== "string" || typeof color !== "string") return invalid;
+    stored[key] = { name, short, color } as ShiftLabel;
+  }
+  if (Object.keys(validateShiftLabels(resolveShiftLabels(stored))).length > 0) return invalid;
+  return { ok: true, shiftLabels: Object.keys(stored).length > 0 ? stored : undefined };
+}
+
 function isWeekStart(value: unknown): value is WeekStart {
   return value === "SUN" || value === "MON";
 }
@@ -116,6 +145,8 @@ function parseV3(data: Record<string, unknown>): ParseResult {
   }
   const history = parsePatternHistory(data.patternHistory);
   if (!history.ok) return history;
+  const labels = parseShiftLabels(data.shiftLabels);
+  if (!labels.ok) return labels;
   if (!isWeekStart(data.weekStart)) return { ok: false, reason: "주 시작 요일 값이 올바르지 않아요." };
   if (!isThemeId(data.theme)) return { ok: false, reason: "테마 값이 올바르지 않아요." };
   const { userName, scheduleName } = data;
@@ -136,6 +167,7 @@ function parseV3(data: Record<string, unknown>): ParseResult {
     scheduleName,
   };
   if (history.history.length > 0) settings.patternHistory = history.history;
+  if (labels.shiftLabels) settings.shiftLabels = labels.shiftLabels;
   return { ok: true, settings };
 }
 
@@ -183,10 +215,11 @@ export async function loadSettings(): Promise<LoadResult> {
 
 /** 실패하면 예외를 그대로 전달해 호출자가 안내하게 한다. */
 export async function saveSettings(settings: StoredSettingsV3): Promise<void> {
-  // 이력이 비면 필드를 생략해 기존 v3 형식과 같게 유지한다.
-  const { patternHistory, ...rest } = settings;
-  const toStore: StoredSettingsV3 =
-    patternHistory && patternHistory.length > 0 ? { ...rest, patternHistory } : rest;
+  // 이력·근무 유형 사용자 정의가 비면 필드를 생략해 기존 v3 형식과 같게 유지한다.
+  const { patternHistory, shiftLabels, ...rest } = settings;
+  const toStore: StoredSettingsV3 = { ...rest };
+  if (patternHistory && patternHistory.length > 0) toStore.patternHistory = patternHistory;
+  if (shiftLabels && Object.keys(shiftLabels).length > 0) toStore.shiftLabels = shiftLabels;
   await Storage.setItem(SETTINGS_KEY, JSON.stringify(toStore));
 }
 

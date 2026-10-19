@@ -52,7 +52,7 @@ const userInput = (page) => page.getByLabel("내 호칭");
   await page.getByRole("button", { name: "설정", exact: true }).click();
   await page.waitForSelector(".settings-menu");
   const items = await page.locator(".settings-menu [role=button]").allInnerTexts();
-  check("설정 버튼: 설정 목록 4항목 그대로", items.length === 4, JSON.stringify(items));
+  check("설정 버튼: 설정 목록 5항목 그대로", items.length === 5, JSON.stringify(items));
   // 설정 목록 경로의 계층은 그대로: 이름 → 뒤로 → 설정 목록 → 뒤로 → 달력
   await page.getByText("이름", { exact: true }).click();
   await page.waitForTimeout(300);

@@ -1,6 +1,6 @@
 import { ConfirmDialog } from "@toss/tds-mobile";
 import { useInitAds } from "./ads/tossAds";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarScreen } from "./components/CalendarScreen";
 import { DayScreen } from "./components/DayScreen";
 import { DisplaySettingsScreen } from "./components/DisplaySettingsScreen";
@@ -10,9 +10,12 @@ import { NamesScreen } from "./components/NamesScreen";
 import { ResetScreen } from "./components/ResetScreen";
 import { SettingsMenu } from "./components/SettingsMenu";
 import { SettingsScreen } from "./components/SettingsScreen";
+import { ShiftLabelsProvider } from "./components/ShiftLabelsContext";
+import { ShiftLabelsScreen } from "./components/ShiftLabelsScreen";
 import { yearMonthOf, type YearMonth } from "./domain/calendar";
 import { applyPatternChange, type ApplyScope, type PatternTimeline } from "./domain/patternHistory";
 import type { DayEntry, DayRecord } from "./domain/dayEntries";
+import { applyShiftColors, countCustomized, resolveShiftLabels, type StoredShiftLabels } from "./domain/shiftLabels";
 import { DEFAULT_THEME, type ThemeId } from "./domain/theme";
 import type { WorkPattern } from "./domain/types";
 import {
@@ -40,6 +43,7 @@ type View =
   | { kind: "calendar" }
   | { kind: "settings-menu" }
   | { kind: "names"; fromCalendar?: boolean }
+  | { kind: "shift-labels" }
   | { kind: "pattern"; fromCalendar?: boolean }
   | { kind: "display" }
   | { kind: "reset" }
@@ -115,6 +119,12 @@ function TurnCal({
   useEffect(() => {
     onThemeChange(settings?.theme ?? DEFAULT_THEME);
   }, [settings?.theme, onThemeChange]);
+
+  // 근무 유형 이름·약어·색 사용자 정의. 색은 테마처럼 루트 CSS 변수로 넣어 팝업에도 적용한다.
+  const shiftLabels = useMemo(() => resolveShiftLabels(settings?.shiftLabels), [settings?.shiftLabels]);
+  useEffect(() => {
+    applyShiftColors(document.documentElement, shiftLabels);
+  }, [shiftLabels]);
 
   /** 저장소를 읽어 상태에 반영한다. updateView가 false면 화면은 그대로 두고 데이터만 맞춘다. */
   const applyLoaded = useCallback(async (updateView = true) => {
@@ -223,6 +233,23 @@ function TurnCal({
     if (isFromCalendar(view)) toCalendar();
     else toSettingsMenu();
   };
+
+  /** 근무 유형 사용자 정의. 비어 있으면 필드를 빼서 기본값으로 돌린다. */
+  const writeShiftLabels = async (shiftLabels: StoredShiftLabels | undefined) => {
+    if (!settings) return;
+    const { shiftLabels: _previous, ...rest } = settings;
+    const updated: StoredSettingsV3 = shiftLabels ? { ...rest, shiftLabels } : rest;
+    await saveSettings(updated);
+    setSettings(updated);
+  };
+
+  const saveShiftLabels = async (shiftLabels: StoredShiftLabels | undefined) => {
+    await writeShiftLabels(shiftLabels);
+    toSettingsMenu();
+  };
+
+  /** 기본값으로 되돌리기는 확인 창 뒤 바로 저장하고 화면에 머문다(편집 중이던 내용도 기본값으로). */
+  const resetShiftLabels = () => writeShiftLabels(undefined);
 
   /** 테마·주 시작 요일 공통: 낙관적으로 반영하고, 저장에 실패하면 이전 값으로 되돌린다. */
   const updateDisplaySettings = async (patch: DisplayPatch) => {
@@ -336,100 +363,113 @@ function TurnCal({
   };
 
   return (
-    <main className="app">
-      {view.kind === "load-error" && (
-        <LoadError reason={view.reason} onReset={() => go({ kind: "pattern" })} />
-      )}
-      {view.kind === "pattern" && (
-        <SettingsScreen
-          key={session}
-          saved={pattern}
-          timeline={pattern || (timeline?.history.length ?? 0) > 0 ? timeline : null}
-          today={today}
-          onSave={savePattern}
-          onDirtyChange={handleDirtyChange}
-          onResetPattern={pattern ? runResetPattern : undefined}
-        />
-      )}
-      {view.kind === "settings-menu" && settings && (
-        <SettingsMenu
-          cycleLength={pattern?.cycle.length ?? null}
-          theme={settings.theme}
-          weekStart={settings.weekStart}
-          scheduleName={settings.scheduleName}
-          onOpenNames={() => go({ kind: "names" })}
-          onOpenPattern={() => go({ kind: "pattern" })}
-          onOpenDisplay={() => {
-            setDisplayError(null);
-            go({ kind: "display" });
-          }}
-          onOpenReset={() => go({ kind: "reset" })}
-        />
-      )}
-      {view.kind === "names" && settings && (
-        <NamesScreen
-          key={session}
-          userName={settings.userName}
-          scheduleName={settings.scheduleName}
-          onSave={saveNames}
-          onDirtyChange={handleDirtyChange}
-        />
-      )}
-      {view.kind === "display" && settings && (
-        <DisplaySettingsScreen
-          theme={settings.theme}
-          weekStart={settings.weekStart}
-          error={displayError}
-          onThemeChange={(theme) => void updateDisplaySettings({ theme })}
-          onWeekStartChange={(weekStart) => void updateDisplaySettings({ weekStart })}
-          onReset={runResetDisplay}
-        />
-      )}
-      {view.kind === "reset" && <ResetScreen key={session} onResetAll={runResetAll} />}
-      {view.kind === "calendar" && settings && timeline && (
-        <CalendarScreen
-          timeline={timeline}
-          weekStart={settings.weekStart}
-          today={today}
-          month={month}
-          onMonthChange={setMonth}
-          userName={settings.userName}
-          scheduleName={settings.scheduleName}
-          days={days}
-          entriesNotice={entriesBroken ? ENTRIES_BROKEN_NOTICE : null}
-          onSelectDate={toDay}
-          showSettingsButton={navSettings === "failed"}
-          onOpenSettings={toSettingsMenu}
-          onRegisterPattern={() => openFromCalendar("pattern")}
-          onEditPattern={() => openFromCalendar("pattern")}
-          onEditNames={() => openFromCalendar("names")}
-        />
-      )}
-      {view.kind === "day" && timeline && (
-        <DayScreen
-          date={view.date}
-          timeline={timeline}
-          day={days[view.date]}
-          entriesBroken={entriesBroken}
-          error={dayError}
-          onAdd={() => go({ kind: "entry", date: view.date, entryId: null })}
-          onOpenEntry={(entryId) => go({ kind: "entry", date: view.date, entryId })}
-          onSelectShiftSource={(entryId) => void selectShiftSource(view.date, entryId)}
-          onStartFresh={() => void startFreshEntries()}
-        />
-      )}
-      {view.kind === "entry" && (
-        <EntryEditor
-          key={session}
-          date={view.date}
-          entry={view.entryId ? days[view.date]?.items.find((item) => item.id === view.entryId) ?? null : null}
-          onSave={(draft) => saveEntry(view.date, view.entryId, draft)}
-          onDelete={() => (view.entryId ? deleteEntry(view.date, view.entryId) : Promise.resolve())}
-          onDirtyChange={handleDirtyChange}
-        />
-      )}
-      <DiscardDialog open={discard !== null} onCancel={() => setDiscard(null)} onDiscard={discardAndLeave} />
-    </main>
+    <ShiftLabelsProvider labels={shiftLabels}>
+      <main className="app">
+        {view.kind === "load-error" && (
+          <LoadError reason={view.reason} onReset={() => go({ kind: "pattern" })} />
+        )}
+        {view.kind === "pattern" && (
+          <SettingsScreen
+            key={session}
+            saved={pattern}
+            timeline={pattern || (timeline?.history.length ?? 0) > 0 ? timeline : null}
+            today={today}
+            onSave={savePattern}
+            onDirtyChange={handleDirtyChange}
+            onResetPattern={pattern ? runResetPattern : undefined}
+          />
+        )}
+        {view.kind === "settings-menu" && settings && (
+          <SettingsMenu
+            cycleLength={pattern?.cycle.length ?? null}
+            theme={settings.theme}
+            weekStart={settings.weekStart}
+            scheduleName={settings.scheduleName}
+            customizedShiftCount={countCustomized(settings.shiftLabels)}
+            onOpenNames={() => go({ kind: "names" })}
+            onOpenPattern={() => go({ kind: "pattern" })}
+            onOpenShiftLabels={() => go({ kind: "shift-labels" })}
+            onOpenDisplay={() => {
+              setDisplayError(null);
+              go({ kind: "display" });
+            }}
+            onOpenReset={() => go({ kind: "reset" })}
+          />
+        )}
+        {view.kind === "names" && settings && (
+          <NamesScreen
+            key={session}
+            userName={settings.userName}
+            scheduleName={settings.scheduleName}
+            onSave={saveNames}
+            onDirtyChange={handleDirtyChange}
+          />
+        )}
+        {view.kind === "shift-labels" && settings && (
+          <ShiftLabelsScreen
+            key={session}
+            saved={settings.shiftLabels}
+            onSave={saveShiftLabels}
+            onReset={resetShiftLabels}
+            onDirtyChange={handleDirtyChange}
+          />
+        )}
+        {view.kind === "display" && settings && (
+          <DisplaySettingsScreen
+            theme={settings.theme}
+            weekStart={settings.weekStart}
+            error={displayError}
+            onThemeChange={(theme) => void updateDisplaySettings({ theme })}
+            onWeekStartChange={(weekStart) => void updateDisplaySettings({ weekStart })}
+            onReset={runResetDisplay}
+          />
+        )}
+        {view.kind === "reset" && <ResetScreen key={session} onResetAll={runResetAll} />}
+        {view.kind === "calendar" && settings && timeline && (
+          <CalendarScreen
+            timeline={timeline}
+            weekStart={settings.weekStart}
+            today={today}
+            month={month}
+            onMonthChange={setMonth}
+            userName={settings.userName}
+            scheduleName={settings.scheduleName}
+            days={days}
+            entriesNotice={entriesBroken ? ENTRIES_BROKEN_NOTICE : null}
+            onSelectDate={toDay}
+            showSettingsButton={navSettings === "failed"}
+            onOpenSettings={toSettingsMenu}
+            onRegisterPattern={() => openFromCalendar("pattern")}
+            onEditPattern={() => openFromCalendar("pattern")}
+            onEditNames={() => openFromCalendar("names")}
+          />
+        )}
+        {view.kind === "day" && timeline && (
+          <DayScreen
+            date={view.date}
+            timeline={timeline}
+            day={days[view.date]}
+            entriesBroken={entriesBroken}
+            error={dayError}
+            onAdd={() => go({ kind: "entry", date: view.date, entryId: null })}
+            onOpenEntry={(entryId) => go({ kind: "entry", date: view.date, entryId })}
+            onSelectShiftSource={(entryId) => void selectShiftSource(view.date, entryId)}
+            onStartFresh={() => void startFreshEntries()}
+          />
+        )}
+        {view.kind === "entry" && (
+          <EntryEditor
+            key={session}
+            date={view.date}
+            entry={view.entryId ? days[view.date]?.items.find((item) => item.id === view.entryId) ?? null : null}
+            onSave={(draft) => saveEntry(view.date, view.entryId, draft)}
+            onDelete={() => (view.entryId ? deleteEntry(view.date, view.entryId) : Promise.resolve())}
+            onDirtyChange={handleDirtyChange}
+          />
+        )}
+        <DiscardDialog open={discard !== null} onCancel={() => setDiscard(null)} onDiscard={discardAndLeave} />
+      </main>
+    </ShiftLabelsProvider>
   );
 }
 
