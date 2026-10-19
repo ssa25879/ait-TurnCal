@@ -618,6 +618,53 @@ body {
   font-weight: 700;
 }
 
+/* ---------- 근무 유형 ---------- */
+.shift-label-card {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.shift-label-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 4px;
+  font-size: var(--font-l);
+  font-weight: 700;
+}
+
+.shift-label-default {
+  font-size: var(--font-s);
+  font-weight: 400;
+  color: var(--color-text-sub);
+}
+
+/* 10색 견본: 360px에서 5개씩 두 줄, 각 44px */
+.shift-color-options {
+  display: grid;
+  grid-template-columns: repeat(5, 44px);
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.shift-color-option {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-m);
+  font: inherit;
+  font-size: var(--font-m);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shift-color-option.is-selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
 /* ---------- 오늘·내일 요약 ---------- */
 .today-summary {
   display: grid;

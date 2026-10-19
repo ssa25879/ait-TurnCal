@@ -2,8 +2,9 @@ import { buildMonthGrid, getWeekdayLabels, weekdayOf, type YearMonth } from "../
 import { getCellMarker, getEffectiveShift } from "../domain/dayEntries";
 import { getHolidays } from "../domain/holidays";
 import { resolvePattern, type PatternTimeline } from "../domain/patternHistory";
-import { SHIFT_LABELS, type WeekStart } from "../domain/types";
+import { type WeekStart } from "../domain/types";
 import type { EntriesByDate } from "../storage/entriesStorage";
+import { useShiftLabels } from "./ShiftLabelsContext";
 
 interface Props {
   month: YearMonth;
@@ -20,6 +21,7 @@ interface Props {
  * 근무 글자(세부 내용 분류로 바뀐 근무 반영, 바뀐 날은 점) 아래에 첫 세부 내용 이름 앞글자를 보여 준다.
  */
 export function Calendar({ month, timeline, weekStart, today, days, onSelectDate }: Props) {
+  const shiftLabels = useShiftLabels();
   const cells = buildMonthGrid(month, weekStart);
   const labels = getWeekdayLabels(weekStart);
   const monthPrefix = `${month.year}-${String(month.month).padStart(2, "0")}-`;
@@ -53,7 +55,7 @@ export function Calendar({ month, timeline, weekStart, today, days, onSelectDate
             const label = [
               date,
               ...holidays.map((holiday) => holiday.name),
-              shift ? SHIFT_LABELS[shift].name : "근무 패턴 없음",
+              shift ? shiftLabels[shift].name : "근무 패턴 없음",
               overridden ? "근무 변경됨" : null,
               count > 0 ? `세부 내용 ${count}개` : null,
               isToday ? "오늘" : null,
@@ -76,7 +78,7 @@ export function Calendar({ month, timeline, weekStart, today, days, onSelectDate
                   {holidays[0]?.short ?? ""}
                 </span>
                 <span className={`calendar-shift${shift ? ` shift-${shift}` : ""}`}>
-                  {shift ? SHIFT_LABELS[shift].short : ""}
+                  {shift ? shiftLabels[shift].short : ""}
                   {overridden && <span className="calendar-changed" aria-hidden="true" />}
                 </span>
                 <span className="calendar-marker" aria-hidden="true">

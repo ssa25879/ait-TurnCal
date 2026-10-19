@@ -6,10 +6,11 @@ import {
   validateEntryInput,
   type DayEntry,
 } from "../domain/dayEntries";
-import { SHIFT_LABELS, SHIFT_TYPES, type ShiftType } from "../domain/types";
+import { SHIFT_TYPES, type ShiftType } from "../domain/types";
 import { useCloseOnBack } from "../platform/overlayBack";
 import { formatDateTitle } from "./DayScreen";
 import { TimeInput } from "./TimeInput";
+import { useShiftLabels } from "./ShiftLabelsContext";
 
 export interface EntryDraft {
   name: string;
@@ -43,6 +44,7 @@ interface Props {
 
 /** 세부 내용 작성·수정. 저장 전에는 날짜 화면·달력이 바뀌지 않는다. */
 export function EntryEditor({ date, entry, onSave, onDelete, onDirtyChange }: Props) {
+  const shiftLabels = useShiftLabels();
   const [original] = useState(() => toDraft(entry));
   const [draft, setDraft] = useState(original);
   const [showErrors, setShowErrors] = useState(false);
@@ -151,7 +153,7 @@ export function EntryEditor({ date, entry, onSave, onDelete, onDirtyChange }: Pr
               className={`category-option shift-${shift}${draft.shift === shift ? " is-selected" : ""}`}
               onClick={() => update({ shift })}
             >
-              {SHIFT_LABELS[shift].name}
+              {shiftLabels[shift].name}
             </button>
           ))}
         </div>

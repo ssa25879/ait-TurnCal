@@ -75,6 +75,7 @@ const screens = {
   "설정 목록": async (p) => { await p.getByRole("button", { name: "설정", exact: true }).click(); await p.waitForSelector(".settings-menu"); },
   "근무 패턴 설정": async (p) => { await p.getByRole("button", { name: "근무 패턴 수정" }).click(); await p.waitForSelector(".settings"); },
   "이름": async (p) => { await p.getByRole("button", { name: "이름 수정" }).click(); await p.waitForTimeout(400); },
+  "근무 유형": async (p) => { await p.getByRole("button", { name: "설정", exact: true }).click(); await p.waitForSelector(".settings-menu"); await p.getByText("근무 유형", { exact: true }).click(); await p.waitForSelector(".shift-labels-screen"); },
   "화면 설정": async (p) => { await p.getByRole("button", { name: "설정", exact: true }).click(); await p.waitForSelector(".settings-menu"); await p.getByText("화면 설정", { exact: true }).click(); await p.waitForSelector(".display-settings"); },
   "초기화 화면": async (p) => { await p.getByRole("button", { name: "설정", exact: true }).click(); await p.waitForSelector(".settings-menu"); await p.getByText("초기화", { exact: true }).click(); await p.waitForSelector(".reset-screen"); },
 };

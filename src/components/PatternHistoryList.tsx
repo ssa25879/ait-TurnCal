@@ -1,5 +1,6 @@
 import { describeTimeline, type PatternTimeline, type TimelineRow } from "../domain/patternHistory";
-import { SHIFT_LABELS, type ShiftType } from "../domain/types";
+import { type ShiftType } from "../domain/types";
+import { useShiftLabels } from "./ShiftLabelsContext";
 
 function formatDate(date: string): string {
   const [year, month, day] = date.split("-").map(Number);
@@ -19,11 +20,12 @@ interface Props {
 }
 
 function Chips({ cycle }: { cycle: ShiftType[] }) {
+  const shiftLabels = useShiftLabels();
   return (
     <>
       {cycle.map((shift, i) => (
         <span key={i} className={`history-chip shift-${shift}`} aria-hidden="true">
-          {SHIFT_LABELS[shift].short}
+          {shiftLabels[shift].short}
         </span>
       ))}
     </>
@@ -36,6 +38,7 @@ function Chips({ cycle }: { cycle: ShiftType[] }) {
  * 근무는 색과 한 글자 약어로 함께 보여 준다.
  */
 export function PatternHistoryList({ timeline, onLoad }: Props) {
+  const shiftLabels = useShiftLabels();
   const rows = describeTimeline(timeline);
   const hasHistory = timeline.history.length > 0;
 
@@ -48,7 +51,7 @@ export function PatternHistoryList({ timeline, onLoad }: Props) {
       <ul className="history-list">
         {rows.map((row, index) => {
           const label = rangeLabel(row);
-          const names = row.cycle.map((shift) => SHIFT_LABELS[shift].name).join(", ");
+          const names = row.cycle.map((shift) => shiftLabels[shift].name).join(", ");
           if (onLoad && !row.current) {
             return (
               <li key={index} className="history-item is-loadable">

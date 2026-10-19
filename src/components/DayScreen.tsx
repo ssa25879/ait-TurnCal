@@ -10,7 +10,7 @@ import {
 import { getHolidays } from "../domain/holidays";
 import { resolvePattern, type PatternTimeline } from "../domain/patternHistory";
 import { getShift } from "../domain/schedule";
-import { SHIFT_LABELS } from "../domain/types";
+import { useShiftLabels } from "./ShiftLabelsContext";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -44,6 +44,7 @@ export function DayScreen({
   onSelectShiftSource,
   onStartFresh,
 }: Props) {
+  const shiftLabels = useShiftLabels();
   const items = sortEntries(day?.items ?? []);
   const pattern = resolvePattern(date, timeline);
   const patternShift = pattern ? getShift(date, pattern) : null;
@@ -60,17 +61,17 @@ export function DayScreen({
       )}
 
       <div className="day-shift">
-        {shift && <span className={`chip shift-${shift}`}>{SHIFT_LABELS[shift].short}</span>}
+        {shift && <span className={`chip shift-${shift}`}>{shiftLabels[shift].short}</span>}
         <span>
           {!shift ? (
             "근무 패턴이 없어요"
           ) : overridden && patternShift ? (
             <>
-              근무 변경: {SHIFT_LABELS[patternShift].name} → <strong>{SHIFT_LABELS[shift].name}</strong>
+              근무 변경: {shiftLabels[patternShift].name} → <strong>{shiftLabels[shift].name}</strong>
             </>
           ) : (
             <>
-              <strong>{SHIFT_LABELS[shift].name}</strong> 근무예요
+              <strong>{shiftLabels[shift].name}</strong> 근무예요
             </>
           )}
         </span>
@@ -101,7 +102,7 @@ export function DayScreen({
                         <span className="entry-time">{time ?? "종일"}</span>
                         <span className="entry-name">{item.name}</span>
                         {item.shift && (
-                          <span className={`entry-shift shift-${item.shift}`}>{SHIFT_LABELS[item.shift].short}</span>
+                          <span className={`entry-shift shift-${item.shift}`}>{shiftLabels[item.shift].short}</span>
                         )}
                       </button>
                     </li>
@@ -127,7 +128,7 @@ export function DayScreen({
                       className={`option-card${selected ? " is-selected" : ""}`}
                       onClick={() => onSelectShiftSource(item.id)}
                     >
-                      <span className={`chip shift-${item.shift}`}>{SHIFT_LABELS[item.shift!].short}</span>
+                      <span className={`chip shift-${item.shift}`}>{shiftLabels[item.shift!].short}</span>
                       <span className="option-name">{item.name}</span>
                       {selected && <span className="option-check">적용 중</span>}
                     </button>

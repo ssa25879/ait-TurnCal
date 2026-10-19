@@ -235,3 +235,56 @@ describe("patternHistory", () => {
     expect(result.kind).toBe("ok");
   });
 });
+
+describe("shiftLabels", () => {
+  const evening = { name: "저녁", short: "저", color: "PINK" };
+
+  async function loadRaw(value: unknown) {
+    memory.set(SETTINGS_KEY, JSON.stringify(value));
+    vi.clearAllMocks();
+    storageMock.getItem.mockImplementation(async (key: string) => memory.get(key) ?? null);
+    return loadSettings();
+  }
+
+  it("필드가 없는 기존 v3는 사용자 정의 없이 복원하고 저장값을 바꾸지 않는다", async () => {
+    const result = await loadRaw(valid);
+    expect(result.kind === "ok" && result.settings.shiftLabels).toBeUndefined();
+    expectNoWrites();
+  });
+
+  it("유효한 필드는 복원되고 저장 왕복 시 version 3과 다른 값이 유지된다", async () => {
+    const result = await loadRaw({ ...valid, shiftLabels: { EVENING: evening } });
+    expect(result.kind).toBe("ok");
+    if (result.kind !== "ok") return;
+    expect(result.settings.shiftLabels).toEqual({ EVENING: evening });
+    await saveSettings(result.settings);
+    const stored = JSON.parse(memory.get(SETTINGS_KEY)!);
+    expect(stored.version).toBe(CURRENT_VERSION);
+    expect(stored.shiftLabels).toEqual({ EVENING: evening });
+    expect(stored.pattern).toEqual(valid.pattern);
+  });
+
+  it("비었거나 없는 사용자 정의는 필드를 생략해 저장한다", async () => {
+    await saveSettings({ ...valid, shiftLabels: {} });
+    expect("shiftLabels" in JSON.parse(memory.get(SETTINGS_KEY)!)).toBe(false);
+    await saveSettings({ ...valid, shiftLabels: undefined });
+    expect("shiftLabels" in JSON.parse(memory.get(SETTINGS_KEY)!)).toBe(false);
+  });
+
+  const corrupt: Array<[string, unknown]> = [
+    ["객체가 아님", ["EVENING"]],
+    ["알 수 없는 유형 키", { WEEKEND: evening }],
+    ["이름 5자", { EVENING: { ...evening, name: "저녁근무조" } }],
+    ["약어 두 글자", { EVENING: { ...evening, short: "저녁" } }],
+    ["다른 유형과 약어 중복", { EVENING: { ...evening, short: "야" } }],
+    ["팔레트 밖 색", { EVENING: { ...evening, color: "#ff0000" } }],
+    ["이름이 문자열이 아님", { EVENING: { ...evening, name: 3 } }],
+    ["항목이 객체가 아님", { EVENING: "저녁" }],
+  ];
+
+  it.each(corrupt)("손상 데이터로 처리한다: %s", async (_name, shiftLabels) => {
+    const result = await loadRaw({ ...valid, shiftLabels });
+    expect(result.kind).toBe("corrupt");
+    expectNoWrites();
+  });
+});

@@ -38,6 +38,8 @@ describe("decideBackAction", () => {
     ["settings-menu", true, false, "to-calendar"],
     ["names", true, false, "to-settings-menu"],
     ["names", true, true, "confirm-discard"],
+    ["shift-labels", true, false, "to-settings-menu"],
+    ["shift-labels", true, true, "confirm-discard"],
     ["reset", true, false, "to-settings-menu"],
     ["day", true, false, "to-calendar"],
     ["entry", true, false, "to-day"],

@@ -2,12 +2,12 @@ import { BottomSheet, Button } from "@toss/tds-mobile";
 import { useState } from "react";
 import {
   MAX_CYCLE_LENGTH,
-  SHIFT_LABELS,
   SHIFT_TYPES,
   isShiftType,
   type ShiftType,
 } from "../domain/types";
 import { useCloseOnBack } from "../platform/overlayBack";
+import { useShiftLabels } from "./ShiftLabelsContext";
 
 interface Props {
   cycle: ShiftType[];
@@ -15,6 +15,7 @@ interface Props {
 }
 
 export function PatternEditor({ cycle, onChange }: Props) {
+  const shiftLabels = useShiftLabels();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const isFull = cycle.length >= MAX_CYCLE_LENGTH;
   const closeSheet = () => setEditingIndex(null);
@@ -44,8 +45,8 @@ export function PatternEditor({ cycle, onChange }: Props) {
             disabled={isFull}
             onClick={() => onChange([...cycle, shift])}
           >
-            <span className="shift-button-short">{SHIFT_LABELS[shift].short}</span>
-            {SHIFT_LABELS[shift].name}
+            <span className="shift-button-short">{shiftLabels[shift].short}</span>
+            {shiftLabels[shift].name}
           </button>
         ))}
       </div>
@@ -62,11 +63,11 @@ export function PatternEditor({ cycle, onChange }: Props) {
               <button
                 type="button"
                 className={`cycle-item shift-${shift}`}
-                aria-label={`${index + 1}번째 ${SHIFT_LABELS[shift].name}, 바꾸거나 지우기`}
+                aria-label={`${index + 1}번째 ${shiftLabels[shift].name}, 바꾸거나 지우기`}
                 onClick={() => setEditingIndex(index)}
               >
                 <span className="cycle-item-order">{index + 1}</span>
-                {SHIFT_LABELS[shift].short}
+                {shiftLabels[shift].short}
               </button>
             </li>
           ))}
@@ -86,7 +87,7 @@ export function PatternEditor({ cycle, onChange }: Props) {
           <>
             <BottomSheet.Select
               options={SHIFT_TYPES.map((shift) => ({
-                name: SHIFT_LABELS[shift].name,
+                name: shiftLabels[shift].name,
                 value: shift,
               }))}
               value={cycle[editingIndex]}
