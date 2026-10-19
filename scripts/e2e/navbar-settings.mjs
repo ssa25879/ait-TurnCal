@@ -52,7 +52,7 @@ async function open(settings, { broken = false, w = 390, h = 844 } = {}) {
   check("달력: 내비게이션 바 기능 버튼 1개", (await accCount()) === 1);
   const info = await page.locator(ACC).evaluate((el) => ({ text: el.textContent, title: el.title }));
   check("버튼 이름 '설정'·아이콘 icon-setting-mono", info.text === "설정" && info.title.includes("icon-setting-mono"), JSON.stringify(info));
-  check("하단에는 바로가기 2개만(대체 [설정] 없음)", (await page.locator(".bottom-action button").count()) === 2);
+  check("하단에는 바로가기 2개와 [이번 달 내보내기]만(대체 [설정] 없음)", (await page.locator(".bottom-action button").count()) === 3 && (await page.locator(".bottom-action").getByRole("button", { name: "설정", exact: true }).count()) === 0);
 
   await page.locator(ACC).click();
   await page.waitForSelector(".settings-menu");
@@ -131,7 +131,7 @@ async function open(settings, { broken = false, w = 390, h = 844 } = {}) {
   await page.waitForTimeout(500);
   check("등록 실패: 기능 버튼 없음", (await page.locator(ACC).count()) === 0);
   const fallback = page.locator(".bottom-action").getByRole("button", { name: "설정", exact: true });
-  check("등록 실패: 하단에 대체 [설정] 버튼 표시(바로가기 2개 + 설정)", (await fallback.isVisible()) && (await page.locator(".bottom-action button").count()) === 3);
+  check("등록 실패: 하단에 대체 [설정] 버튼 표시(바로가기 2개 + 내보내기 + 설정)", (await fallback.isVisible()) && (await page.locator(".bottom-action button").count()) === 4);
   const box = await fallback.boundingBox();
   check("대체 버튼 터치 영역 44px 이상", box.height >= 44, `h=${Math.round(box.height)}`);
   await fallback.click();
