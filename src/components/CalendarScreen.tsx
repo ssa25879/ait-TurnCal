@@ -6,7 +6,7 @@ import type { ReminderSetting } from "../domain/calendarReminder";
 import { scheduleTitle } from "../domain/names";
 import type { PatternTimeline } from "../domain/patternHistory";
 import type { WeekStart } from "../domain/types";
-import { exportMonth, type ExportKind } from "../export/exportMonth";
+import { exportMonth, lastExportError, type ExportKind } from "../export/exportMonth";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
 import { ExportSheet } from "./ExportSheet";
@@ -81,7 +81,7 @@ export function CalendarScreen({
     });
     setExporting(false);
     if (result === "unsupported") setExportNotice("토스 앱을 업데이트하면 내보낼 수 있어요.");
-    if (result === "failed") setExportNotice("내보내지 못했어요. 잠시 후 다시 시도해 주세요.");
+    if (result === "failed") setExportNotice(`내보내지 못했어요. [진단] ${lastExportError}`);
   };
 
   const todayMonth = yearMonthOf(today);

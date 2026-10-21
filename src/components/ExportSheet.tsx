@@ -18,6 +18,10 @@ const OPTIONS: ReadonlyArray<{ kind: ExportKind; title: string; desc: string }> 
     title: "캘린더 파일 보내기",
     desc: "공유 창에는 캘린더 앱이 없을 수 있어요.\n나와의 채팅, 드라이브 등으로 보낸 뒤 받은 파일을 열면 캘린더 앱에 추가할 수 있어요.",
   },
+  { kind: "cal-nolink", title: "[진단] 캘린더 파일 · 링크 없이", desc: "text/calendar, 공유 링크 없음" },
+  { kind: "cal-octet", title: "[진단] 캘린더 파일 · octet-stream", desc: "application/octet-stream" },
+  { kind: "cal-plain", title: "[진단] 텍스트(.txt)로", desc: "text/plain, .txt" },
+  { kind: "cal-tiny", title: "[진단] 빈 캘린더 파일", desc: "text/calendar, 일정 없는 최소 파일" },
 ];
 
 /** 이번 달 내보내기 선택지. 고르면 기기의 파일 공유 창이 열린다(취소해도 결과를 알 수 없다). */
