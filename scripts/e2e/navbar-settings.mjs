@@ -57,7 +57,7 @@ async function open(settings, { broken = false, w = 390, h = 844 } = {}) {
   await page.locator(ACC).click();
   await page.waitForSelector(".settings-menu");
   const items = await page.locator(".settings-menu [role=button]").allInnerTexts();
-  check("버튼 클릭 → 설정 목록 5항목", items.length === 5, JSON.stringify(items));
+  check("버튼 클릭 → 설정 목록 6항목", items.length === 6, JSON.stringify(items));
   check("설정 목록에서는 기능 버튼 없음", (await accCount()) === 0);
 
   // 설정 계열 화면 전부에서 없음
@@ -136,7 +136,7 @@ async function open(settings, { broken = false, w = 390, h = 844 } = {}) {
   check("대체 버튼 터치 영역 44px 이상", box.height >= 44, `h=${Math.round(box.height)}`);
   await fallback.click();
   await page.waitForSelector(".settings-menu");
-  check("대체 버튼 → 설정 목록 5항목", (await page.locator(".settings-menu [role=button]").count()) === 5);
+  check("대체 버튼 → 설정 목록 6항목", (await page.locator(".settings-menu [role=button]").count()) === 6);
   await back();
   check("설정 목록 → 뒤로가기 → 달력, 대체 버튼 유지", (await page.locator(".calendar").isVisible()) && (await fallback.isVisible()));
   // 배너와의 간격 32px

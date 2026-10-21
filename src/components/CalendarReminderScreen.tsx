@@ -15,14 +15,14 @@ export function CalendarReminderScreen({ reminder, error, onEnabledChange, onHou
     <section className="reminder-settings">
       <h1 className="page-title">캘린더 알림</h1>
 
-      <label className="reminder-toggle">
+      <div className="reminder-toggle">
         <span className="reminder-toggle-text">캘린더 파일에 알림 넣기</span>
         <Switch
           checked={enabled}
           aria-label="캘린더 파일에 알림 넣기"
           onChange={(_event, checked) => onEnabledChange(checked)}
         />
-      </label>
+      </div>
 
       <p className="section-desc">
         보낸 캘린더 파일을 캘린더 앱에 추가하면, 주간·오후·야간·당직 전날에 캘린더 앱이 알림을 울려요. 비번·휴무에는

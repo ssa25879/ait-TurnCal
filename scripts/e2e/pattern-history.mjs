@@ -209,7 +209,7 @@ let afterFromToday;
   const before = JSON.parse(afterFromToday);
   const { context, page } = await open(afterFromToday);
   await openPattern(page);
-  check("패턴 초기화 설명: 이력은 남는다고 안내", (await page.getByText("패턴 이력·근무 유형·화면 설정·이름·날짜 세부 내용은 남아요").count()) > 0);
+  check("패턴 초기화 설명: 이력은 남는다고 안내", (await page.getByText("패턴 이력·근무 유형·화면 설정·캘린더 알림·이름·날짜 세부 내용은 남아요").count()) > 0);
   await page.getByRole("button", { name: "근무 패턴 초기화" }).click();
   await page.getByText("근무 패턴을 초기화할까요?").waitFor({ state: "visible", timeout: 3000 });
   await page.getByRole("button", { name: "초기화하기" }).click();

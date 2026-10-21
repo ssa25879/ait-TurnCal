@@ -70,7 +70,7 @@ const colorsOf = (locator) => locator.evaluate((e) => { const s = getComputedSty
   await openMenu(page);
   const items = await page.locator(".settings-menu [role=button]").allInnerTexts();
   const tops = items.map((t) => t.split("\n")[0].trim());
-  check("설정 목록 5항목·순서(근무 유형은 근무 패턴과 화면 설정 사이)", JSON.stringify(tops) === JSON.stringify(["이름", "근무 패턴", "근무 유형", "화면 설정", "초기화"]), JSON.stringify(tops));
+  check("설정 목록 6항목·순서(근무 유형은 근무 패턴과 화면 설정 사이)", JSON.stringify(tops) === JSON.stringify(["이름", "근무 패턴", "근무 유형", "화면 설정", "캘린더 알림", "초기화"]), JSON.stringify(tops));
   check("근무 유형 보조 문구 '기본값'", items[2].includes("기본값"), items[2]);
   await page.getByText("근무 유형", { exact: true }).click();
   await page.waitForSelector(".shift-labels-screen");
@@ -231,7 +231,7 @@ let customized;
   await openMenu(page);
   await page.getByText("근무 패턴", { exact: true }).click();
   await page.waitForSelector(".settings");
-  check("패턴 초기화 설명에 근무 유형은 남는다고 안내", (await page.getByText("패턴 이력·근무 유형·화면 설정·이름·날짜 세부 내용은 남아요").count()) > 0);
+  check("패턴 초기화 설명에 근무 유형은 남는다고 안내", (await page.getByText("패턴 이력·근무 유형·화면 설정·캘린더 알림·이름·날짜 세부 내용은 남아요").count()) > 0);
   await page.getByRole("button", { name: "근무 패턴 초기화" }).click();
   await page.getByText("근무 패턴을 초기화할까요?").waitFor({ state: "visible", timeout: 3000 });
   await page.getByRole("button", { name: "초기화하기" }).click();

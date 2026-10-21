@@ -71,7 +71,7 @@ await fresh(v3());
 check("이름 없음: '내 근무표'", (await page.locator(".schedule-title").textContent()) === "내 근무표" && (await page.locator(".schedule-owner").count()) === 0);
 await openMenu();
 const menuItems = await page.locator(".settings-menu [role=button]").evaluateAll((els) => els.map((e) => e.textContent));
-check("설정 목록 5항목 순서", ["이름", "근무 패턴", "근무 유형", "화면 설정", "초기화"].every((t, i) => menuItems[i]?.startsWith(t)), JSON.stringify(menuItems));
+check("설정 목록 6항목 순서", ["이름", "근무 패턴", "근무 유형", "화면 설정", "캘린더 알림", "초기화"].every((t, i) => menuItems[i]?.startsWith(t)), JSON.stringify(menuItems));
 await page.getByText("이름", { exact: true }).click();
 await page.waitForSelector(".names-screen");
 await page.getByLabel("근무표 이름").fill("가".repeat(21));
