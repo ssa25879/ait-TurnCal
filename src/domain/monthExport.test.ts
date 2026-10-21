@@ -8,6 +8,7 @@ import {
   fromBase64Utf8,
   toBase64Utf8,
 } from "./monthExport";
+import { DEFAULT_REMINDER } from "./calendarReminder";
 import type { PatternTimeline } from "./patternHistory";
 import { DEFAULT_SHIFT_LABELS, resolveShiftLabels } from "./shiftLabels";
 
@@ -58,7 +59,7 @@ describe("buildMonthShifts", () => {
 });
 
 describe("buildIcs", () => {
-  const base = { month: OCT, labels: DEFAULT_SHIFT_LABELS, title: "병동 3교대 2026년 10월", now: NOW };
+  const base = { month: OCT, labels: DEFAULT_SHIFT_LABELS, title: "병동 3교대 2026년 10월", reminder: DEFAULT_REMINDER, now: NOW };
 
   const lines = (ics: string) => ics.replace(/\r\n /g, "").split("\r\n");
 
@@ -107,7 +108,7 @@ describe("buildIcs", () => {
     expect(withLink).toContain("DESCRIPTION:턴캘에서 보기: https://toss.im/share/abc");
     expect(withLink).toContain("URL:https://toss.im/share/abc");
     const without = buildIcs({ ...base, shifts, link: null });
-    expect(without).not.toContain("DESCRIPTION");
+    expect(without).not.toContain("턴캘에서 보기");
     expect(without).not.toContain("URL:");
   });
 
@@ -125,6 +126,58 @@ describe("buildIcs", () => {
     expect(ics).not.toContain("14:00");
     expect(ics).not.toContain("진료");
     expect(lines(ics)).toContain("SUMMARY:휴무");
+  });
+
+  describe("전날 저녁 알림(VALARM)", () => {
+    const shifts = buildMonthShifts(OCT, timeline, {});
+    const eventOf = (l: string[], ymd: string) => {
+      const i = l.indexOf(`UID:turncal-${ymd}@ait-turncal`);
+      return l.slice(i, l.indexOf("END:VEVENT", i));
+    };
+
+    it("기본(켜짐·21시): 야간 일정에 -PT3H '내일 야간', BEGIN/END 짝", () => {
+      const l = lines(buildIcs({ ...base, shifts, link: null }));
+      const night = eventOf(l, "20261014");
+      expect(night).toContain("BEGIN:VALARM");
+      expect(night).toContain("ACTION:DISPLAY");
+      expect(night).toContain("DESCRIPTION:내일 야간");
+      expect(night).toContain("TRIGGER:-PT3H");
+      expect(night.indexOf("END:VALARM")).toBeGreaterThan(night.indexOf("BEGIN:VALARM"));
+      // 10월: 주·주·오·야·야·비·휴 반복 → 비번·휴무 10일을 뺀 21일
+      expect(l.filter((x) => x === "BEGIN:VALARM")).toHaveLength(21);
+      expect(l.filter((x) => x === "END:VALARM")).toHaveLength(21);
+    });
+
+    it("비번·휴무 일정에는 알림이 없다(이름을 바꿔도)", () => {
+      const labels = resolveShiftLabels({ OFF: { name: "쉼", short: "쉼", color: "GRAY" } });
+      const l = lines(buildIcs({ ...base, labels, shifts, link: null }));
+      const afterNight = eventOf(l, "20261016");
+      const off = eventOf(l, "20261017");
+      expect(afterNight).toContain("SUMMARY:비번");
+      expect(off).toContain("SUMMARY:쉼");
+      expect(afterNight).not.toContain("BEGIN:VALARM");
+      expect(off).not.toContain("BEGIN:VALARM");
+    });
+
+    it("세부 내용으로 휴무가 된 날은 알림이 없다", () => {
+      const days: Record<string, DayRecord> = { "2026-10-14": { items: [entry({ shift: "OFF" })] } };
+      const l = lines(buildIcs({ ...base, shifts: buildMonthShifts(OCT, timeline, days), link: null }));
+      expect(eventOf(l, "20261014")).not.toContain("BEGIN:VALARM");
+    });
+
+    it("시각 변경과 끄기", () => {
+      const at19 = lines(buildIcs({ ...base, reminder: { enabled: true, hour: 19 }, shifts, link: null }));
+      expect(at19.filter((x) => x.startsWith("TRIGGER:")).every((x) => x === "TRIGGER:-PT5H")).toBe(true);
+      const off = buildIcs({ ...base, reminder: { enabled: false, hour: 19 }, shifts, link: null });
+      expect(off).not.toContain("VALARM");
+    });
+
+    it("사용자 정의 이름은 이스케이프·75옥텟 접기", () => {
+      const labels = resolveShiftLabels({ NIGHT: { name: "밤;,근무", short: "밤", color: "ORANGE" } });
+      const ics = buildIcs({ ...base, labels, shifts, link: "https://toss.im/share/" + "x".repeat(80) });
+      for (const raw of ics.split("\r\n")) expect(new TextEncoder().encode(raw).length).toBeLessThanOrEqual(75);
+      expect(lines(ics)).toContain("DESCRIPTION:내일 밤\\;\\,근무");
+    });
   });
 });
 

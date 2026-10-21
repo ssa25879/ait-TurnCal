@@ -1,4 +1,5 @@
 import type { YearMonth } from "./calendar";
+import { isReminderShift, reminderTrigger, type ReminderSetting } from "./calendarReminder";
 import { addDays } from "./date";
 import { getEffectiveShift, type DayRecord } from "./dayEntries";
 import { resolvePattern, type PatternTimeline } from "./patternHistory";
@@ -78,11 +79,16 @@ export interface IcsInput {
   title: string;
   /** 턴캘을 여는 공유 링크. 만들지 못했으면 null */
   link: string | null;
+  /** 근무 전날 저녁 알림. 꺼져 있으면 알림을 넣지 않는다 */
+  reminder: ReminderSetting;
   now: Date;
 }
 
-/** 근무가 있는 날마다 하루 종일 일정 하나. 같은 날짜는 항상 같은 UID라 다시 가져오면 갱신된다. */
-export function buildIcs({ shifts, labels, title, link, now }: IcsInput): string {
+/**
+ * 근무가 있는 날마다 하루 종일 일정 하나. 같은 날짜는 항상 같은 UID라 다시 가져오면 갱신된다.
+ * 알림이 켜져 있으면 비번·휴무를 뺀 일정에 전날 설정 시각의 표시 알림을 하나 넣는다.
+ */
+export function buildIcs({ shifts, labels, title, link, reminder, now }: IcsInput): string {
   const stamp = formatStamp(now);
   const lines = [
     "BEGIN:VCALENDAR",
@@ -104,6 +110,15 @@ export function buildIcs({ shifts, labels, title, link, now }: IcsInput): string
       "TRANSP:TRANSPARENT",
     );
     if (link) lines.push(`DESCRIPTION:${escapeText(`턴캘에서 보기: ${link}`)}`, `URL:${link}`);
+    if (reminder.enabled && isReminderShift(shift)) {
+      lines.push(
+        "BEGIN:VALARM",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:${escapeText(`내일 ${labels[shift].name}`)}`,
+        `TRIGGER:${reminderTrigger(reminder.hour)}`,
+        "END:VALARM",
+      );
+    }
     lines.push("END:VEVENT");
   }
   lines.push("END:VCALENDAR");

@@ -1,4 +1,5 @@
 import { Storage } from "@apps-in-toss/web-framework";
+import { DEFAULT_REMINDER_HOUR, isReminderHour, type ReminderHour } from "../domain/calendarReminder";
 import { isValidDateString } from "../domain/date";
 import { isValidName, SCHEDULE_NAME_MAX, USER_NAME_MAX } from "../domain/names";
 import { MAX_PATTERN_HISTORY, type PastPattern } from "../domain/patternHistory";
@@ -34,6 +35,12 @@ export interface StoredSettingsV3 {
    * 이 필드를 모르는 이전 v3 앱은 무시하고 기본 이름으로 보여 준다.
    */
   shiftLabels?: StoredShiftLabels;
+  /**
+   * 캘린더 파일 알림. 끈 경우만 false, 시각은 21시가 아닌 경우만 둔다. 둘은 독립이라 꺼도 시각이 남는다.
+   * 이 필드를 모르는 이전 v3 앱은 무시한다.
+   */
+  icsReminderEnabled?: false;
+  icsReminderHour?: ReminderHour;
 }
 
 export type LoadResult =
@@ -149,6 +156,13 @@ function parseV3(data: Record<string, unknown>): ParseResult {
   if (!labels.ok) return labels;
   if (!isWeekStart(data.weekStart)) return { ok: false, reason: "주 시작 요일 값이 올바르지 않아요." };
   if (!isThemeId(data.theme)) return { ok: false, reason: "테마 값이 올바르지 않아요." };
+  const { icsReminderEnabled, icsReminderHour } = data;
+  if (
+    !(icsReminderEnabled === undefined || icsReminderEnabled === false) ||
+    !(icsReminderHour === undefined || isReminderHour(icsReminderHour))
+  ) {
+    return { ok: false, reason: "캘린더 알림 값이 올바르지 않아요." };
+  }
   const { userName, scheduleName } = data;
   if (
     !(userName === null || typeof userName === "string") ||
@@ -168,6 +182,8 @@ function parseV3(data: Record<string, unknown>): ParseResult {
   };
   if (history.history.length > 0) settings.patternHistory = history.history;
   if (labels.shiftLabels) settings.shiftLabels = labels.shiftLabels;
+  if (icsReminderEnabled === false) settings.icsReminderEnabled = false;
+  if (icsReminderHour !== undefined && icsReminderHour !== DEFAULT_REMINDER_HOUR) settings.icsReminderHour = icsReminderHour;
   return { ok: true, settings };
 }
 
@@ -215,11 +231,13 @@ export async function loadSettings(): Promise<LoadResult> {
 
 /** 실패하면 예외를 그대로 전달해 호출자가 안내하게 한다. */
 export async function saveSettings(settings: StoredSettingsV3): Promise<void> {
-  // 이력·근무 유형 사용자 정의가 비면 필드를 생략해 기존 v3 형식과 같게 유지한다.
-  const { patternHistory, shiftLabels, ...rest } = settings;
+  // 이력·근무 유형 사용자 정의가 비거나 캘린더 알림이 기본값이면 필드를 생략해 기존 v3 형식과 같게 유지한다.
+  const { patternHistory, shiftLabels, icsReminderEnabled, icsReminderHour, ...rest } = settings;
   const toStore: StoredSettingsV3 = { ...rest };
   if (patternHistory && patternHistory.length > 0) toStore.patternHistory = patternHistory;
   if (shiftLabels && Object.keys(shiftLabels).length > 0) toStore.shiftLabels = shiftLabels;
+  if (icsReminderEnabled === false) toStore.icsReminderEnabled = false;
+  if (icsReminderHour !== undefined && icsReminderHour !== DEFAULT_REMINDER_HOUR) toStore.icsReminderHour = icsReminderHour;
   await Storage.setItem(SETTINGS_KEY, JSON.stringify(toStore));
 }
 

@@ -1,6 +1,7 @@
 import { ConfirmDialog } from "@toss/tds-mobile";
 import { useInitAds } from "./ads/tossAds";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CalendarReminderScreen } from "./components/CalendarReminderScreen";
 import { CalendarScreen } from "./components/CalendarScreen";
 import { DayScreen } from "./components/DayScreen";
 import { DisplaySettingsScreen } from "./components/DisplaySettingsScreen";
@@ -13,6 +14,13 @@ import { SettingsScreen } from "./components/SettingsScreen";
 import { ShiftLabelsProvider } from "./components/ShiftLabelsContext";
 import { ShiftLabelsScreen } from "./components/ShiftLabelsScreen";
 import { yearMonthOf, type YearMonth } from "./domain/calendar";
+import {
+  DEFAULT_REMINDER,
+  reminderLabel,
+  resolveReminder,
+  type ReminderHour,
+  type ReminderSetting,
+} from "./domain/calendarReminder";
 import { applyPatternChange, type ApplyScope, type PatternTimeline } from "./domain/patternHistory";
 import type { DayEntry, DayRecord } from "./domain/dayEntries";
 import { applyShiftColors, countCustomized, resolveShiftLabels, type StoredShiftLabels } from "./domain/shiftLabels";
@@ -46,6 +54,7 @@ type View =
   | { kind: "shift-labels" }
   | { kind: "pattern"; fromCalendar?: boolean }
   | { kind: "display" }
+  | { kind: "reminder" }
   | { kind: "reset" }
   | { kind: "day"; date: string }
   | { kind: "entry"; date: string; entryId: string | null };
@@ -108,6 +117,7 @@ function TurnCal({
   const [session, setSession] = useState(0);
   const [discard, setDiscard] = useState<DiscardTarget | null>(null);
   const [displayError, setDisplayError] = useState<string | null>(null);
+  const [reminderError, setReminderError] = useState<string | null>(null);
   const [dayError, setDayError] = useState<string | null>(null);
 
   const pattern = settings?.pattern ?? null;
@@ -267,6 +277,27 @@ function TurnCal({
     }
   };
 
+  /** 캘린더 알림: 화면 설정처럼 낙관적으로 반영하고, 저장에 실패하면 이전 값으로 되돌린다. */
+  const updateReminder = async (patch: Partial<ReminderSetting>) => {
+    if (!settings) return;
+    const previous = settings;
+    const current = resolveReminder(settings);
+    const next = { ...current, ...patch };
+    if (next.enabled === current.enabled && next.hour === current.hour) return;
+    const { icsReminderEnabled: _enabled, icsReminderHour: _hour, ...rest } = settings;
+    const updated: StoredSettingsV3 = { ...rest };
+    if (!next.enabled) updated.icsReminderEnabled = false;
+    if (next.hour !== DEFAULT_REMINDER.hour) updated.icsReminderHour = next.hour;
+    setSettings(updated);
+    setReminderError(null);
+    try {
+      await saveSettings(updated);
+    } catch {
+      setSettings(previous);
+      setReminderError("캘린더 알림을 저장하지 못했어요. 다시 시도해 주세요.");
+    }
+  };
+
   // ---------- 초기화 (실패하면 예외를 ResetAction이 받아 그 화면에서 안내한다) ----------
   const runResetAll = async () => {
     try {
@@ -386,12 +417,17 @@ function TurnCal({
             weekStart={settings.weekStart}
             scheduleName={settings.scheduleName}
             customizedShiftCount={countCustomized(settings.shiftLabels)}
+            reminderLabel={reminderLabel(resolveReminder(settings))}
             onOpenNames={() => go({ kind: "names" })}
             onOpenPattern={() => go({ kind: "pattern" })}
             onOpenShiftLabels={() => go({ kind: "shift-labels" })}
             onOpenDisplay={() => {
               setDisplayError(null);
               go({ kind: "display" });
+            }}
+            onOpenReminder={() => {
+              setReminderError(null);
+              go({ kind: "reminder" });
             }}
             onOpenReset={() => go({ kind: "reset" })}
           />
@@ -424,6 +460,14 @@ function TurnCal({
             onReset={runResetDisplay}
           />
         )}
+        {view.kind === "reminder" && settings && (
+          <CalendarReminderScreen
+            reminder={resolveReminder(settings)}
+            error={reminderError}
+            onEnabledChange={(enabled) => void updateReminder({ enabled })}
+            onHourChange={(hour: ReminderHour) => void updateReminder({ hour })}
+          />
+        )}
         {view.kind === "reset" && <ResetScreen key={session} onResetAll={runResetAll} />}
         {view.kind === "calendar" && settings && timeline && (
           <CalendarScreen
@@ -436,6 +480,7 @@ function TurnCal({
             scheduleName={settings.scheduleName}
             days={days}
             entriesNotice={entriesBroken ? ENTRIES_BROKEN_NOTICE : null}
+            reminder={resolveReminder(settings)}
             onSelectDate={toDay}
             showSettingsButton={navSettings === "failed"}
             onOpenSettings={toSettingsMenu}

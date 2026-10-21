@@ -35,6 +35,7 @@ describe("decideBackAction", () => {
     ["pattern", true, false, "to-settings-menu"],
     ["pattern", true, true, "confirm-discard"],
     ["display", true, false, "to-settings-menu"],
+    ["reminder", true, false, "to-settings-menu"],
     ["settings-menu", true, false, "to-calendar"],
     ["names", true, false, "to-settings-menu"],
     ["names", true, true, "confirm-discard"],

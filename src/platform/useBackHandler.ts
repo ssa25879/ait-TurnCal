@@ -10,6 +10,7 @@ export type Screen =
   | "shift-labels"
   | "pattern"
   | "display"
+  | "reminder"
   | "reset"
   | "day"
   | "entry";
@@ -51,6 +52,7 @@ export function decideBackAction({
     case "shift-labels":
       return isDirty ? "confirm-discard" : "to-settings-menu";
     case "display":
+    case "reminder":
     case "reset":
       return "to-settings-menu";
     case "settings-menu":

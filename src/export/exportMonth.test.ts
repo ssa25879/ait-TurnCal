@@ -8,6 +8,7 @@ const sdk = vi.hoisted(() => {
 vi.mock("@apps-in-toss/web-framework", () => sdk);
 vi.mock("./renderMonthImage", () => ({ renderMonthImage: vi.fn(() => "UE5H") }));
 
+import { DEFAULT_REMINDER } from "../domain/calendarReminder";
 import { fromBase64Utf8 } from "../domain/monthExport";
 import { DEFAULT_SHIFT_LABELS } from "../domain/shiftLabels";
 import { exportMonth, type ExportInput } from "./exportMonth";
@@ -21,6 +22,7 @@ const input: ExportInput = {
   labels: DEFAULT_SHIFT_LABELS,
   scheduleTitle: "병동/3교대 ../",
   primary: "#4F46E5",
+  reminder: DEFAULT_REMINDER,
 };
 
 const savedArgs = () => sdk.saveBase64Data.mock.calls.at(-1)![0] as { data: string; fileName: string; mimeType: string };
@@ -49,6 +51,12 @@ describe("exportMonth", () => {
     const ics = fromBase64Utf8(data);
     expect(ics).toContain("URL:https://toss.im/share/abc");
     expect(ics).not.toContain("intoss-private");
+    expect(ics).toContain("TRIGGER:-PT3H");
+  });
+
+  it("캘린더 알림을 끄면 .ics에 알림이 없다", async () => {
+    await exportMonth("calendar", { ...input, reminder: { enabled: false, hour: 20 } });
+    expect(fromBase64Utf8(savedArgs().data)).not.toContain("VALARM");
   });
 
   it("파일 이름에 근무표 이름이 들어가지 않는다", async () => {
@@ -61,7 +69,7 @@ describe("exportMonth", () => {
     expect(await exportMonth("calendar", input)).toBe("opened");
     const ics = fromBase64Utf8(savedArgs().data);
     expect(ics).not.toContain("URL:");
-    expect(ics).not.toContain("DESCRIPTION");
+    expect(ics).not.toContain("턴캘에서 보기");
   });
 
   it("링크가 2초 안에 오지 않으면 링크 없이 보낸다", async () => {

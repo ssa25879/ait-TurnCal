@@ -169,7 +169,7 @@ export function SettingsScreen({ saved, timeline, today, onSave, onDirtyChange, 
       {onResetPattern && (
         <ResetAction
           title="근무 패턴 초기화"
-          description="현재 반복 근무 순서와 기준일을 지우고 다시 등록해요. 패턴 이력·근무 유형·화면 설정·이름·날짜 세부 내용은 남아요."
+          description="현재 반복 근무 순서와 기준일을 지우고 다시 등록해요. 패턴 이력·근무 유형·화면 설정·캘린더 알림·이름·날짜 세부 내용은 남아요."
           confirm="근무 패턴을 초기화할까요?"
           onReset={onResetPattern}
         />

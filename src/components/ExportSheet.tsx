@@ -1,10 +1,12 @@
 import { BottomSheet } from "@toss/tds-mobile";
+import type { ReminderSetting } from "../domain/calendarReminder";
 import type { ExportKind } from "../export/exportMonth";
 import { useCloseOnBack } from "../platform/overlayBack";
 
 interface Props {
   open: boolean;
   busy: boolean;
+  reminder: ReminderSetting;
   onClose(): void;
   onSelect(kind: ExportKind): void;
 }
@@ -19,8 +21,11 @@ const OPTIONS: ReadonlyArray<{ kind: ExportKind; title: string; desc: string }> 
 ];
 
 /** 이번 달 내보내기 선택지. 고르면 기기의 파일 공유 창이 열린다(취소해도 결과를 알 수 없다). */
-export function ExportSheet({ open, busy, onClose, onSelect }: Props) {
+export function ExportSheet({ open, busy, reminder, onClose, onSelect }: Props) {
   useCloseOnBack(open, onClose);
+  const reminderNote = reminder.enabled
+    ? `근무 전날 ${reminder.hour}:00에 알림이 울려요. 비번·휴무는 빼요.`
+    : "알림 없이 보내요. 설정에서 켤 수 있어요.";
   return (
     <BottomSheet open={open} onClose={onClose} header={<BottomSheet.Header>이번 달 내보내기</BottomSheet.Header>}>
       <div className="export-sheet">
@@ -35,6 +40,7 @@ export function ExportSheet({ open, busy, onClose, onSelect }: Props) {
           >
             <span className="export-title">{option.title}</span>
             <span className="export-desc">{option.desc}</span>
+            {option.kind === "calendar" && <span className="export-desc export-reminder">{reminderNote}</span>}
           </button>
         ))}
       </div>
