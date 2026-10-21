@@ -35,9 +35,9 @@ beforeEach(() => {
 });
 
 describe("exportMonth", () => {
-  it("이미지: PNG를 고정 파일 이름으로 공유 창에 넘기고 opened", async () => {
+  it("이미지: PNG를 연·월·보낸 시각 파일 이름으로 공유 창에 넘기고 opened", async () => {
     expect(await exportMonth("image", input)).toBe("opened");
-    expect(savedArgs()).toEqual({ data: "UE5H", fileName: "turncal-2026-10.png", mimeType: "image/png" });
+    expect(savedArgs()).toEqual({ data: "UE5H", fileName: expect.stringMatching(/^turncal-2026-10-\d{14}\.png$/), mimeType: "image/png" });
     expect(vi.mocked(renderMonthImage).mock.calls[0][0].title).toBe("병동/3교대 ../ · 2026년 10월");
     expect(sdk.Share.createLink).not.toHaveBeenCalled();
   });
@@ -46,7 +46,7 @@ describe("exportMonth", () => {
     expect(await exportMonth("calendar", input)).toBe("opened");
     expect(sdk.Share.createLink).toHaveBeenCalledWith({ path: "intoss://ait-turncal" });
     const { data, fileName, mimeType } = savedArgs();
-    expect(fileName).toBe("turncal-2026-10.ics");
+    expect(fileName).toMatch(/^turncal-2026-10-\d{14}\.ics$/);
     expect(mimeType).toBe("text/calendar");
     const ics = fromBase64Utf8(data);
     expect(ics).toContain("URL:https://toss.im/share/abc");

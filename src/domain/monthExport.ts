@@ -18,9 +18,15 @@ export function daysInMonth({ year, month }: YearMonth): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
-/** 파일 이름은 연·월·확장자로만 만든다(사용자 입력을 넣지 않는다). */
-export function exportFileName({ year, month }: YearMonth, extension: "png" | "ics"): string {
-  return `turncal-${year}-${pad(month)}.${extension}`;
+/**
+ * 파일 이름은 연·월과 보낸 시각(현지, 초 단위)·확장자로만 만든다(사용자 입력을 넣지 않는다).
+ * 같은 이름의 파일이 기기에 있으면 토스 앱이 "파일이 이미 존재해요"로 거부하므로 보낼 때마다 이름을 바꾼다.
+ */
+export function exportFileName({ year, month }: YearMonth, extension: "png" | "ics", now: Date): string {
+  const stamp =
+    `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
+    `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return `turncal-${year}-${pad(month)}-${stamp}.${extension}`;
 }
 
 /** 보고 있는 달 1일~말일의 근무. 달력 칸과 같은 규칙(그날 패턴, 세부 내용 분류 우선)을 쓴다. */

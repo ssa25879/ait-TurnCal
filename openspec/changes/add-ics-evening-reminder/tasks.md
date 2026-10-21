@@ -14,6 +14,10 @@
 - [x] 3.1 새 `CalendarReminderScreen`(TDS `Switch` "캘린더 파일에 알림 넣기", 안내 문단, radiogroup 여섯 시각·"기본" 표시·꺼지면 비활성, 오류 `role=alert`), `SettingsMenu`에 "캘린더 알림" 행(화면 설정 다음, 보조 문구 `reminderLabel`), `App.tsx`에 뷰 `{ kind: "reminder" }`·뒤로가기(설정 목록으로)·`updateReminder`(낙관적 반영, 실패 시 되돌림·"캘린더 알림을 저장하지 못했어요. 다시 시도해 주세요."), `exportMonth`·`ExportSheet`에 설정 전달과 안내 한 줄, 전체 초기화 경고 문구에 "캘린더 알림" 추가, 스타일. 확인: `npm run typecheck` 통과.
 - [x] 3.2 E2E 새 스크립트 `scripts/e2e/calendar-reminder.mjs`: 설정 목록 여섯 항목·순서·보조 문구 "전날 21:00", 화면 기본 상태(토글 켜짐·21시 선택)·안내 문구, 20시 선택 → 목록 문구·새로고침 후 유지·저장값 `icsReminderHour: 20`, 21시로 되돌리면 필드 없음, 토글 끄기 → 목록 "끔"·시각 선택지 비활성(눌러도 안 바뀜)·저장값 `icsReminderEnabled: false`·바텀시트 문구, 다시 켜면 20시 그대로, 뒤로가기 → 설정 목록, .ics 다운로드에 VALARM(기본 `-PT3H`, 비번·휴무 없음, 끄면 0개), 저장 실패(저장소 쓰기 실패 주입) → 되돌림·안내, 패턴 초기화 뒤 설정 유지, 전체 초기화 뒤 기본값, 360px 가로 스크롤 없음·선택지 높이 44px·글자 11px 이상. 기존 `display-settings`·`shift-labels`·`navbar-settings`·`month-export`·`empty-calendar`(설정 목록 항목 수·초기화 문구·바텀시트 안내)의 기대값 조정. 확인: 새 스크립트·기존 스크립트 통과.
 
+## 3A. 실기기에서 드러난 기존 버그(2026-10-21)
+
+- [x] 3A.1 캘린더 파일 보내기가 v1.2 라이브에서도 "파일이 이미 존재해요"로 실패(진단 번들 `20261021-25`, 브랜치 `spike/ics-export-error` — **병합·출시 금지**). 같은 이름(`turncal-YYYY-MM.ics`)이 기기에 있으면 토스 앱이 저장을 거부한다. 파일 이름을 `turncal-YYYY-MM-YYYYMMDDHHMMSS.<확장자>`(보낸 현지 시각)로 바꾸고(PNG 포함) `schedule-export` "저장 파일 이름"·"달력 이미지 보내기"·"캘린더 파일 보내기" 명세 수정, 단위·`month-export` E2E 갱신. 확인: 단위 367·E2E month-export 28·calendar-reminder 32 통과.
+
 ## 4. 통합 확인·문서
 
 - [x] 4.1 `typecheck`·`npm test`·`test:tz`·E2E 전 종(14종, 개발 서버 실행 중 `src` 수정 금지)을 돌린다. 확인: 전부 통과, 개수 기록.

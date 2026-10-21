@@ -28,10 +28,17 @@ describe("daysInMonth / exportFileName", () => {
     expect(daysInMonth({ year: 2028, month: 2 })).toBe(29);
   });
 
-  it("파일 이름은 연·월·확장자로만 만든다", () => {
-    expect(exportFileName({ year: 2026, month: 10 }, "png")).toBe("turncal-2026-10.png");
-    expect(exportFileName({ year: 2027, month: 1 }, "ics")).toBe("turncal-2027-01.ics");
-    expect(exportFileName.length).toBe(2);
+  it("파일 이름은 연·월·보낸 시각(현지)·확장자로만 만든다", () => {
+    const at = new Date(2026, 9, 21, 11, 45, 30);
+    expect(exportFileName({ year: 2026, month: 10 }, "png", at)).toBe("turncal-2026-10-20261021114530.png");
+    expect(exportFileName({ year: 2027, month: 1 }, "ics", new Date(2027, 0, 2, 3, 4, 5))).toBe("turncal-2027-01-20270102030405.ics");
+    expect(exportFileName.length).toBe(3);
+  });
+
+  it("다시 보내면 이름이 달라진다", () => {
+    const first = exportFileName({ year: 2026, month: 10 }, "ics", new Date(2026, 9, 21, 11, 45, 30));
+    const second = exportFileName({ year: 2026, month: 10 }, "ics", new Date(2026, 9, 21, 11, 45, 31));
+    expect(first).not.toBe(second);
   });
 });
 

@@ -43,14 +43,15 @@ export async function exportMonth(kind: ExportKind, input: ExportInput): Promise
   const { month, weekStart, timeline, days, labels, scheduleTitle, primary, reminder } = input;
   const shifts = buildMonthShifts(month, timeline, days);
   const monthTitle = `${month.year}년 ${month.month}월`;
+  const now = new Date();
   try {
     if (kind === "image") {
       const data = renderMonthImage({ month, weekStart, shifts, labels, primary, title: `${scheduleTitle} · ${monthTitle}` });
-      await saveBase64Data({ data, fileName: exportFileName(month, "png"), mimeType: "image/png" });
+      await saveBase64Data({ data, fileName: exportFileName(month, "png", now), mimeType: "image/png" });
     } else {
       const link = await createAppLink();
-      const ics = buildIcs({ month, shifts, labels, link, reminder, title: `${scheduleTitle} ${monthTitle}`, now: new Date() });
-      await saveBase64Data({ data: toBase64Utf8(ics), fileName: exportFileName(month, "ics"), mimeType: "text/calendar" });
+      const ics = buildIcs({ month, shifts, labels, link, reminder, title: `${scheduleTitle} ${monthTitle}`, now });
+      await saveBase64Data({ data: toBase64Utf8(ics), fileName: exportFileName(month, "ics", now), mimeType: "text/calendar" });
     }
     return "opened";
   } catch {
