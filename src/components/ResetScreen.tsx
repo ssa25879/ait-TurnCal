@@ -12,7 +12,7 @@ export function ResetScreen({ onResetAll }: Props) {
       <p className="section-desc">초기화한 데이터는 되돌릴 수 없어요.</p>
       <ResetAction
         title="전체 초기화"
-        description="근무 패턴과 패턴 이력, 근무 유형, 화면 설정, 이름, 날짜 세부 내용을 모두 지우고 처음 상태로 돌아가요. 패턴 이력까지 함께 사라져요."
+        description="근무 패턴과 패턴 이력, 근무 유형, 화면 설정, 캘린더 알림, 이름, 날짜 세부 내용을 모두 지우고 처음 상태로 돌아가요. 패턴 이력까지 함께 사라져요."
         confirm="모든 데이터를 지울까요?"
         danger
         onReset={onResetAll}

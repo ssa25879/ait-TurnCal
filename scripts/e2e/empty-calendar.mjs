@@ -68,7 +68,7 @@ const stored = async (page) => JSON.parse(await page.evaluate((k) => localStorag
   await page.getByRole("button", { name: "설정", exact: true }).click();
   await page.waitForSelector(".settings-menu");
   const items = await page.locator(".settings-menu [role=button]").allInnerTexts();
-  check("설정 목록 5항목 접근·근무 패턴은 등록되지 않음", items.length === 5 && items[1].includes("등록되지 않음"), JSON.stringify(items));
+  check("설정 목록 6항목 접근·근무 패턴은 등록되지 않음", items.length === 6 && items[1].includes("등록되지 않음"), JSON.stringify(items));
   await page.getByText("이름", { exact: true }).click();
   await page.waitForTimeout(300);
   await back();

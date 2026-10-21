@@ -30,6 +30,7 @@ node $env:TEMP\turncal-e2e\visual-audit.mjs # 화면 감사: 11px 미만 글자�
 node $env:TEMP\turncal-e2e\navbar-settings.mjs # 설정 진입 내비 바 기능 버튼(달력에서만·해제·클릭·대체 하단 버튼) 35개
 node $env:TEMP\turncal-e2e\shift-labels.mjs   # 근무 유형 이름·약어·색(메뉴·입력 규칙·앱 전체 반영·저장값·되돌리기·폐기·초기화·손상·360px) 57개
 node $env:TEMP\turncal-e2e\month-export.mjs   # 이번 달 내보내기(버튼 표시·시트·뒤로가기·PNG/ics 다운로드 내용·실패 안내·360px) 28개, OUT_DIR을 주면 받은 PNG 저장
+node $env:TEMP\turncal-e2e\calendar-reminder.mjs # 캘린더 알림(설정 목록·토글·시각·저장값·꺼짐 비활성·.ics VALARM·비번/휴무 제외·시트 안내·저장 실패·초기화·360px) 32개
 ```
 
 - Edge 155+는 Playwright 1.49의 옛 `--headless`·`--remote-debugging-pipe` 실행이 안 돼(실행 직후 종료) 직접 띄운 Edge에 CDP로 연결한다: `msedge.exe --headless=new --hide-scrollbars --mute-audio --disable-gpu --remote-debugging-port=9333 --user-data-dir=%TEMP%edge-cdp about:blank` 후 `CDP_URL=http://127.0.0.1:9333`을 주고 스크립트를 실행한다(`--hide-scrollbars`가 없으면 세로 스크롤바가 폭을 차지해 360px 가로 스크롤 검사가 틀어진다). `CDP_URL`이 없으면 예전처럼 직접 실행한다.

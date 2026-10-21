@@ -288,3 +288,58 @@ describe("shiftLabels", () => {
     expectNoWrites();
   });
 });
+
+describe("캘린더 알림(icsReminderEnabled·icsReminderHour)", () => {
+  async function loadRaw(value: unknown) {
+    memory.set(SETTINGS_KEY, JSON.stringify(value));
+    vi.clearAllMocks();
+    storageMock.getItem.mockImplementation(async (key: string) => memory.get(key) ?? null);
+    return loadSettings();
+  }
+  const stored = () => JSON.parse(memory.get(SETTINGS_KEY)!);
+
+  it("필드가 없는 기존 v3는 기본값으로 복원하고 저장값을 바꾸지 않는다", async () => {
+    const result = await loadRaw(valid);
+    expect(result.kind === "ok" && result.settings.icsReminderEnabled).toBeUndefined();
+    expect(result.kind === "ok" && result.settings.icsReminderHour).toBeUndefined();
+    expectNoWrites();
+  });
+
+  it("20시 저장·복원", async () => {
+    await saveSettings({ ...valid, icsReminderHour: 20 });
+    expect(stored().icsReminderHour).toBe(20);
+    expect("icsReminderEnabled" in stored()).toBe(false);
+    expect(stored().version).toBe(CURRENT_VERSION);
+    const result = await loadRaw(stored());
+    expect(result.kind === "ok" && result.settings.icsReminderHour).toBe(20);
+  });
+
+  it("끄면 시각과 함께 저장·복원", async () => {
+    await saveSettings({ ...valid, icsReminderEnabled: false, icsReminderHour: 20 });
+    expect(stored()).toMatchObject({ icsReminderEnabled: false, icsReminderHour: 20 });
+    const result = await loadRaw(stored());
+    expect(result.kind === "ok" && result.settings).toMatchObject({ icsReminderEnabled: false, icsReminderHour: 20 });
+  });
+
+  it("켜짐·21시면 두 필드를 생략한다", async () => {
+    await saveSettings({ ...valid, icsReminderHour: 21 });
+    expect("icsReminderHour" in stored()).toBe(false);
+    expect("icsReminderEnabled" in stored()).toBe(false);
+  });
+
+  const corrupt: Array<[string, object]> = [
+    ["시각 17", { icsReminderHour: 17 }],
+    ["시각 24", { icsReminderHour: 24 }],
+    ["시각 20.5", { icsReminderHour: 20.5 }],
+    ["시각 문자열", { icsReminderHour: "21" }],
+    ["시각 null", { icsReminderHour: null }],
+    ["켜짐 true", { icsReminderEnabled: true }],
+    ["켜짐 문자열", { icsReminderEnabled: "false" }],
+  ];
+
+  it.each(corrupt)("손상 데이터로 처리한다: %s", async (_name, extra) => {
+    const result = await loadRaw({ ...valid, ...extra });
+    expect(result.kind).toBe("corrupt");
+    expectNoWrites();
+  });
+});

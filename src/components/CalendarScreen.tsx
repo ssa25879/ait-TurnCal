@@ -2,6 +2,7 @@ import { Button } from "@toss/tds-mobile";
 import { useEffect, useState } from "react";
 import { CalendarBanner } from "../ads/CalendarBanner";
 import { addMonths, yearMonthOf, type YearMonth } from "../domain/calendar";
+import type { ReminderSetting } from "../domain/calendarReminder";
 import { scheduleTitle } from "../domain/names";
 import type { PatternTimeline } from "../domain/patternHistory";
 import type { WeekStart } from "../domain/types";
@@ -23,6 +24,8 @@ interface Props {
   scheduleName: string | null;
   days: EntriesByDate;
   entriesNotice: string | null;
+  /** 캘린더 파일 전날 저녁 알림 설정 */
+  reminder: ReminderSetting;
   onSelectDate(date: string): void;
   /** 내비게이션 바 기능 버튼을 쓸 수 없을 때만 true: 하단에 대체 [설정] 버튼을 보인다. */
   showSettingsButton: boolean;
@@ -45,6 +48,7 @@ export function CalendarScreen({
   scheduleName,
   days,
   entriesNotice,
+  reminder,
   onSelectDate,
   showSettingsButton,
   onOpenSettings,
@@ -73,6 +77,7 @@ export function CalendarScreen({
       labels: shiftLabels,
       scheduleTitle: scheduleTitle(scheduleName),
       primary,
+      reminder,
     });
     setExporting(false);
     if (result === "unsupported") setExportNotice("토스 앱을 업데이트하면 내보낼 수 있어요.");
@@ -179,7 +184,7 @@ export function CalendarScreen({
         )}
       </div>
 
-      <ExportSheet open={exportOpen} busy={exporting} onClose={() => setExportOpen(false)} onSelect={(kind) => void runExport(kind)} />
+      <ExportSheet open={exportOpen} busy={exporting} reminder={reminder} onClose={() => setExportOpen(false)} onSelect={(kind) => void runExport(kind)} />
 
       <CalendarBanner />
     </section>

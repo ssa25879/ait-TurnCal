@@ -8,6 +8,7 @@ const sdk = vi.hoisted(() => {
 vi.mock("@apps-in-toss/web-framework", () => sdk);
 vi.mock("./renderMonthImage", () => ({ renderMonthImage: vi.fn(() => "UE5H") }));
 
+import { DEFAULT_REMINDER } from "../domain/calendarReminder";
 import { fromBase64Utf8 } from "../domain/monthExport";
 import { DEFAULT_SHIFT_LABELS } from "../domain/shiftLabels";
 import { exportMonth, type ExportInput } from "./exportMonth";
@@ -21,6 +22,7 @@ const input: ExportInput = {
   labels: DEFAULT_SHIFT_LABELS,
   scheduleTitle: "병동/3교대 ../",
   primary: "#4F46E5",
+  reminder: DEFAULT_REMINDER,
 };
 
 const savedArgs = () => sdk.saveBase64Data.mock.calls.at(-1)![0] as { data: string; fileName: string; mimeType: string };
@@ -33,9 +35,9 @@ beforeEach(() => {
 });
 
 describe("exportMonth", () => {
-  it("이미지: PNG를 고정 파일 이름으로 공유 창에 넘기고 opened", async () => {
+  it("이미지: PNG를 연·월·보낸 시각 파일 이름으로 공유 창에 넘기고 opened", async () => {
     expect(await exportMonth("image", input)).toBe("opened");
-    expect(savedArgs()).toEqual({ data: "UE5H", fileName: "turncal-2026-10.png", mimeType: "image/png" });
+    expect(savedArgs()).toEqual({ data: "UE5H", fileName: expect.stringMatching(/^turncal-2026-10-\d{14}\.png$/), mimeType: "image/png" });
     expect(vi.mocked(renderMonthImage).mock.calls[0][0].title).toBe("병동/3교대 ../ · 2026년 10월");
     expect(sdk.Share.createLink).not.toHaveBeenCalled();
   });
@@ -44,11 +46,17 @@ describe("exportMonth", () => {
     expect(await exportMonth("calendar", input)).toBe("opened");
     expect(sdk.Share.createLink).toHaveBeenCalledWith({ path: "intoss://ait-turncal" });
     const { data, fileName, mimeType } = savedArgs();
-    expect(fileName).toBe("turncal-2026-10.ics");
+    expect(fileName).toMatch(/^turncal-2026-10-\d{14}\.ics$/);
     expect(mimeType).toBe("text/calendar");
     const ics = fromBase64Utf8(data);
     expect(ics).toContain("URL:https://toss.im/share/abc");
     expect(ics).not.toContain("intoss-private");
+    expect(ics).toContain("TRIGGER:-PT3H");
+  });
+
+  it("캘린더 알림을 끄면 .ics에 알림이 없다", async () => {
+    await exportMonth("calendar", { ...input, reminder: { enabled: false, hour: 20 } });
+    expect(fromBase64Utf8(savedArgs().data)).not.toContain("VALARM");
   });
 
   it("파일 이름에 근무표 이름이 들어가지 않는다", async () => {
@@ -61,7 +69,7 @@ describe("exportMonth", () => {
     expect(await exportMonth("calendar", input)).toBe("opened");
     const ics = fromBase64Utf8(savedArgs().data);
     expect(ics).not.toContain("URL:");
-    expect(ics).not.toContain("DESCRIPTION");
+    expect(ics).not.toContain("턴캘에서 보기");
   });
 
   it("링크가 2초 안에 오지 않으면 링크 없이 보낸다", async () => {

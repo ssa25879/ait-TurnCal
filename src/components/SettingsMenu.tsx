@@ -10,24 +10,29 @@ interface Props {
   scheduleName: string | null;
   /** 기본값과 다르게 바꾼 근무 유형 수 */
   customizedShiftCount: number;
+  /** "전날 21:00" 또는 "끔" */
+  reminderLabel: string;
   onOpenNames(): void;
   onOpenPattern(): void;
   onOpenShiftLabels(): void;
   onOpenDisplay(): void;
+  onOpenReminder(): void;
   onOpenReset(): void;
 }
 
-/** 설정 목록: 이름 · 근무 패턴(draft + [저장]) · 근무 유형(draft + [저장]) · 화면 설정(즉시 저장) · 초기화 */
+/** 설정 목록: 이름 · 근무 패턴(draft + [저장]) · 근무 유형(draft + [저장]) · 화면 설정·캘린더 알림(즉시 저장) · 초기화 */
 export function SettingsMenu({
   cycleLength,
   theme,
   weekStart,
   scheduleName,
   customizedShiftCount,
+  reminderLabel,
   onOpenNames,
   onOpenPattern,
   onOpenShiftLabels,
   onOpenDisplay,
+  onOpenReminder,
   onOpenReset,
 }: Props) {
   const rows = [
@@ -43,6 +48,7 @@ export function SettingsMenu({
       bottom: `${THEMES[theme].name} · ${weekStart === "SUN" ? "일요일" : "월요일"} 시작`,
       onClick: onOpenDisplay,
     },
+    { top: "캘린더 알림", bottom: reminderLabel, onClick: onOpenReminder },
     { top: "초기화", bottom: "전체 데이터 지우기", onClick: onOpenReset },
   ];
 

@@ -1,4 +1,5 @@
 import type { YearMonth } from "./calendar";
+import { isReminderShift, reminderTrigger, type ReminderSetting } from "./calendarReminder";
 import { addDays } from "./date";
 import { getEffectiveShift, type DayRecord } from "./dayEntries";
 import { resolvePattern, type PatternTimeline } from "./patternHistory";
@@ -17,9 +18,15 @@ export function daysInMonth({ year, month }: YearMonth): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
-/** 파일 이름은 연·월·확장자로만 만든다(사용자 입력을 넣지 않는다). */
-export function exportFileName({ year, month }: YearMonth, extension: "png" | "ics"): string {
-  return `turncal-${year}-${pad(month)}.${extension}`;
+/**
+ * 파일 이름은 연·월과 보낸 시각(현지, 초 단위)·확장자로만 만든다(사용자 입력을 넣지 않는다).
+ * 같은 이름의 파일이 기기에 있으면 토스 앱이 "파일이 이미 존재해요"로 거부하므로 보낼 때마다 이름을 바꾼다.
+ */
+export function exportFileName({ year, month }: YearMonth, extension: "png" | "ics", now: Date): string {
+  const stamp =
+    `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
+    `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return `turncal-${year}-${pad(month)}-${stamp}.${extension}`;
 }
 
 /** 보고 있는 달 1일~말일의 근무. 달력 칸과 같은 규칙(그날 패턴, 세부 내용 분류 우선)을 쓴다. */
@@ -78,11 +85,16 @@ export interface IcsInput {
   title: string;
   /** 턴캘을 여는 공유 링크. 만들지 못했으면 null */
   link: string | null;
+  /** 근무 전날 저녁 알림. 꺼져 있으면 알림을 넣지 않는다 */
+  reminder: ReminderSetting;
   now: Date;
 }
 
-/** 근무가 있는 날마다 하루 종일 일정 하나. 같은 날짜는 항상 같은 UID라 다시 가져오면 갱신된다. */
-export function buildIcs({ shifts, labels, title, link, now }: IcsInput): string {
+/**
+ * 근무가 있는 날마다 하루 종일 일정 하나. 같은 날짜는 항상 같은 UID라 다시 가져오면 갱신된다.
+ * 알림이 켜져 있으면 비번·휴무를 뺀 일정에 전날 설정 시각의 표시 알림을 하나 넣는다.
+ */
+export function buildIcs({ shifts, labels, title, link, reminder, now }: IcsInput): string {
   const stamp = formatStamp(now);
   const lines = [
     "BEGIN:VCALENDAR",
@@ -104,6 +116,15 @@ export function buildIcs({ shifts, labels, title, link, now }: IcsInput): string
       "TRANSP:TRANSPARENT",
     );
     if (link) lines.push(`DESCRIPTION:${escapeText(`턴캘에서 보기: ${link}`)}`, `URL:${link}`);
+    if (reminder.enabled && isReminderShift(shift)) {
+      lines.push(
+        "BEGIN:VALARM",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:${escapeText(`내일 ${labels[shift].name}`)}`,
+        `TRIGGER:${reminderTrigger(reminder.hour)}`,
+        "END:VALARM",
+      );
+    }
     lines.push("END:VEVENT");
   }
   lines.push("END:VCALENDAR");

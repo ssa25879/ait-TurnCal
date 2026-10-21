@@ -1031,3 +1031,27 @@ body {
   flex: 1 1 0;
   min-width: 0;
 }
+
+/* ---------- 캘린더 알림 ---------- */
+.reminder-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+  font-size: var(--font-l);
+  font-weight: 600;
+}
+
+.reminder-hours.is-disabled .theme-option {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.reminder-default {
+  color: var(--color-text-sub);
+  font-size: var(--font-m);
+  font-weight: 400;
+}
