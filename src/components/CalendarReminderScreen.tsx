@@ -28,6 +28,9 @@ export function CalendarReminderScreen({ reminder, error, onEnabledChange, onHou
         보낸 캘린더 파일을 캘린더 앱에 추가하면, 주간·오후·야간·당직 전날에 캘린더 앱이 알림을 울려요. 비번·휴무에는
         넣지 않아요.
       </p>
+      <p className="section-desc">
+        알림을 끄거나 비번·휴무처럼 알림을 넣지 않은 일정에는 캘린더 앱의 기본 알림이 따로 붙을 수 있어요.
+      </p>
       <p className="section-desc">이미 추가한 일정에는 바뀐 설정이 반영되지 않아요. 파일을 다시 보내 주세요.</p>
 
       <section className="section">

@@ -81,7 +81,7 @@ async function exportIcs(page) {
   check("토글 기본 켜짐", await toggle(page).isChecked());
   check("시각 여섯 개, 21시 선택·기본 표시", (await page.locator(".reminder-hours [role=radio]").count()) === 6 && (await selectedHour(page)).includes("전날 21:00") && (await selectedHour(page)).includes("기본"), await selectedHour(page));
   const text = (await page.locator(".reminder-settings").innerText()).replace(/\s+/g, " ");
-  check("안내: 캘린더 앱이 울림·비번·휴무 제외·다시 보내야 반영", text.includes("캘린더 앱이 알림을 울려요") && text.includes("비번·휴무에는") && text.includes("파일을 다시 보내 주세요"), text);
+  check("안내: 캘린더 앱이 울림·비번·휴무 제외·기본 알림·다시 보내야 반영", text.includes("캘린더 앱이 알림을 울려요") && text.includes("비번·휴무에는") && text.includes("기본 알림이 따로 붙을 수") && text.includes("파일을 다시 보내 주세요"), text);
   await back(page);
   check("뒤로가기 → 설정 목록", await page.locator(".settings-menu").isVisible());
   await context.close();
