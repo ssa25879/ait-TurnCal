@@ -2,17 +2,17 @@
 
 ## 1. 도메인: 알림 설정·.ics 알림
 
-- [ ] 1.1 새 `src/domain/calendarReminder.ts`(`REMINDER_HOURS` 18~23, `DEFAULT_REMINDER_HOUR` 21, `ReminderSetting`, `isReminderSetting`, `resolveReminder`, `reminderTrigger`, `isReminderShift`, `reminderLabel`)와 `calendarReminder.test.ts`(경계 17·18·23·24·20.5·"21"·null, 트리거 18→`-PT6H`·21→`-PT3H`·23→`-PT1H`, 대상 유형 4종/제외 2종, 문구). 확인: `npm test` 통과.
-- [ ] 1.2 `buildIcs`에 `reminder` 입력을 더해 대상 일정에 `VALARM`(ACTION:DISPLAY, DESCRIPTION "내일 {이름}", TRIGGER)을 `END:VEVENT` 앞에 넣는다. `monthExport.test.ts`에 추가: 기본 21시 → 야간 일정에 `-PT3H`·"내일 야간", 비번·휴무 일정에 VALARM 없음, 이름 바꾼 휴무("쉼")도 없음, 세부 내용으로 휴무가 된 날 없음, 19시 → `-PT5H`, null → VALARM 0개, BEGIN/END:VALARM 짝, 사용자 정의 이름 이스케이프·75옥텟 접기. 기존 테스트는 `reminder` 인자만 보충. 확인: `npm test`·`npm run test:tz` 통과.
+- [ ] 1.1 새 `src/domain/calendarReminder.ts`(`REMINDER_HOURS` 18~23, `DEFAULT_REMINDER_HOUR` 21, `ReminderSetting { enabled, hour }`, `isReminderHour`, `resolveReminder`, `reminderTrigger`, `isReminderShift`, `reminderLabel`)와 `calendarReminder.test.ts`(시각 경계 17·18·23·24·20.5·"21"·null, 필드 없으면 켜짐·21, 끔+20시 유지, 문구 "전날 20:00"·"끔", 트리거 18→`-PT6H`·21→`-PT3H`·23→`-PT1H`, 대상 유형 4종/제외 2종, 문구). 확인: `npm test` 통과.
+- [ ] 1.2 `buildIcs`에 `reminder` 입력을 더해 대상 일정에 `VALARM`(ACTION:DISPLAY, DESCRIPTION "내일 {이름}", TRIGGER)을 `END:VEVENT` 앞에 넣는다. `monthExport.test.ts`에 추가: 기본 21시 → 야간 일정에 `-PT3H`·"내일 야간", 비번·휴무 일정에 VALARM 없음, 이름 바꾼 휴무("쉼")도 없음, 세부 내용으로 휴무가 된 날 없음, 19시 → `-PT5H`, `enabled: false` → VALARM 0개, BEGIN/END:VALARM 짝, 사용자 정의 이름 이스케이프·75옥텟 접기. 기존 테스트는 `reminder` 인자만 보충. 확인: `npm test`·`npm run test:tz` 통과.
 
 ## 2. 저장
 
-- [ ] 2.1 `src/storage/scheduleStorage.ts`: `StoredSettingsV3.icsReminderHour?`, v3 파서 검증(잘못된 값은 손상), `saveSettings`에서 21이면 필드 생략·null은 저장. `scheduleStorage.test.ts`: 20 저장/복원, null 저장/복원, 21이면 필드 없음, 필드 없는 기존 설정 그대로, 17·24·20.5·"21" 손상 처리. 확인: `npm test` 통과.
+- [ ] 2.1 `src/storage/scheduleStorage.ts`: `StoredSettingsV3.icsReminderEnabled?: false`·`icsReminderHour?`, v3 파서 검증(잘못된 값은 손상), `saveSettings`에서 켜짐이면 `icsReminderEnabled` 생략·21이면 `icsReminderHour` 생략. `scheduleStorage.test.ts`: 20 저장/복원, 끔+20 저장/복원(두 필드 함께), 켜짐·21이면 두 필드 없음, 필드 없는 기존 설정 그대로, 시각 17·24·20.5·"21"·null과 `icsReminderEnabled` true·"false" 손상 처리. 확인: `npm test` 통과.
 
 ## 3. 화면 연결
 
-- [ ] 3.1 새 `CalendarReminderScreen`(안내 문단, radiogroup 일곱 선택지·"기본" 표시, 오류 `role=alert`), `SettingsMenu`에 "캘린더 알림" 행(화면 설정 다음, 보조 문구 `reminderLabel`), `App.tsx`에 뷰 `{ kind: "reminder" }`·뒤로가기(설정 목록으로)·`updateReminder`(낙관적 반영, 실패 시 되돌림·"캘린더 알림을 저장하지 못했어요. 다시 시도해 주세요."), `exportMonth`·`ExportSheet`에 설정 전달과 안내 한 줄, 전체 초기화 경고 문구에 "캘린더 알림" 추가, 스타일. 확인: `npm run typecheck` 통과.
-- [ ] 3.2 E2E 새 스크립트 `scripts/e2e/calendar-reminder.mjs`: 설정 목록 여섯 항목·순서·보조 문구 "전날 21:00", 화면 기본 선택·안내 문구, 20시 선택 → 목록 문구·새로고침 후 유지·저장값 `icsReminderHour: 20`, 21시로 되돌리면 필드 없음, "알림 안 함" → null·바텀시트 문구, 뒤로가기 → 설정 목록, .ics 다운로드에 VALARM(기본 `-PT3H`, 비번·휴무 없음, 알림 안 함이면 0개), 저장 실패(저장소 쓰기 실패 주입) → 되돌림·안내, 패턴 초기화 뒤 설정 유지, 전체 초기화 뒤 기본값, 360px 가로 스크롤 없음·선택지 높이 44px·글자 11px 이상. 기존 `display-settings`·`shift-labels`·`navbar-settings`·`month-export`·`empty-calendar`(설정 목록 항목 수·초기화 문구·바텀시트 안내)의 기대값 조정. 확인: 새 스크립트·기존 스크립트 통과.
+- [ ] 3.1 새 `CalendarReminderScreen`(TDS `Switch` "캘린더 파일에 알림 넣기", 안내 문단, radiogroup 여섯 시각·"기본" 표시·꺼지면 비활성, 오류 `role=alert`), `SettingsMenu`에 "캘린더 알림" 행(화면 설정 다음, 보조 문구 `reminderLabel`), `App.tsx`에 뷰 `{ kind: "reminder" }`·뒤로가기(설정 목록으로)·`updateReminder`(낙관적 반영, 실패 시 되돌림·"캘린더 알림을 저장하지 못했어요. 다시 시도해 주세요."), `exportMonth`·`ExportSheet`에 설정 전달과 안내 한 줄, 전체 초기화 경고 문구에 "캘린더 알림" 추가, 스타일. 확인: `npm run typecheck` 통과.
+- [ ] 3.2 E2E 새 스크립트 `scripts/e2e/calendar-reminder.mjs`: 설정 목록 여섯 항목·순서·보조 문구 "전날 21:00", 화면 기본 상태(토글 켜짐·21시 선택)·안내 문구, 20시 선택 → 목록 문구·새로고침 후 유지·저장값 `icsReminderHour: 20`, 21시로 되돌리면 필드 없음, 토글 끄기 → 목록 "끔"·시각 선택지 비활성(눌러도 안 바뀜)·저장값 `icsReminderEnabled: false`·바텀시트 문구, 다시 켜면 20시 그대로, 뒤로가기 → 설정 목록, .ics 다운로드에 VALARM(기본 `-PT3H`, 비번·휴무 없음, 끄면 0개), 저장 실패(저장소 쓰기 실패 주입) → 되돌림·안내, 패턴 초기화 뒤 설정 유지, 전체 초기화 뒤 기본값, 360px 가로 스크롤 없음·선택지 높이 44px·글자 11px 이상. 기존 `display-settings`·`shift-labels`·`navbar-settings`·`month-export`·`empty-calendar`(설정 목록 항목 수·초기화 문구·바텀시트 안내)의 기대값 조정. 확인: 새 스크립트·기존 스크립트 통과.
 
 ## 4. 통합 확인·문서
 
