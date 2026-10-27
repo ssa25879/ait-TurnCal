@@ -47,6 +47,7 @@
 | `npm run build:adtest` (커밋 `530d249`, 재가져오기 안내 문구) | 2026-10-27 로컬 빌드 성공, 콘솔 `20261027-29`·`CREATED`·SDK 3.9.0, 사용자 요청으로 본인 테스트 푸시 성공. 실제 광고 ID 미포함 확인 | `01a17b36-7bd0-74c7-8d86-3db34d8e1462` | `CCAA24A18E61A9E34D2EC89AC54C328426B5C10B59E10D70286236362E0F3F3E` |
 | `npm run build:adtest` (커밋 `05c0989`, 보내기 전 확인 창) | 2026-10-27 로컬 빌드 성공, 콘솔 `20261027-30`·`CREATED`·SDK 3.9.0, 사용자 요청으로 본인 테스트 푸시 성공. 실제 광고 ID 미포함 확인 | `01a17b41-f6d3-728c-808d-dfed353c72bf` | `E75F6B37B0EA49197C45FB4B09D2B77D004966133CFA8D7C448EDD8A9A944F70` |
 | `npm run build:adtest` (커밋 `1b32d90`, 내보내기 뒤 리뷰 요청 안내) | 2026-10-27 로컬 빌드 성공, 콘솔 `20261027-31`·`CREATED`·SDK 3.9.0, 사용자 요청으로 본인 테스트 푸시 성공. 실제 광고 ID 미포함 확인 | `01a17b51-10f4-7d92-9982-2e1d674e7417` | `182E4B68DFB9D92696D3FD294D8F6A326380060F2A0E512AF7E86CED581658E8` |
+| `npm run build:adtest` (커밋 `6dee135`, 내보내기 뒤 리뷰 요청 창) | 2026-10-27 로컬 빌드 성공, 콘솔 `20261027-32`·`CREATED`·SDK 3.9.0, 사용자 요청으로 본인 테스트 푸시 성공. 실제 광고 ID 미포함 확인 | `01a17b6b-86eb-705d-8cb5-0bb22a56f975` | `EBEEFD51ED8C1441061209AB533A26714E4630EE7A0FF5A478A2E3BBDAEF6DC9` |
 | `npm run build` | 로컬 출시용 빌드 성공, 업로드하지 않음 | `01a17697-9ae1-7ed8-a749-a8641a2522d8` | `B85FFD7CF6B4C593FA74E2E95F27B41D0C03F51090E31A703507780000055151` |
 
 출시용 `dist`는 실제 광고 설정 값 포함, 테스트 배너 ID·mock 저장 접두어·Devtools 전역/이벤트 표식 없음, 소스맵 0개를 확인했다. 실제 광고 값은 출력하지 않았다. 최종 SDK·Devtools·CLI는 3.9.0이고 peer 오류가 없다. JS는 약 1.22MB이며 기존 단일 청크 경고가 남는다. 실제 기기에서의 로딩·광고 노출은 아직 검사하지 않았다.
@@ -58,6 +59,7 @@
 - `20261027-29` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b36-7bd0-74c7-8d86-3db34d8e1462&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b36-7bd0-74c7-8d86-3db34d8e1462&testVersionName=20261027-29). 검수 신청하지 않음
 - `20261027-30` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b41-f6d3-728c-808d-dfed353c72bf&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b41-f6d3-728c-808d-dfed353c72bf&testVersionName=20261027-30). 검수 신청하지 않음
 - `20261027-31` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b51-10f4-7d92-9982-2e1d674e7417&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b51-10f4-7d92-9982-2e1d674e7417&testVersionName=20261027-31). 검수 신청하지 않음
+- `20261027-32` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b6b-86eb-705d-8cb5-0bb22a56f975&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b6b-86eb-705d-8cb5-0bb22a56f975&testVersionName=20261027-32). 검수 신청하지 않음
 
 ## 실기기 확인 준비
 
@@ -92,6 +94,8 @@
 `내 폰 저장`·구글·삼성 캘린더 모두 같은 결과다(구글·삼성은 가져온 일정을 사용자가 직접 옮겨 확인). 기존 일정 갱신은 파일로 해결할 수 없는 외부 앱 동작이므로 파일 생성 규칙(날짜별 고정 UID)은 유지한다. 대신 내보내기 시트와 알림 설정 화면에 "그 달 일정을 지운 뒤 가져오기"와 저장 캘린더 확인 안내를 넣었다. C02·C03은 **차이 있음(앱 한계, 안내로 대응)**으로 확정한다.
 
 **테스트 번들 `20261027-29` 실기기 확인(2026-10-27, 사용자 보고):** 기기 Galaxy S26 Ultra, Android 17 / One UI 9.0, 토스·캘린더 앱 최신(정확한 버전 번호 미기록). 새 재가져오기 안내를 포함해 "나머지는 정상 작동"으로 확인했다. 차이: 내보내기 시트 안의 캘린더 파일 안내 글자가 너무 작다 → 안내를 "캘린더 파일 보내기"를 고른 뒤 뜨는 확인 창(큰 글자, [취소]/[보내기])으로 옮겼다(미커밋, 실기기 재확인 필요). C06 실제 알림 도착은 10월 28일 근무의 알림 시각(10월 27일 21:00)이 보고 시점 뒤라 아직 미확인이다.
+
+**테스트 번들 `20261027-32` 실기기 확인(2026-10-27, 사용자 보고, 같은 기기):** 캘린더 파일 보내기 전 확인 창과 내보내기 뒤 리뷰 요청 창을 포함해 "정상 작동"으로 확인했다. 리뷰 창은 한 번 넘긴 뒤 다시 나오지 않았다. 앱은 같은 실행에서 한 번만 묻도록 설계했고, 토스 리뷰 창도 이미 응답했거나 피로도 정책에 걸린 사용자에게는 뜨지 않으므로 예상과 같은 동작으로 본다. 다시 나오지 않은 원인이 앱 규칙인지 토스 정책인지는 구분하지 않았다. 중간 번들 `20261027-30`(확인 창)·`20261027-31`(하단 안내 글)은 `20261027-32`로 대체됐다. C06은 여전히 미확인이다.
 
 ## 명세·기록 대조
 
