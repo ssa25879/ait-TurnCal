@@ -31,7 +31,7 @@ export function CalendarReminderScreen({ reminder, error, onEnabledChange, onHou
       <p className="section-desc">
         알림을 끄거나 비번·휴무처럼 알림을 넣지 않은 일정에는 캘린더 앱의 기본 알림이 따로 붙을 수 있어요.
       </p>
-      <p className="section-desc">설정을 바꿔도 이미 추가한 일정은 자동으로 바뀌지 않아요. 다시 가져온 일정의 중복 여부와 알림을 확인해 주세요.</p>
+      <p className="section-desc">설정을 바꿔도 이미 추가한 일정은 자동으로 바뀌지 않아요. 다시 가져와도 기존 일정은 그대로라서, 그 달 일정을 지운 뒤 가져와 주세요.</p>
 
       <section className="section">
         <h2 className="section-title">알림 시각</h2>

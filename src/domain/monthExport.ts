@@ -91,7 +91,8 @@ export interface IcsInput {
 }
 
 /**
- * 근무가 있는 날마다 하루 종일 일정 하나. 같은 날짜는 항상 같은 UID라 다시 가져오면 갱신된다.
+ * 근무가 있는 날마다 하루 종일 일정 하나. 같은 날짜는 항상 같은 UID라 같은 파일을 다시 가져와도 중복되지 않는다.
+ * 기존 일정이 갱신되지는 않는다(Galaxy 기본 캘린더: 이미 있는 UID는 건너뛰고 새 UID만 추가, 지운 뒤에는 다시 가져올 수 있음).
  * 알림이 켜져 있으면 비번·휴무를 뺀 일정에 전날 설정 시각의 표시 알림을 하나 넣는다.
  */
 export function buildIcs({ shifts, labels, title, link, reminder, now }: IcsInput): string {

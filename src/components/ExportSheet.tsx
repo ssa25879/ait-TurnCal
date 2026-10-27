@@ -42,6 +42,11 @@ export function ExportSheet({ open, busy, reminder, onClose, onSelect }: Props) 
             <span className="export-desc">{option.desc}</span>
             {option.kind === "calendar" && <span className="export-desc export-reminder">{reminderNote}</span>}
             {option.kind === "calendar" && <span className="export-desc export-default-reminder">캘린더 앱의 기본 알림이 따로 붙을 수 있어요.</span>}
+            {option.kind === "calendar" && (
+              <span className="export-desc export-reimport">
+                이미 가져온 달은 그 달 일정을 지운 뒤 가져와야 바뀌어요. 저장된 캘린더는 가져온 뒤 확인해 주세요.
+              </span>
+            )}
           </button>
         ))}
       </div>
