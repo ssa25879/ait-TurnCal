@@ -1,5 +1,5 @@
 import { Button } from "@toss/tds-mobile";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarBanner } from "../ads/CalendarBanner";
 import { addMonths, yearMonthOf, type YearMonth } from "../domain/calendar";
 import type { ReminderSetting } from "../domain/calendarReminder";
@@ -7,6 +7,7 @@ import { scheduleTitle } from "../domain/names";
 import type { PatternTimeline } from "../domain/patternHistory";
 import type { WeekStart } from "../domain/types";
 import { exportMonth, type ExportKind } from "../export/exportMonth";
+import { recordExportRequested, recordExportResult } from "../platform/analytics";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
 import { ExportSheet } from "./ExportSheet";
@@ -59,15 +60,20 @@ export function CalendarScreen({
   const shiftLabels = useShiftLabels();
   const [exportOpen, setExportOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const exportInFlight = useRef(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
   // 다른 달로 넘기면 이전 달의 내보내기 안내는 지운다(화면을 떠나면 이 컴포넌트와 함께 사라진다).
   useEffect(() => setExportNotice(null), [month.year, month.month]);
 
   /** 공유 창은 취소해도 성공으로 끝나므로 완료 안내는 하지 않고 실패·미지원만 알린다. */
   const runExport = async (kind: ExportKind) => {
+    // 닫힘 애니메이션에 남은 선택지가 다시 눌려도 같은 요청을 시작하지 않는다.
+    if (exportInFlight.current) return;
+    exportInFlight.current = true;
     setExportOpen(false);
     setExporting(true);
     setExportNotice(null);
+    recordExportRequested(kind);
     const primary = getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim() || "#4F46E5";
     const result = await exportMonth(kind, {
       month,
@@ -79,6 +85,8 @@ export function CalendarScreen({
       primary,
       reminder,
     });
+    recordExportResult(kind, result);
+    exportInFlight.current = false;
     setExporting(false);
     if (result === "unsupported") setExportNotice("토스 앱을 업데이트하면 내보낼 수 있어요.");
     if (result === "failed") setExportNotice("내보내지 못했어요. 잠시 후 다시 시도해 주세요.");

@@ -14,7 +14,7 @@
     "deploy": "ait deploy"
   },
   "devDependencies": {
-    "@apps-in-toss/devtools": "^3.7.0",
+    "@apps-in-toss/devtools": "3.9.0",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "6.0.0",
@@ -24,7 +24,7 @@
     "vitest": "^5.0.4"
   },
   "dependencies": {
-    "@apps-in-toss/web-framework": "3.7.0",
+    "@apps-in-toss/web-framework": "3.9.0",
     "@emotion/react": "^11.14.0",
     "@toss/tds-mobile": "2.4.1",
     "@toss/tds-mobile-ait": "2.4.1",

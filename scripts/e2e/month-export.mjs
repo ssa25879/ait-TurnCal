@@ -77,8 +77,8 @@ const unfold = (text) => text.replace(/\r\n /g, "");
   await exportButton(page).click();
   await option(page, "달력 이미지 보내기").waitFor({ state: "visible", timeout: 3000 });
   const sheet = (await page.locator(".export-sheet").innerText()).replace(/\s+/g, " ");
-  check("선택지 두 개와 공유 창 안내", (await page.locator(".export-option").count()) === 2 && sheet.includes("공유 창에서") && sheet.includes("세부 내용은 들어가지 않아요"), sheet);
-  const calDesc = await option(page, "캘린더 파일 보내기").locator(".export-desc:not(.export-reminder)").innerText();
+  check("선택지 두 개와 공유 창·기본 알림 안내", (await page.locator(".export-option").count()) === 2 && sheet.includes("공유 창에서") && sheet.includes("세부 내용은 들어가지 않아요") && sheet.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."), sheet);
+  const calDesc = await option(page, "캘린더 파일 보내기").locator(".export-desc:not(.export-reminder):not(.export-default-reminder)").innerText();
   check("캘린더 파일 안내 두 줄(캘린더 앱이 없을 수 있음 / 나와의 채팅·드라이브로 보낸 뒤 열기)", calDesc === "공유 창에는 캘린더 앱이 없을 수 있어요.\n나와의 채팅, 드라이브 등으로 보낸 뒤 받은 파일을 열면 캘린더 앱에 추가할 수 있어요.", JSON.stringify(calDesc));
   // TDS 바텀시트는 열림 애니메이션(약 0.3초) 중의 닫기 요청을 무시한다(기존 시트와 같음). 열린 뒤에 뒤로가기를 누른다.
   await page.waitForTimeout(800);

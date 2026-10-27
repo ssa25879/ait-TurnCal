@@ -32,6 +32,7 @@ import {
   useCloseOnBack,
 } from "./platform/overlayBack";
 import { useAnonymousKey } from "./platform/useAnonymousKey";
+import { recordPatternSaved } from "./platform/analytics";
 import { useBackHandler } from "./platform/useBackHandler";
 import { useNavSettingsButton } from "./platform/useNavSettingsButton";
 import { useSafeArea } from "./platform/useSafeArea";
@@ -231,6 +232,7 @@ function TurnCal({
       ...(result.history.length > 0 ? { patternHistory: result.history } : {}),
     };
     await saveSettings(updated);
+    recordPatternSaved();
     setSettings(updated);
     toCalendar();
   };

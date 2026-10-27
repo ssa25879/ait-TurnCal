@@ -63,10 +63,11 @@ async function exportIcs(page) {
   const option = page.locator(".export-option", { hasText: "캘린더 파일 보내기" });
   await option.waitFor({ state: "visible", timeout: 3000 });
   const note = await option.locator(".export-reminder").innerText();
+  const guidance = await option.innerText();
   const [download] = await Promise.all([page.waitForEvent("download", { timeout: 8000 }), option.click()]);
   const lines = unfold(readFileSync(await download.path()).toString("utf8")).split("\r\n");
   const event = (ymd) => { const i = lines.indexOf(`UID:turncal-${ymd}@ait-turncal`); return lines.slice(i, lines.indexOf("END:VEVENT", i)); };
-  return { note, lines, event };
+  return { note, guidance, lines, event };
 }
 
 // ---------- 1. 설정 목록·기본 상태 ----------
@@ -81,7 +82,7 @@ async function exportIcs(page) {
   check("토글 기본 켜짐", await toggle(page).isChecked());
   check("시각 여섯 개, 21시 선택·기본 표시", (await page.locator(".reminder-hours [role=radio]").count()) === 6 && (await selectedHour(page)).includes("전날 21:00") && (await selectedHour(page)).includes("기본"), await selectedHour(page));
   const text = (await page.locator(".reminder-settings").innerText()).replace(/\s+/g, " ");
-  check("안내: 캘린더 앱이 울림·비번·휴무 제외·기본 알림·다시 보내야 반영", text.includes("캘린더 앱이 알림을 울려요") && text.includes("비번·휴무에는") && text.includes("기본 알림이 따로 붙을 수") && text.includes("파일을 다시 보내 주세요"), text);
+  check("안내: 파일 알림·휴무 제외·기본 알림·자동 변경 없음·중복 확인", text.includes("파일에") && text.includes("캘린더 앱에서 울려요") && text.includes("비번·휴무는 제외") && text.includes("기본 알림이 따로 붙을 수") && text.includes("자동으로 바뀌지 않아요") && text.includes("중복 여부와 알림을 확인"), text);
   await back(page);
   check("뒤로가기 → 설정 목록", await page.locator(".settings-menu").isVisible());
   await context.close();
@@ -134,8 +135,9 @@ async function exportIcs(page) {
 // ---------- 4. 캘린더 파일·바텀시트 안내 ----------
 {
   const { context, page } = await open(base());
-  const { note, lines, event } = await exportIcs(page);
-  check("시트 안내(켜짐): 근무 전날 21:00에 알림", note === "근무 전날 21:00에 알림이 울려요. 비번·휴무는 빼요.", note);
+  const { note, guidance, lines, event } = await exportIcs(page);
+  check("시트 안내(켜짐): 전날 21시 알림을 파일에 넣음", note === "근무 전날 21:00 알림을 파일에 넣어요. 비번·휴무는 제외해요.", note);
+  check("시트 켜짐에서도 캘린더 기본 알림 안내", guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
   check("야간(10/14) 일정에 -PT3H '내일 야간'", event("20261014").includes("TRIGGER:-PT3H") && event("20261014").includes("DESCRIPTION:내일 야간"), event("20261014").join(" | "));
   check("비번(10/16)·휴무(10/17) 일정은 있지만 알림 없음", event("20261016").includes("SUMMARY:비번") && !event("20261016").includes("BEGIN:VALARM") && event("20261017").includes("SUMMARY:휴무") && !event("20261017").includes("BEGIN:VALARM"));
   check("10월 알림 21개(비번·휴무 10일 제외)", lines.filter((l) => l === "BEGIN:VALARM").length === 21);
@@ -152,8 +154,9 @@ async function exportIcs(page) {
 }
 {
   const { context, page } = await open(base({ icsReminderEnabled: false }));
-  const { note, lines } = await exportIcs(page);
-  check("시트 안내(꺼짐): 알림 없이 보내요", note === "알림 없이 보내요. 설정에서 켤 수 있어요.", note);
+  const { note, guidance, lines } = await exportIcs(page);
+  check("시트 안내(꺼짐): 턴캘 알림만 파일에 넣지 않음", note === "턴캘 알림을 파일에 넣지 않아요. 설정에서 켤 수 있어요.", note);
+  check("시트 꺼짐에서도 캘린더 기본 알림 안내", guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
   check("꺼짐 → 알림 0개", !lines.some((l) => l.includes("VALARM")));
   await page.waitForTimeout(300);
   await context.close();
@@ -207,9 +210,9 @@ async function exportIcs(page) {
   await context.close();
 }
 
-// ---------- 7. 360px ----------
-{
-  const { context, page } = await open(base(), { width: 360, height: 740 });
+// ---------- 7. 좁은 화면·변경 시각 ----------
+for (const width of [360, 390]) {
+  const { context, page } = await open(base({ icsReminderHour: 20 }), { width, height: 740 });
   await openReminder(page);
   const audit = await page.evaluate(() => {
     const scroll = document.documentElement.scrollWidth > document.documentElement.clientWidth;
@@ -218,8 +221,16 @@ async function exportIcs(page) {
     const toggleRow = document.querySelector(".reminder-toggle").getBoundingClientRect().height;
     return { scroll, small, minHeight: Math.min(...heights), toggleRow };
   });
-  check("360px: 가로 스크롤 없음·11px 미만 글자 없음", !audit.scroll && audit.small === 0, JSON.stringify(audit));
-  check("360px: 시각 선택지·토글 행 높이 44px 이상", audit.minHeight >= 44 && audit.toggleRow >= 44, JSON.stringify(audit));
+  check(`${width}px: 가로 스크롤 없음·11px 미만 글자 없음`, !audit.scroll && audit.small === 0, JSON.stringify(audit));
+  check(`${width}px: 시각 선택지·토글 행 높이 44px 이상`, audit.minHeight >= 44 && audit.toggleRow >= 44, JSON.stringify(audit));
+  await back(page); await back(page);
+  await page.getByRole("button", { name: "이번 달 내보내기" }).click();
+  const option = page.locator(".export-option", { hasText: "캘린더 파일 보내기" });
+  await option.waitFor({ state: "visible" });
+  const guidance = await option.innerText();
+  check(`${width}px: 변경 시각 20시·기본 알림 안내`, guidance.includes("근무 전날 20:00 알림을 파일에 넣어요.") && guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
+  const sheetAudit = await option.evaluate((element) => ({ overflow: document.documentElement.scrollWidth > innerWidth, small: [...element.querySelectorAll("span")].some(el => parseFloat(getComputedStyle(el).fontSize) < 11), clipped: element.scrollWidth > element.clientWidth }));
+  check(`${width}px: 내보내기 문구 잘림·가로 스크롤·작은 글자 없음`, !sheetAudit.overflow && !sheetAudit.small && !sheetAudit.clipped, JSON.stringify(sheetAudit));
   await context.close();
 }
 

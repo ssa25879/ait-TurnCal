@@ -279,7 +279,19 @@ check("v2 실행: 딥 틸·월요일, 무기록", (await page.locator(".calendar
 
 // ---------- 저장 실패 ----------
 await fresh(v3({ scheduleName: "병동", theme: "TEAL" }), null);
-await page.evaluate(() => { const o = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k.startsWith("__ait_storage:turncal")) throw new Error("quota"); return o.call(this, k, v); }; Storage.prototype.removeItem = function () { throw new Error("io"); }; });
+await page.evaluate(async () => {
+  const originalSet = Storage.prototype.setItem;
+  Storage.prototype.setItem = function (key, value) {
+    if (key.startsWith("__ait_storage:turncal")) throw new Error("quota");
+    return originalSet.call(this, key, value);
+  };
+  // Devtools 3.9는 localStorage 삭제 오류를 삼킨다. 앱이 받는 SDK 거부를 직접 주입한다.
+  const source = await (await fetch("/src/storage/entriesStorage.ts")).text();
+  const sdkUrl = source.match(/from\s+["']([^"']+)["']/)?.[1];
+  if (!sdkUrl) throw new Error("저장소 SDK import를 찾지 못했어요.");
+  const sdk = await import(sdkUrl);
+  sdk.Storage.removeItem = async () => { throw new Error("io"); };
+});
 await cell(today).click();
 await page.waitForSelector(".day-screen");
 await page.getByRole("button", { name: "세부 내용 추가" }).click();

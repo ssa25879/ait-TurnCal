@@ -24,8 +24,8 @@ const OPTIONS: ReadonlyArray<{ kind: ExportKind; title: string; desc: string }> 
 export function ExportSheet({ open, busy, reminder, onClose, onSelect }: Props) {
   useCloseOnBack(open, onClose);
   const reminderNote = reminder.enabled
-    ? `근무 전날 ${reminder.hour}:00에 알림이 울려요. 비번·휴무는 빼요.`
-    : "알림 없이 보내요. 설정에서 켤 수 있어요.";
+    ? `근무 전날 ${reminder.hour}:00 알림을 파일에 넣어요. 비번·휴무는 제외해요.`
+    : "턴캘 알림을 파일에 넣지 않아요. 설정에서 켤 수 있어요.";
   return (
     <BottomSheet open={open} onClose={onClose} header={<BottomSheet.Header>이번 달 내보내기</BottomSheet.Header>}>
       <div className="export-sheet">
@@ -41,6 +41,7 @@ export function ExportSheet({ open, busy, reminder, onClose, onSelect }: Props) 
             <span className="export-title">{option.title}</span>
             <span className="export-desc">{option.desc}</span>
             {option.kind === "calendar" && <span className="export-desc export-reminder">{reminderNote}</span>}
+            {option.kind === "calendar" && <span className="export-desc export-default-reminder">캘린더 앱의 기본 알림이 따로 붙을 수 있어요.</span>}
           </button>
         ))}
       </div>
