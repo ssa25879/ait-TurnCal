@@ -58,6 +58,12 @@ const save = async page => {
   await page.waitForSelector(".calendar-screen", { timeout: 2000 });
 };
 const selectExport = async (page, format) => {
+  // 앞선 내보내기 뒤 뜬 리뷰 요청 창은 [다음에]로 닫는다(분석 이벤트와 무관).
+  const later = page.getByRole("button", { name: "다음에", exact: true });
+  if (await later.isVisible()) {
+    await later.click();
+    await later.waitFor({ state: "hidden", timeout: 3000 });
+  }
   await page.getByRole("button", { name: "이번 달 내보내기", exact: true }).click();
   const option = page.locator(".export-option", { hasText: format === "image" ? "달력 이미지 보내기" : "캘린더 파일 보내기" });
   await option.click();

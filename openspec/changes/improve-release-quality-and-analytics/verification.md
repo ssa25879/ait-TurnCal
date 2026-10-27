@@ -46,6 +46,7 @@
 | `npm run build:adtest` | 로컬 빌드 성공, 콘솔 `20261026-28`·`CREATED`, 사용자 요청으로 본인 테스트 푸시 성공 | `01a17696-a073-7068-b98c-7900c79ab54b` | `DC909964E4A525C754AFF7C4900E95297F5C142D6E8C548DBA6170CD19E71C85` |
 | `npm run build:adtest` (커밋 `530d249`, 재가져오기 안내 문구) | 2026-10-27 로컬 빌드 성공, 콘솔 `20261027-29`·`CREATED`·SDK 3.9.0, 사용자 요청으로 본인 테스트 푸시 성공. 실제 광고 ID 미포함 확인 | `01a17b36-7bd0-74c7-8d86-3db34d8e1462` | `CCAA24A18E61A9E34D2EC89AC54C328426B5C10B59E10D70286236362E0F3F3E` |
 | `npm run build:adtest` (커밋 `05c0989`, 보내기 전 확인 창) | 2026-10-27 로컬 빌드 성공, 콘솔 `20261027-30`·`CREATED`·SDK 3.9.0, 사용자 요청으로 본인 테스트 푸시 성공. 실제 광고 ID 미포함 확인 | `01a17b41-f6d3-728c-808d-dfed353c72bf` | `E75F6B37B0EA49197C45FB4B09D2B77D004966133CFA8D7C448EDD8A9A944F70` |
+| `npm run build:adtest` (커밋 `1b32d90`, 내보내기 뒤 리뷰 요청 안내) | 2026-10-27 로컬 빌드 성공, 콘솔 `20261027-31`·`CREATED`·SDK 3.9.0, 사용자 요청으로 본인 테스트 푸시 성공. 실제 광고 ID 미포함 확인 | `01a17b51-10f4-7d92-9982-2e1d674e7417` | `182E4B68DFB9D92696D3FD294D8F6A326380060F2A0E512AF7E86CED581658E8` |
 | `npm run build` | 로컬 출시용 빌드 성공, 업로드하지 않음 | `01a17697-9ae1-7ed8-a749-a8641a2522d8` | `B85FFD7CF6B4C593FA74E2E95F27B41D0C03F51090E31A703507780000055151` |
 
 출시용 `dist`는 실제 광고 설정 값 포함, 테스트 배너 ID·mock 저장 접두어·Devtools 전역/이벤트 표식 없음, 소스맵 0개를 확인했다. 실제 광고 값은 출력하지 않았다. 최종 SDK·Devtools·CLI는 3.9.0이고 peer 오류가 없다. JS는 약 1.22MB이며 기존 단일 청크 경고가 남는다. 실제 기기에서의 로딩·광고 노출은 아직 검사하지 않았다.
@@ -56,6 +57,7 @@
 - [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17696-a073-7068-b98c-7900c79ab54b&testVersionName=20261026-28)
 - `20261027-29` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b36-7bd0-74c7-8d86-3db34d8e1462&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b36-7bd0-74c7-8d86-3db34d8e1462&testVersionName=20261027-29). 검수 신청하지 않음
 - `20261027-30` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b41-f6d3-728c-808d-dfed353c72bf&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b41-f6d3-728c-808d-dfed353c72bf&testVersionName=20261027-30). 검수 신청하지 않음
+- `20261027-31` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b51-10f4-7d92-9982-2e1d674e7417&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b51-10f4-7d92-9982-2e1d674e7417&testVersionName=20261027-31). 검수 신청하지 않음
 
 ## 실기기 확인 준비
 

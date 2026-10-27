@@ -12,6 +12,11 @@ export function canAskReview(): boolean {
   }
 }
 
+/** [다음에]로 닫아도 같은 실행 중에는 다시 묻지 않는다. */
+export function skipReview(): void {
+  requested = true;
+}
+
 /** 리뷰 창은 피로도 정책에 따라 뜨지 않을 수 있고 결과도 알 수 없으므로 기다리지 않는다. */
 export function askReview(): void {
   requested = true;

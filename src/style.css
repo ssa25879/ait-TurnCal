@@ -666,23 +666,6 @@ body {
   text-align: left;
 }
 
-.review-prompt {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
-.review-prompt-text {
-  flex: 1 1 160px;
-  margin: 0;
-  font-size: var(--font-m);
-  line-height: 1.5;
-  color: var(--color-text);
-}
-
 .bottom-action .notice-inline {
   margin: 8px 0 0;
 }

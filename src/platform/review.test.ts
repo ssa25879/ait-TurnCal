@@ -37,6 +37,13 @@ describe("리뷰 요청", () => {
     expect(canAskReview()).toBe(false);
   });
 
+  it("[다음에]로 닫으면 요청하지 않고 같은 실행 중에는 다시 묻지 않는다", async () => {
+    const { skipReview, canAskReview } = await load();
+    skipReview();
+    expect(sdk.requestReview).not.toHaveBeenCalled();
+    expect(canAskReview()).toBe(false);
+  });
+
   it("요청 실패·동기 예외는 사용자 흐름으로 번지지 않는다", async () => {
     const { askReview } = await load();
     sdk.requestReview.mockRejectedValue(new Error("x"));

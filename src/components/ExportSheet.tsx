@@ -50,6 +50,27 @@ interface ConfirmProps {
   onConfirm(): void;
 }
 
+interface ReviewProps {
+  open: boolean;
+  onLater(): void;
+  onReview(): void;
+}
+
+/** 내보내기 뒤 리뷰 요청. 공유 창은 취소해도 결과가 같아 완료라고 말하지 않는다. */
+export function ReviewRequestDialog({ open, onLater, onReview }: ReviewProps) {
+  useCloseOnBack(open, onLater);
+  return (
+    <ConfirmDialog
+      open={open}
+      title="턴캘이 도움이 됐나요?"
+      description="리뷰를 남겨 주시면 턴캘을 더 좋게 만드는 데 큰 힘이 돼요."
+      onClose={onLater}
+      cancelButton={<ConfirmDialog.CancelButton onClick={onLater}>다음에</ConfirmDialog.CancelButton>}
+      confirmButton={<ConfirmDialog.ConfirmButton onClick={onReview}>리뷰 남기기</ConfirmDialog.ConfirmButton>}
+    />
+  );
+}
+
 /** 캘린더 파일을 보내기 전 알림·다시 가져오기 안내. 시트보다 큰 글자로 보여 준다. */
 export function CalendarExportDialog({ open, reminder, onCancel, onConfirm }: ConfirmProps) {
   useCloseOnBack(open, onCancel);

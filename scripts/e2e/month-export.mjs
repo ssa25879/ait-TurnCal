@@ -56,8 +56,16 @@ const back = async (page) => {
 };
 const exportButton = (page) => page.getByRole("button", { name: "이번 달 내보내기" });
 const option = (page, title) => page.locator(".export-option", { hasText: title });
-/** 선택지를 누르고 다운로드(Devtools의 saveBase64Data)를 받는다. */
-async function exportAs(page, title) {
+const reviewTitle = (page) => page.getByText("턴캘이 도움이 됐나요?", { exact: true });
+/** 내보내기 뒤 리뷰 요청 창이 뜨면 [다음에]로 닫는다(같은 실행에서 첫 내보내기 뒤에만 뜬다). */
+async function dismissReview(page) {
+  if (await reviewTitle(page).waitFor({ state: "visible", timeout: 1500 }).then(() => true, () => false)) {
+    await page.getByRole("button", { name: "다음에", exact: true }).click();
+    await reviewTitle(page).waitFor({ state: "hidden", timeout: 3000 });
+  }
+}
+/** 선택지를 누르고 다운로드(Devtools의 saveBase64Data)를 받는다. keepReview면 리뷰 요청 창을 닫지 않는다. */
+async function exportAs(page, title, { keepReview = false } = {}) {
   await exportButton(page).click();
   await option(page, title).waitFor({ state: "visible", timeout: 3000 });
   // 캘린더 파일은 보내기 전 확인 창에서 [보내기]를 눌러야 공유 창이 열린다.
@@ -66,6 +74,7 @@ async function exportAs(page, title) {
     : () => option(page, title).click();
   const [download] = await Promise.all([page.waitForEvent("download", { timeout: 8000 }), send()]);
   const path = await download.path();
+  if (!keepReview) await dismissReview(page);
   return { name: download.suggestedFilename(), bytes: readFileSync(path) };
 }
 const unfold = (text) => text.replace(/\r\n /g, "");
@@ -119,7 +128,7 @@ const unfold = (text) => text.replace(/\r\n /g, "");
 // ---------- 3. 캘린더 파일 보내기 ----------
 {
   const { context, page } = await open(base());
-  const { name, bytes } = await exportAs(page, "캘린더 파일 보내기");
+  const { name, bytes } = await exportAs(page, "캘린더 파일 보내기", { keepReview: true });
   const ics = unfold(bytes.toString("utf8"));
   const lines = ics.split("\r\n");
   check("파일 이름 turncal-2026-10-<보낸 시각>.ics", /^turncal-2026-10-[0-9]{14}[.]ics$/.test(name), name);
@@ -131,20 +140,30 @@ const unfold = (text) => text.replace(/\r\n /g, "");
   check("일정 설명에 턴캘 공유 링크(intoss://ait-turncal)", event("20261013").some((l) => l.startsWith("URL:") && l.includes("intoss://ait-turncal")) && event("20261013").some((l) => l.startsWith("DESCRIPTION:턴캘에서 보기")), event("20261013").filter((l) => l.startsWith("URL")).join());
   check("intoss-private 없음", !ics.includes("intoss-private"));
   check("캘린더 이름에 근무표 이름(파일 이름에는 없음)", lines.some((l) => l.startsWith("X-WR-CALNAME:병동/3교대 ../ 2026년 10월")) && !name.includes("병동"));
-  // 리뷰 요청: 내보내기 뒤 달력 하단 안내, 버튼을 눌러야 requestReview, 같은 실행에서 한 번만.
+  // 리뷰 요청: 내보내기 뒤 창, [리뷰 남기기]를 눌러야 requestReview, 같은 실행에서 한 번만.
   // Devtools는 Promise 호출을 pending·resolved 두 줄로 남기므로 pending만 센다.
   const reviewCalls = () => page.evaluate(() => window.__ait.state.sdkCallLog.filter((e) => e.method === "requestReview" && e.status === "pending").length);
-  const prompt = page.locator(".bottom-action .review-prompt");
-  await prompt.waitFor({ state: "visible", timeout: 3000 });
-  check("내보내기 뒤 리뷰 안내·버튼 보임, 완료 문구 없음", (await prompt.innerText()).includes("턴캘이 도움이 됐다면 리뷰를 남겨 주세요.") && (await prompt.getByRole("button", { name: "리뷰 남기기" }).count()) === 1 && (await page.getByText(/보냈어요|저장했어요|전송 완료/).count()) === 0);
+  await reviewTitle(page).waitFor({ state: "visible", timeout: 3000 });
+  check("내보내기 뒤 리뷰 요청 창·두 버튼 보임, 완료 문구 없음", (await page.getByRole("button", { name: "리뷰 남기기", exact: true }).count()) === 1 && (await page.getByRole("button", { name: "다음에", exact: true }).count()) === 1 && (await page.getByText(/보냈어요|저장했어요|전송 완료/).count()) === 0);
   check("버튼을 누르기 전에는 requestReview 호출 없음", (await reviewCalls()) === 0);
-  await prompt.getByRole("button", { name: "리뷰 남기기" }).click();
-  await prompt.waitFor({ state: "hidden", timeout: 3000 });
-  check("[리뷰 남기기] → requestReview 1회·안내 사라짐", (await reviewCalls()) === 1);
+  await page.getByRole("button", { name: "리뷰 남기기", exact: true }).click();
+  await reviewTitle(page).waitFor({ state: "hidden", timeout: 3000 });
+  check("[리뷰 남기기] → requestReview 1회·창 닫힘", (await reviewCalls()) === 1);
   await page.waitForTimeout(300);
+  await exportAs(page, "달력 이미지 보내기", { keepReview: true });
+  await page.waitForTimeout(1500);
+  check("같은 실행에서 다시 내보내도 리뷰 요청 창 다시 안 뜸", (await reviewTitle(page).count()) === 0 && (await reviewCalls()) === 1);
+  await page.waitForTimeout(300);
+  await context.close();
+}
+{
+  const { context, page } = await open(base());
   await exportAs(page, "달력 이미지 보내기");
   await page.waitForTimeout(300);
-  check("같은 실행에서 다시 내보내도 리뷰 안내 다시 안 뜸", (await prompt.count()) === 0 && (await reviewCalls()) === 1);
+  await exportAs(page, "달력 이미지 보내기", { keepReview: true });
+  await page.waitForTimeout(1500);
+  const calls = await page.evaluate(() => window.__ait.state.sdkCallLog.filter((e) => e.method === "requestReview").length);
+  check("[다음에]로 닫으면 requestReview 없이 같은 실행에서 다시 안 뜸", (await reviewTitle(page).count()) === 0 && calls === 0, `calls=${calls}`);
   await page.waitForTimeout(300);
   await context.close();
 }
@@ -160,7 +179,7 @@ const unfold = (text) => text.replace(/\r\n /g, "");
   const alert = page.locator(".bottom-action [role=alert]");
   check("공유 창 실패 → 실패 안내(role=alert)", (await alert.count()) === 1 && (await alert.innerText()).includes("내보내지 못했어요"));
   check("실패해도 저장값 그대로", (await raw(page)) === settingsBefore);
-  check("실패하면 리뷰 안내 없음", (await page.locator(".review-prompt").count()) === 0);
+  check("실패하면 리뷰 요청 창 없음", (await reviewTitle(page).count()) === 0);
   await page.getByRole("button", { name: "다음 달" }).click();
   await page.waitForTimeout(300);
   check("달을 넘기면 안내 사라짐", (await alert.count()) === 0);
@@ -201,14 +220,12 @@ const unfold = (text) => text.replace(/\r\n /g, "");
   await page.waitForTimeout(300);
   const [download] = await Promise.all([page.waitForEvent("download", { timeout: 8000 }), option(page, "달력 이미지 보내기").click()]);
   await download.path();
-  const review = page.locator(".review-prompt");
-  await review.waitFor({ state: "visible", timeout: 3000 });
-  const r = await review.evaluate((e) => ({
+  await reviewTitle(page).waitFor({ state: "visible", timeout: 3000 });
+  const r = await page.evaluate(() => ({
     sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth,
-    font: parseFloat(getComputedStyle(e.querySelector(".review-prompt-text")).fontSize),
-    button: e.querySelector("button").getBoundingClientRect().height,
+    buttons: [...document.querySelectorAll("button")].filter((b) => ["리뷰 남기기", "다음에"].includes(b.textContent.trim())).map((b) => b.getBoundingClientRect().height),
   }));
-  check("360px 리뷰 안내: 가로 스크롤 없음·글자 13px 초과·버튼 44px 이상", r.sw <= r.cw && r.font > 13 && r.button >= 44, JSON.stringify(r));
+  check("360px 리뷰 요청 창: 가로 스크롤 없음·버튼 44px 이상", r.sw <= r.cw && r.buttons.length === 2 && r.buttons.every((h) => h >= 44), JSON.stringify(r));
   await page.waitForTimeout(300);
   await context.close();
 }

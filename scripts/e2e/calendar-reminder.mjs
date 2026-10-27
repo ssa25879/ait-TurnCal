@@ -69,6 +69,9 @@ async function exportIcs(page) {
   const guidance = await confirm.innerText();
   const [download] = await Promise.all([page.waitForEvent("download", { timeout: 8000 }), page.getByRole("button", { name: "보내기", exact: true }).click()]);
   const lines = unfold(readFileSync(await download.path()).toString("utf8")).split("\r\n");
+  // 첫 내보내기 뒤 뜨는 리뷰 요청 창은 [다음에]로 닫는다.
+  const later = page.getByRole("button", { name: "다음에", exact: true });
+  if (await later.waitFor({ state: "visible", timeout: 1500 }).then(() => true, () => false)) await later.click();
   const event = (ymd) => { const i = lines.indexOf(`UID:turncal-${ymd}@ait-turncal`); return lines.slice(i, lines.indexOf("END:VEVENT", i)); };
   return { note, guidance, lines, event };
 }
