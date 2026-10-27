@@ -660,6 +660,12 @@ body {
   white-space: pre-line;
 }
 
+.export-confirm {
+  display: grid;
+  gap: var(--space-2);
+  text-align: left;
+}
+
 .bottom-action .notice-inline {
   margin: 8px 0 0;
 }

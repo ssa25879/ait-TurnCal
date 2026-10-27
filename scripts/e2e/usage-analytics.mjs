@@ -62,6 +62,8 @@ const selectExport = async (page, format) => {
   const option = page.locator(".export-option", { hasText: format === "image" ? "달력 이미지 보내기" : "캘린더 파일 보내기" });
   await option.click();
   await option.waitFor({ state: "hidden" });
+  // 캘린더 파일은 보내기 전 확인 창에서 [보내기]를 누른다.
+  if (format !== "image") await page.getByRole("button", { name: "보내기", exact: true }).click();
 };
 const noCompletion = page => page.getByText(/저장했어요|보냈어요|전송 완료/).count().then(count => count === 0);
 
@@ -159,8 +161,10 @@ try {
     await page.evaluate(() => { window.__testSdk.Share.createLink = () => new Promise(() => {}); });
     await page.getByRole("button", { name: "이번 달 내보내기", exact: true }).click();
     await page.locator(".export-option", { hasText: "캘린더 파일 보내기" }).click();
+    const send = page.getByRole("button", { name: "보내기", exact: true });
+    await send.click();
     // TDS가 닫힘 애니메이션에 이전 버튼을 남겨도 진행 중 요청은 중복 실행하지 않는다.
-    await page.locator(".export-option").evaluateAll(elements => elements.forEach(element => element.click()));
+    await send.evaluateAll(elements => elements.forEach(element => element.click()));
     await page.waitForFunction(() => window.__shareCalls === 1, undefined, { timeout: 4000 });
     const requests = (await events(page)).filter(entry => entry.params.log_name === "turncal_export_requested").length;
     await selectExport(page, "image");

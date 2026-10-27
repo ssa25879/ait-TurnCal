@@ -10,7 +10,7 @@ import { exportMonth, type ExportKind } from "../export/exportMonth";
 import { recordExportRequested, recordExportResult } from "../platform/analytics";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
-import { ExportSheet } from "./ExportSheet";
+import { CalendarExportDialog, ExportSheet } from "./ExportSheet";
 import { useShiftLabels } from "./ShiftLabelsContext";
 import { TodaySummary } from "./TodaySummary";
 
@@ -59,6 +59,7 @@ export function CalendarScreen({
 }: Props) {
   const shiftLabels = useShiftLabels();
   const [exportOpen, setExportOpen] = useState(false);
+  const [calendarConfirmOpen, setCalendarConfirmOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const exportInFlight = useRef(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
@@ -192,7 +193,26 @@ export function CalendarScreen({
         )}
       </div>
 
-      <ExportSheet open={exportOpen} busy={exporting} reminder={reminder} onClose={() => setExportOpen(false)} onSelect={(kind) => void runExport(kind)} />
+      <ExportSheet
+        open={exportOpen}
+        busy={exporting}
+        onClose={() => setExportOpen(false)}
+        onSelect={(kind) => {
+          // 캘린더 파일은 알림·다시 가져오기 안내를 확인 창으로 한 번 더 보여 준 뒤 보낸다.
+          if (kind === "image") return void runExport(kind);
+          setExportOpen(false);
+          setCalendarConfirmOpen(true);
+        }}
+      />
+      <CalendarExportDialog
+        open={calendarConfirmOpen}
+        reminder={reminder}
+        onCancel={() => setCalendarConfirmOpen(false)}
+        onConfirm={() => {
+          setCalendarConfirmOpen(false);
+          void runExport("calendar");
+        }}
+      />
 
       <CalendarBanner />
     </section>

@@ -62,9 +62,12 @@ async function exportIcs(page) {
   await page.getByRole("button", { name: "이번 달 내보내기" }).click();
   const option = page.locator(".export-option", { hasText: "캘린더 파일 보내기" });
   await option.waitFor({ state: "visible", timeout: 3000 });
-  const note = await option.locator(".export-reminder").innerText();
-  const guidance = await option.innerText();
-  const [download] = await Promise.all([page.waitForEvent("download", { timeout: 8000 }), option.click()]);
+  await option.click();
+  const confirm = page.locator(".export-confirm");
+  await confirm.waitFor({ state: "visible", timeout: 3000 });
+  const note = await confirm.locator(".export-reminder").innerText();
+  const guidance = await confirm.innerText();
+  const [download] = await Promise.all([page.waitForEvent("download", { timeout: 8000 }), page.getByRole("button", { name: "보내기", exact: true }).click()]);
   const lines = unfold(readFileSync(await download.path()).toString("utf8")).split("\r\n");
   const event = (ymd) => { const i = lines.indexOf(`UID:turncal-${ymd}@ait-turncal`); return lines.slice(i, lines.indexOf("END:VEVENT", i)); };
   return { note, guidance, lines, event };
@@ -132,12 +135,13 @@ async function exportIcs(page) {
   await context.close();
 }
 
-// ---------- 4. 캘린더 파일·바텀시트 안내 ----------
+// ---------- 4. 캘린더 파일·보내기 전 확인 창 안내 ----------
 {
   const { context, page } = await open(base());
   const { note, guidance, lines, event } = await exportIcs(page);
-  check("시트 안내(켜짐): 전날 21시 알림을 파일에 넣음", note === "근무 전날 21:00 알림을 파일에 넣어요. 비번·휴무는 제외해요.", note);
-  check("시트 켜짐에서도 캘린더 기본 알림 안내", guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
+  check("확인 창 안내(켜짐): 전날 21시 알림을 파일에 넣음", note === "근무 전날 21:00 알림을 파일에 넣어요. 비번·휴무는 제외해요.", note);
+  check("확인 창 켜짐에서도 캘린더 기본 알림 안내", guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
+  check("확인 창에 다시 가져오기·저장 캘린더 안내", guidance.includes("그 달 일정을 지운 뒤 가져와야 바뀌어요.") && guidance.includes("저장된 캘린더는 가져온 뒤 확인해 주세요."), guidance);
   check("야간(10/14) 일정에 -PT3H '내일 야간'", event("20261014").includes("TRIGGER:-PT3H") && event("20261014").includes("DESCRIPTION:내일 야간"), event("20261014").join(" | "));
   check("비번(10/16)·휴무(10/17) 일정은 있지만 알림 없음", event("20261016").includes("SUMMARY:비번") && !event("20261016").includes("BEGIN:VALARM") && event("20261017").includes("SUMMARY:휴무") && !event("20261017").includes("BEGIN:VALARM"));
   check("10월 알림 21개(비번·휴무 10일 제외)", lines.filter((l) => l === "BEGIN:VALARM").length === 21);
@@ -155,8 +159,8 @@ async function exportIcs(page) {
 {
   const { context, page } = await open(base({ icsReminderEnabled: false }));
   const { note, guidance, lines } = await exportIcs(page);
-  check("시트 안내(꺼짐): 턴캘 알림만 파일에 넣지 않음", note === "턴캘 알림을 파일에 넣지 않아요. 설정에서 켤 수 있어요.", note);
-  check("시트 꺼짐에서도 캘린더 기본 알림 안내", guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
+  check("확인 창 안내(꺼짐): 턴캘 알림만 파일에 넣지 않음", note === "턴캘 알림을 파일에 넣지 않아요. 설정에서 켤 수 있어요.", note);
+  check("확인 창 꺼짐에서도 캘린더 기본 알림 안내", guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
   check("꺼짐 → 알림 0개", !lines.some((l) => l.includes("VALARM")));
   await page.waitForTimeout(300);
   await context.close();
@@ -227,10 +231,21 @@ for (const width of [360, 390]) {
   await page.getByRole("button", { name: "이번 달 내보내기" }).click();
   const option = page.locator(".export-option", { hasText: "캘린더 파일 보내기" });
   await option.waitFor({ state: "visible" });
-  const guidance = await option.innerText();
-  check(`${width}px: 변경 시각 20시·기본 알림 안내`, guidance.includes("근무 전날 20:00 알림을 파일에 넣어요.") && guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
-  const sheetAudit = await option.evaluate((element) => ({ overflow: document.documentElement.scrollWidth > innerWidth, small: [...element.querySelectorAll("span")].some(el => parseFloat(getComputedStyle(el).fontSize) < 11), clipped: element.scrollWidth > element.clientWidth }));
-  check(`${width}px: 내보내기 문구 잘림·가로 스크롤·작은 글자 없음`, !sheetAudit.overflow && !sheetAudit.small && !sheetAudit.clipped, JSON.stringify(sheetAudit));
+  await option.click();
+  const confirm = page.locator(".export-confirm");
+  await confirm.waitFor({ state: "visible", timeout: 3000 });
+  const guidance = await confirm.innerText();
+  check(`${width}px: 확인 창에 변경 시각 20시·기본 알림 안내`, guidance.includes("근무 전날 20:00 알림을 파일에 넣어요.") && guidance.includes("캘린더 앱의 기본 알림이 따로 붙을 수 있어요."));
+  const sheetAudit = await confirm.evaluate((element) => {
+    const sizes = [...element.querySelectorAll("span")].map(el => parseFloat(getComputedStyle(el).fontSize));
+    return { overflow: document.documentElement.scrollWidth > innerWidth, minFont: Math.min(...sizes), clipped: element.scrollWidth > element.clientWidth };
+  });
+  // 시트 설명(13px)보다 큰 글자로 보여 준다.
+  check(`${width}px: 확인 창 문구 잘림·가로 스크롤 없음, 글자 13px 초과`, !sheetAudit.overflow && !sheetAudit.clipped && sheetAudit.minFont > 13, JSON.stringify(sheetAudit));
+  await page.getByRole("button", { name: "취소", exact: true }).click();
+  await confirm.waitFor({ state: "hidden", timeout: 3000 });
+  const saves = await page.evaluate(() => window.__ait.state.sdkCallLog.filter((e) => JSON.stringify(e).includes("saveBase64Data")).length);
+  check(`${width}px: 확인 창 취소 → 파일을 보내지 않고 닫힘`, saves === 0, `saveBase64Data 호출 ${saves}회`);
   await context.close();
 }
 
