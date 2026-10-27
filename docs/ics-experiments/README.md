@@ -1,6 +1,6 @@
 # ICS 저장 캘린더 실기기 실험 (E1~E4)
 
-근거: [ICS_TARGET_CALENDAR_ANALYSIS.md](../ICS_TARGET_CALENDAR_ANALYSIS.md) 4절. 결과는 `openspec/changes/improve-release-quality-and-analytics/verification.md`의 C02·C03에 반영한다.
+근거: [ICS_TARGET_CALENDAR_ANALYSIS.md](../ICS_TARGET_CALENDAR_ANALYSIS.md) 4절. 결과는 `openspec/changes/archive/2026-10-27-improve-release-quality-and-analytics/verification.md`의 C02·C03에 반영한다.
 
 ## 파일
 
