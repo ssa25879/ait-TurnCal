@@ -61,6 +61,20 @@
 - `20261027-31` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b51-10f4-7d92-9982-2e1d674e7417&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b51-10f4-7d92-9982-2e1d674e7417&testVersionName=20261027-31). 검수 신청하지 않음
 - `20261027-32` [테스트 앱](intoss-private://ait-turncal?_deploymentId=01a17b6b-86eb-705d-8cb5-0bb22a56f975&host=appsInTossHost) · [콘솔 테스트 QR](https://apps-in-toss.toss.im/workspace/96603/mini-app/86006/app-build?testDeploymentId=01a17b6b-86eb-705d-8cb5-0bb22a56f975&testVersionName=20261027-32). 검수 신청하지 않음
 
+### 작업 4.1 환경 기록 (2026-10-27)
+
+| 항목 | 기록 | 근거 |
+|---|---|---|
+| 번들 ID | `20261027-32`(`01a17b6b-86eb-705d-8cb5-0bb22a56f975`), 이전 `20261027-29`~`31` | 위 최종 번들 표 |
+| 기기·OS | Galaxy S26 Ultra, Android 17 / One UI 9.0 | 사용자 보고 |
+| 토스·캘린더 앱 버전 | 최신(번호 미기록) | 사용자 보고, tasks 4.1 완화 조건(사용자 결정) |
+| 기본 알림 | 턴캘 알림을 넣지 않은 일정에 캘린더 앱 기본 알림(예: 하루 전 17:00)이 붙음 | 2026-10-21 같은 기기 확인(`add-ics-evening-reminder`) |
+| 알림 권한 | 가져온 일정의 알림이 실제로 울림 → 허용 상태로 판단 | C06 사용자 보고 |
+| 시간대 | 한국 시간(Asia/Seoul) | 사용자 보고 |
+| 개인 일정과 분리 | 테스트 일정은 개인 일정과 분리해서 수행. ICS 실험은 2027년 1~6월(개인 일정과 겹치지 않는 달) 사용 | 사용자 보고, `docs/ics-experiments/README.md` |
+
+위 기록으로 작업 4.1의 확인 조건을 충족한다.
+
 ## 실기기 확인 준비
 
 사용자 답변: Galaxy S26 Ultra에서 삼성·구글 캘린더 확인 가능. 테스트 번들 `20261026-28`과 C01~C06 안내 뒤 **“정상 작동 확인”** 응답을 받았다. 두 캘린더에 대한 일괄 정상 확인으로 기록하며, 앱별 일정 수·중복 처리·알림 시각 등 사례별 상세 결과를 추정해 채우지 않는다.
