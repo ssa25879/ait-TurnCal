@@ -8,6 +8,7 @@ import type { PatternTimeline } from "../domain/patternHistory";
 import type { WeekStart } from "../domain/types";
 import { exportMonth, type ExportKind } from "../export/exportMonth";
 import { recordExportRequested, recordExportResult } from "../platform/analytics";
+import { askReview, canAskReview } from "../platform/review";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
 import { CalendarExportDialog, ExportSheet } from "./ExportSheet";
@@ -63,6 +64,7 @@ export function CalendarScreen({
   const [exporting, setExporting] = useState(false);
   const exportInFlight = useRef(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [reviewPrompt, setReviewPrompt] = useState(false);
   // 다른 달로 넘기면 이전 달의 내보내기 안내는 지운다(화면을 떠나면 이 컴포넌트와 함께 사라진다).
   useEffect(() => setExportNotice(null), [month.year, month.month]);
 
@@ -89,6 +91,8 @@ export function CalendarScreen({
     recordExportResult(kind, result);
     exportInFlight.current = false;
     setExporting(false);
+    // 공유 창은 취소해도 "opened"라 완료라고 말하지 않고, 리뷰는 사용자가 버튼을 눌렀을 때만 요청한다.
+    if (result === "opened" && canAskReview()) setReviewPrompt(true);
     if (result === "unsupported") setExportNotice("토스 앱을 업데이트하면 내보낼 수 있어요.");
     if (result === "failed") setExportNotice("내보내지 못했어요. 잠시 후 다시 시도해 주세요.");
   };
@@ -185,6 +189,22 @@ export function CalendarScreen({
           <p className="notice-inline" role="alert">
             {exportNotice}
           </p>
+        )}
+        {reviewPrompt && (
+          <div className="review-prompt">
+            <p className="review-prompt-text">턴캘이 도움이 됐다면 리뷰를 남겨 주세요.</p>
+            <Button
+              className="tap-44"
+              size="medium"
+              variant="weak"
+              onClick={() => {
+                askReview();
+                setReviewPrompt(false);
+              }}
+            >
+              리뷰 남기기
+            </Button>
+          </div>
         )}
         {showSettingsButton && (
           <Button className="tap-44" size="medium" variant="weak" display="full" onClick={onOpenSettings}>
