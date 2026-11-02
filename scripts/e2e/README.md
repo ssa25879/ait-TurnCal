@@ -20,24 +20,25 @@ Copy-Item scripts\e2e\*.mjs $env:TEMP\turncal-e2e\
 node $env:TEMP\turncal-e2e\mvp-regression.mjs     # MVP 회귀 58개
 node $env:TEMP\turncal-e2e\display-settings.mjs   # 설정 목록·테마·저장 v2→v3 39개
 node $env:TEMP\turncal-e2e\day-entries.mjs        # 세부 내용·이름·초기화·주말·공휴일 59개
-node $env:TEMP\turncal-e2e\banner.mjs             # 달력 하단 배너 19개
 node $env:TEMP\turncal-e2e\user-key.mjs           # 사용자 식별키 저장·초기화 6개
-node $env:TEMP\turncal-e2e\today-summary.mjs      # 오늘·내일 요약 37개(시계 고정, 360px, 자정 갱신)
+node $env:TEMP\turncal-e2e\today-summary.mjs      # 오늘·내일 요약 35개(시계 고정, 360px, 자정 갱신)
 node $env:TEMP\turncal-e2e\pattern-history.mjs    # 패턴 이력·적용 범위·초기화(패턴/전체)·이력 불러오기·손상 데이터·360px·저장 실패 80개
 node $env:TEMP\turncal-e2e\empty-calendar.mjs    # 패턴 없음 빈 달력·안내 카드·설정/뒤로가기 계층·첫 실행·전체 초기화·재실행 빈 달력·뒤로가기 종료·360px 45개
 node $env:TEMP\turncal-e2e\calendar-shortcuts.mjs # 달력 바로가기(패턴·이름 수정)·뒤로가기/폐기/저장 후 달력 복귀·설정 경로 불변·360px 33개
 node $env:TEMP\turncal-e2e\visual-audit.mjs # 화면 감사: 11px 미만 글자·터치 영역 44px·가로 스크롤·6주 격자가 첫 화면 안(360×740·390×844)·근무 유형 화면 63개
-node $env:TEMP\turncal-e2e\navbar-settings.mjs # 설정 진입 내비 바 기능 버튼(달력에서만·해제·클릭·대체 하단 버튼) 35개
+node $env:TEMP\turncal-e2e\navbar-settings.mjs # 설정 진입 내비 바 기능 버튼(달력에서만·해제·클릭·대체 하단 버튼) 34개
 node $env:TEMP\turncal-e2e\shift-labels.mjs   # 근무 유형 이름·약어·색(메뉴·입력 규칙·앱 전체 반영·저장값·되돌리기·폐기·초기화·손상·360px) 57개
 node $env:TEMP\turncal-e2e\month-export.mjs   # 이번 달 내보내기(버튼 표시·시트·뒤로가기·PNG/ics 다운로드 내용·실패 안내·360px) 28개, OUT_DIR을 주면 받은 PNG 저장
 node $env:TEMP\turncal-e2e\calendar-reminder.mjs # 캘린더 알림(설정·저장·.ics VALARM·휴무 제외·켜짐/꺼짐 안내·기본 알림·자동 갱신 없음·실패·초기화·360/390px) 40개
 node $env:TEMP\turncal-e2e\usage-analytics.mjs   # 사용 이벤트(저장 성공/실패·복원·이력·렌더 중복·내보내기 결과·분석 실패 격리·정보 제외) 40개
+node $env:TEMP\turncal-e2e\month-stats.mjs       # 월간 근무 통계(독립 계산 일치·달 이동·바뀐 근무·사용자 정의 이름·패턴 없음 숨김·360/390px·기존 동작 유지) 26개
+node $env:TEMP\turncal-e2e\month-jump.mjs        # 연·월 직접 이동(시트 선택 상태·연도 변경·1970/2100 경계·뒤로가기·기존 이동과 병용·360/390px) 31개
 ```
 
 - Edge 155+는 Playwright 1.49의 옛 `--headless`·`--remote-debugging-pipe` 실행이 안 돼(실행 직후 종료) 직접 띄운 Edge에 CDP로 연결한다: `msedge.exe --headless=new --hide-scrollbars --mute-audio --disable-gpu --remote-debugging-port=9333 --user-data-dir=%TEMP%edge-cdp about:blank` 후 `CDP_URL=http://127.0.0.1:9333`을 주고 스크립트를 실행한다(`--hide-scrollbars`가 없으면 세로 스크롤바가 폭을 차지해 360px 가로 스크롤 검사가 틀어진다). `CDP_URL`이 없으면 예전처럼 직접 실행한다.
 - 브라우저 경로는 `EDGE_PATH`, 앱 주소는 `APP_URL` 환경 변수로 바꿀 수 있다.
 - mock의 `closeView`는 `history.back()`을 호출하므로 스크립트가 `history.back`을 무력화하고 콘솔 로그(`closeView called`)로 종료를 판정한다.
-- 뒤로가기는 `window.dispatchEvent(new CustomEvent("__ait:backEvent"))`, 저장값은 `localStorage`의 `__ait_storage:` 접두어 키, SDK 호출 기록은 `window.__ait.state.sdkCallLog`, 광고 없음 강제는 `window.__ait.patch("ads", { forceNoFill: true })`.
+- 뒤로가기는 `window.dispatchEvent(new CustomEvent("__ait:backEvent"))`, 저장값은 `localStorage`의 `__ait_storage:` 접두어 키, SDK 호출 기록은 `window.__ait.state.sdkCallLog`.
 - 사용 이벤트는 `window.__ait.state.analyticsLog`에서 `params.log_name`이 `turncal_`로 시작하는 항목으로 확인한다. 앱 페이로드는 고정된 세 이름과 형식·결과만 허용한다. 가상 이름·메모·근무표와 원시 오류가 포함되지 않는지 검사하며 SDK 자동 공통 속성과 구분한다. mock 기록 통과는 운영 수집 성공을 뜻하지 않는다.
 - Devtools 3.9.0은 `localStorage.removeItem` 오류를 경고 후 성공 반환할 수 있다. 전체 초기화 실패 검사는 앱이 받는 SDK `Storage.removeItem`을 거부시킨다. 분석 실패 검사는 실제 SDK 경계에 동기 예외·Promise 거부·응답 지연·메서드 부재를 주입한다.
 - `page.clock.setFixedTime`은 `Date.now`를 멈춰 TDS 바텀시트 닫힘 애니메이션이 끝나지 않는다(닫힌 시트가 화면을 덮음). 시트를 열고 닫는 스크립트는 `page.clock.install({ time })`으로 시작 시각만 정한다(`month-export.mjs`). 시트는 열림 애니메이션(약 0.3초) 중의 닫기 요청을 무시하니 열린 뒤에 뒤로가기를 보낸다.

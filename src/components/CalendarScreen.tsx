@@ -1,6 +1,5 @@
 import { Button } from "@toss/tds-mobile";
 import { useEffect, useRef, useState } from "react";
-import { CalendarBanner } from "../ads/CalendarBanner";
 import { addMonths, yearMonthOf, type YearMonth } from "../domain/calendar";
 import type { ReminderSetting } from "../domain/calendarReminder";
 import { scheduleTitle } from "../domain/names";
@@ -12,6 +11,8 @@ import { askReview, canAskReview, skipReview } from "../platform/review";
 import type { EntriesByDate } from "../storage/entriesStorage";
 import { Calendar } from "./Calendar";
 import { CalendarExportDialog, ExportSheet, ReviewRequestDialog } from "./ExportSheet";
+import { MonthPickerSheet } from "./MonthPickerSheet";
+import { MonthStats } from "./MonthStats";
 import { useShiftLabels } from "./ShiftLabelsContext";
 import { TodaySummary } from "./TodaySummary";
 
@@ -65,6 +66,7 @@ export function CalendarScreen({
   const exportInFlight = useRef(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
   const [reviewPrompt, setReviewPrompt] = useState(false);
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
   // 다른 달로 넘기면 이전 달의 내보내기 안내는 지운다(화면을 떠나면 이 컴포넌트와 함께 사라진다).
   useEffect(() => setExportNotice(null), [month.year, month.month]);
 
@@ -136,7 +138,17 @@ export function CalendarScreen({
           </svg>
         </button>
         <h1 className="month-title">
-          {month.year}년 {month.month}월
+          <button
+            type="button"
+            className="month-title-button"
+            aria-label={`${month.year}년 ${month.month}월, 연월 선택`}
+            onClick={() => setMonthPickerOpen(true)}
+          >
+            {month.year}년 {month.month}월
+            <svg className="month-title-caret" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </h1>
         <button
           type="button"
@@ -161,6 +173,8 @@ export function CalendarScreen({
         days={days}
         onSelectDate={onSelectDate}
       />
+
+      <MonthStats month={month} timeline={timeline} days={days} />
 
       <div className="bottom-action">
         <div className="shortcut-row">
@@ -197,6 +211,15 @@ export function CalendarScreen({
         )}
       </div>
 
+      <MonthPickerSheet
+        open={monthPickerOpen}
+        month={month}
+        onClose={() => setMonthPickerOpen(false)}
+        onPick={(picked) => {
+          setMonthPickerOpen(false);
+          onMonthChange(picked);
+        }}
+      />
       <ExportSheet
         open={exportOpen}
         busy={exporting}
@@ -228,8 +251,6 @@ export function CalendarScreen({
           setReviewPrompt(false);
         }}
       />
-
-      <CalendarBanner />
     </section>
   );
 }

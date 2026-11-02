@@ -139,14 +139,6 @@ async function open(settings, { broken = false, w = 390, h = 844 } = {}) {
   check("대체 버튼 → 설정 목록 6항목", (await page.locator(".settings-menu [role=button]").count()) === 6);
   await back();
   check("설정 목록 → 뒤로가기 → 달력, 대체 버튼 유지", (await page.locator(".calendar").isVisible()) && (await fallback.isVisible()));
-  // 배너와의 간격 32px
-  await page.waitForSelector(".calendar-banner.is-shown", { timeout: 5000 }).catch(() => {});
-  const gap = await page.evaluate(() => {
-    const s = document.querySelector(".bottom-action").getBoundingClientRect();
-    const a = document.querySelector(".calendar-banner").getBoundingClientRect();
-    return a.top - s.bottom;
-  });
-  check("대체 버튼 아래 배너와 32px 이상 간격", gap >= 32, `gap=${Math.round(gap)}`);
   await context.close();
 }
 

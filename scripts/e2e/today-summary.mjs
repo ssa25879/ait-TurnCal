@@ -29,7 +29,7 @@ const entries = (days) => JSON.stringify({ version: 1, days });
 const item = (id, extra) => ({ id, name: id, createdAt: 1, ...extra });
 
 /** 시계를 고정한 새 컨텍스트로 달력을 연다. */
-async function open(now, { width = 390, height = 844, stored = {}, noFill = false } = {}) {
+async function open(now, { width = 390, height = 844, stored = {} } = {}) {
   const context = await browser.newContext({ viewport: { width, height } });
   await context.addInitScript(() => { history.back = () => {}; });
   const page = await context.newPage();
@@ -42,7 +42,6 @@ async function open(now, { width = 390, height = 844, stored = {}, noFill = fals
   }, [SKEY, stored.settings ?? settings(), EKEY, stored.entries ?? entries({})]);
   await page.reload({ waitUntil: "networkidle" });
   await page.waitForSelector(".today-card");
-  if (noFill) await page.evaluate(() => window.__ait?.patch?.("ads", { forceNoFill: true }));
   await page.waitForTimeout(500);
   return { context, page };
 }
@@ -64,9 +63,9 @@ const back = async (page) => { await page.waitForTimeout(250); await page.evalua
   check("aria-label에 날짜·근무", (await card(page, 1).getAttribute("aria-label")) === "내일, 10월 14일 (수), 야간");
   const order = await page.evaluate(() => {
     const y = (sel) => document.querySelector(sel)?.getBoundingClientRect().y ?? -1;
-    return [y(".schedule-header"), y(".today-summary"), y(".month-nav"), y(".calendar"), y(".bottom-action"), y(".calendar-banner")];
+    return [y(".schedule-header"), y(".today-summary"), y(".month-nav"), y(".calendar"), y(".bottom-action")];
   });
-  check("순서: 요약 → 월 이동 → 격자 → 하단 조작 → 광고", order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), JSON.stringify(order.map(Math.round)));
+  check("순서: 요약 → 월 이동 → 격자 → 하단 조작", order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), JSON.stringify(order.map(Math.round)));
   const sizes = await page.evaluate(() => [...document.querySelectorAll(".today-card")].map((c) => c.getBoundingClientRect().height));
   check("카드 누름 영역 44px 이상", sizes.every((h) => h >= 44), JSON.stringify(sizes));
   const fonts = await page.evaluate(() => Math.min(...[...document.querySelectorAll(".today-card *")].filter((e) => e.textContent.trim() && e.children.length === 0).map((e) => parseFloat(getComputedStyle(e).fontSize))));
@@ -197,7 +196,7 @@ const back = async (page) => { await page.waitForTimeout(250); await page.evalua
   await context.close();
 }
 
-// ---------- 360px 폭 · 광고 없음 ----------
+// ---------- 360px 폭 ----------
 {
   const stored = { entries: entries({
     "2026-10-13": { items: [item("병동 인수인계", { start: "15:00", end: "23:00", shift: "EVENING" })] },
@@ -214,25 +213,6 @@ const back = async (page) => { await page.waitForTimeout(250); await page.evalua
   check("360px: 달력 7열 모두 표시", m.cols === 7);
   await context.close();
 }
-{
-  const { context, page } = await open("2026-10-13T10:00:00+09:00", { noFill: true });
-  await page.waitForTimeout(500);
-  check("광고 없음에서도 요약·격자 정상", (await page.locator(".today-card").count()) === 2 && (await page.locator(".calendar-cell").count()) === 42);
-  await context.close();
-}
-{
-  const { context, page } = await open("2026-10-13T10:00:00+09:00");
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(300);
-  const gap = await page.evaluate(() => {
-    const s = document.querySelector(".bottom-action").getBoundingClientRect();
-    const a = document.querySelector(".calendar-banner").getBoundingClientRect();
-    return a.top - s.bottom;
-  });
-  check("하단 조작–광고 간격 32px 이상 유지", gap >= 32, `gap=${Math.round(gap)}`);
-  await context.close();
-}
-
 check("페이지 오류 없음", errors.length === 0, errors.join(" | "));
 await browser.close();
 const failed = results.filter((r) => !r.ok);

@@ -285,8 +285,86 @@ body {
   text-align: center;
 }
 
+.month-title-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.month-title-button:active {
+  background: var(--color-bg-sub);
+}
+
+.month-title-caret {
+  flex-shrink: 0;
+  color: var(--color-text-sub);
+}
+
 .month-today {
   min-height: 44px;
+}
+
+/* ---------- 연·월 선택 시트 ---------- */
+.month-picker {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0 24px 16px;
+}
+
+.month-picker-year {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.month-picker-year-text {
+  margin: 0;
+  font-size: var(--font-xl);
+  font-weight: 700;
+}
+
+.month-picker-year .month-nav-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.month-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.month-picker-month {
+  min-height: 48px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-m);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-l);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.month-picker-month:active {
+  background: var(--color-bg-sub);
+}
+
+.month-picker-month.is-selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-weak);
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
 .month-nav-button {
@@ -980,29 +1058,50 @@ body {
   margin-bottom: 10px;
 }
 
-/* ---------- 달력 하단 배너 ---------- */
-/* 화면 전체 너비(풀블리드). 렌더링 전·광고 없음·실패 시 높이 0으로 빈 공간을 남기지 않는다. */
-.calendar-banner {
-  width: 100vw;
-  height: 0;
-  margin: 32px 0 0 calc(50% - 50vw);
-  overflow: hidden;
+/* ---------- 월간 근무 통계 ---------- */
+.month-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.calendar-banner.is-shown {
-  height: 96px;
+.month-stats-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-m);
 }
 
-.calendar-banner-slot {
-  width: 100%;
-  height: 96px;
+.month-stats-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--badge-size);
+  height: var(--badge-size);
+  border-radius: var(--radius-s);
+  font-size: var(--font-s);
+  font-weight: 700;
 }
 
-@media (min-width: 481px) {
-  .calendar-banner {
-    width: calc(100% + 40px);
-    margin-left: -20px;
-  }
+.month-stats-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--font-xs);
+  color: var(--color-text-sub);
+}
+
+.month-stats-count {
+  margin-left: auto;
+  font-size: var(--font-s);
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .no-pattern-card {
